@@ -1,23 +1,15 @@
 package example;
 
-import auth.AuthentificationException;
-import auth.TimeOutException;
+import auth.core.Role;
+import auth.exceptions.AuthentificationException;
+import auth.exceptions.TimeOutException;
 import bank.Account;
 import core.Action;
-import auth.User;
-import lombok.Getter;
-import lombok.Setter;
 
 public class DivisionAction extends Action {
-    @Getter
-    @Setter
     private double dividend;
-    @Getter
-    @Setter
     private double divisor;
-    @Getter
     private int quotient;
-    @Getter
     private int remainder;
 
     private boolean isAuthorized;
@@ -43,7 +35,7 @@ public class DivisionAction extends Action {
     }
 
     @Override
-    public void authorize(User user, Account account) throws AuthentificationException {
+    public void authorize(Role role, Account account) throws AuthentificationException {
         /*
            Authentify user with an account in the database
            If valid, set isAuthorized to true

@@ -1,7 +1,7 @@
 package example;
 
 import bank.Account;
-import bank.Customer;
+import auth.core.Customer;
 
 public class ExampleAccount extends Account {
     private int accountId;

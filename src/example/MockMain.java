@@ -1,9 +1,8 @@
 package example;
 
-import auth.AuthentificationException;
-import auth.TimeOutException;
-import auth.User;
-import bank.Customer;
+import auth.exceptions.AuthentificationException;
+import auth.exceptions.TimeOutException;
+import auth.core.Customer;
 
 public class MockMain {
     public static void main(String[] args) {
