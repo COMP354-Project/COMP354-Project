@@ -9,14 +9,4 @@ public class ExampleAccount extends Account {
         super(customer);
 
     }
-
-    @Override
-    public void pay() {
-
-    }
-
-    @Override
-    public void receipt() {
-
-    }
 }
