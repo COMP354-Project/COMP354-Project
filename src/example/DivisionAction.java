@@ -45,7 +45,39 @@ public class DivisionAction extends Action {
     }
 
     @Override
-    public void isAuthorized() {
+    public boolean isAuthorized() {
+        return false;
+    }
 
+    public double getDividend() {
+        return dividend;
+    }
+
+    public void setDividend(double dividend) {
+        this.dividend = dividend;
+    }
+
+    public double getDivisor() {
+        return divisor;
+    }
+
+    public void setDivisor(double divisor) {
+        this.divisor = divisor;
+    }
+
+    public int getQuotient() {
+        return quotient;
+    }
+
+    public void setQuotient(int quotient) {
+        this.quotient = quotient;
+    }
+
+    public int getRemainder() {
+        return remainder;
+    }
+
+    public void setRemainder(int remainder) {
+        this.remainder = remainder;
     }
 }

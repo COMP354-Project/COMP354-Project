@@ -1,5 +1,6 @@
 package example;
 
+import auth.core.Role;
 import auth.exceptions.AuthentificationException;
 import auth.exceptions.TimeOutException;
 import auth.core.Customer;
@@ -22,7 +23,8 @@ public class MockMain {
         mockAction.setDividend(10);
         mockAction.setDivisor(5);
         try {
-            mockAction.authorize(new User(), new ExampleAccount(new Customer("Jack")));
+            mockAction.authorize(new Role() {
+            }, new ExampleAccount(new Customer("Jack")));
         } catch (AuthentificationException e) {
             // Display bad authentification error, redirect flow of execution based on the activity diagram or use case diagram
             displayErrorGUI(e);
