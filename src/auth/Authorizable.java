@@ -8,5 +8,5 @@ import javax.naming.AuthenticationException;
 
 public interface Authorizable {
     void authorize(Role role, Account account) throws AuthentificationException, AuthenticationException;
-    void isAuthorized();
+    boolean isAuthorized();
 }
