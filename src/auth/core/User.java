@@ -2,7 +2,9 @@ package auth.core;
 
 import auth.exceptions.PasswordFormatException;
 
-public abstract class Role {
+import java.util.Objects;
+
+public abstract class User {
     protected String email;
     protected String password;
 
@@ -25,5 +27,21 @@ public abstract class Role {
 
     public String getPassword() {
         return password;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+        return Objects.equals(email, user.email) ;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(email);
+        result = 31 * result + Objects.hashCode(password);
+        return result;
     }
 }

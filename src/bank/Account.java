@@ -12,11 +12,18 @@ public abstract class Account {
     protected Customer customer;
     protected List<Transaction> transactions;
     protected double balance;
+    protected int accountStatus;
+
+    public int ACCOUNT_STATUS_INACTIVE = 0;
+    public int ACCOUNT_STATUS_ACTIVE = 1;
+
+
 
     public Account(Customer customer) {;
         this.accountId = UUID.randomUUID().toString();
         this.customer = customer;
         this.transactions = new ArrayList<>();
+        this.accountStatus = ACCOUNT_STATUS_ACTIVE;
     }
 
     public String getAccountID() {
