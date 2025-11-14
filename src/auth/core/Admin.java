@@ -1,4 +1,9 @@
 package auth.core;
 
-public class Admin extends Role{
+/**
+ * Admin is a superuser of this system. It has access to every action in this banking system.
+ * @see User
+ *
+ */
+public class Admin extends User {
 }

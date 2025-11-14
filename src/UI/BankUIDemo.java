@@ -1,0 +1,217 @@
+package UI;
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.nio.file.*;
+import java.util.*;
+import java.util.List;
+import com.google.gson.*;
+
+// ---------- Models / Store (users + roles from JSON) ----------
+class User { String user_id; String password; String role; }
+class UsersFile { List<User> users = new ArrayList<>(); }
+
+class UserJsonStore {
+    private final Map<String,User> byId = new HashMap<>();
+    UserJsonStore(String path) {
+        try {
+            String json = Files.readString(Paths.get(path));
+            UsersFile uf = new Gson().fromJson(json, UsersFile.class);
+            if (uf != null && uf.users != null)
+                for (User u : uf.users) byId.put(u.user_id.toLowerCase(Locale.ROOT), u);
+        } catch (Exception e) { throw new RuntimeException("Load users.json failed", e); }
+    }
+    User find(String id){ return id==null?null:byId.get(id.toLowerCase(Locale.ROOT)); }
+}
+
+// ---------- App ----------
+public class BankUIDemo {
+    private final JFrame frame = new JFrame("Bank");
+    private final CardLayout cards = new CardLayout();
+    private final JPanel root = new JPanel(cards);
+    private final UserJsonStore store = new UserJsonStore("users.json");
+    private String currentRole = null;
+
+    public static void main(String[] args) { SwingUtilities.invokeLater(() -> new BankUIDemo().start()); }
+
+    private void start() {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // pages
+        root.add(new LoginPage(), "login");
+
+        // customer
+        root.add(new CustomerDashboard(), "customer");
+        root.add(new CustomerAccountInfo(), "cust_account");
+        root.add(new CustomerProfile(), "cust_profile");
+
+        // teller
+        root.add(new TellerDashboard(), "teller");
+        root.add(new TellerManageCustomers(), "teller_manage");
+
+        // admin
+        root.add(new AdminDashboard(), "admin");
+        root.add(new AdminUserMgmt(), "admin_user_mgmt");
+
+        cards.show(root, "login");
+        frame.setContentPane(root);
+        frame.setPreferredSize(new Dimension(390, 250)); // bigger window
+
+        frame.pack();
+        frame.setLocationByPlatform(true);
+        frame.setVisible(true);
+    }
+
+    private void go(String page){ cards.show(root, page); }
+
+    // ---------- Login ----------
+    class LoginPage extends JPanel {
+        JTextField tfUser = new JTextField(22);
+        JPasswordField pfPass = new JPasswordField(22);
+        LoginPage(){
+            super(new GridBagLayout());
+            setBorder(BorderFactory.createEmptyBorder(16,16,16,16));
+            GridBagConstraints c = gbc();
+
+            JLabel title = title("Login"); c.gridy=0; c.gridwidth=2; add(title,c);
+
+            row(this,c,1,"User ID", tfUser);
+            row(this,c,2,"Password", pfPass);
+
+            JButton signIn = new JButton(new AbstractAction("Sign In"){
+                @Override public void actionPerformed(ActionEvent e){ doLogin(); }
+            });
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT)); actions.add(signIn);
+            c.gridy=3; c.gridx=0; c.gridwidth=2; add(actions,c);
+        }
+        void doLogin(){
+            String id = tfUser.getText().trim();
+            String pw = new String(pfPass.getPassword());
+            User u = store.find(id);
+            if (u==null || !Objects.equals(u.password, pw)) { toast("Invalid credentials"); return; }
+            currentRole = u.role==null? "": u.role;
+            switch (currentRole.toLowerCase(Locale.ROOT)) {
+                case "customer" -> go("customer");
+                case "teller"   -> go("teller");
+                case "admin"    -> go("admin");
+                default         -> toast("Unknown role: "+currentRole);
+            }
+        }
+    }
+
+    // ---------- Customer ----------
+    class CustomerDashboard extends JPanel {
+        CustomerDashboard(){
+            super(new GridBagLayout()); setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Customer Dashboard"), g(c,0,0,2));
+
+            JButton account = btn("Account Information", ()-> go("cust_account"));
+            JButton profile = btn("Personal Profile",    ()-> go("cust_profile"));
+            JButton logout  = btn("Logout",              ()-> go("login"));
+
+            add(account, g(c,0,1,2));
+            add(profile, g(c,0,2,2));
+            add(logout,  g(c,0,3,2));
+        }
+    }
+    class CustomerAccountInfo extends JPanel {
+        CustomerAccountInfo(){
+            super(new GridBagLayout()); setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Account Information"), g(c,0,0,2));
+
+            add(btn("Transaction History", ()-> info("Open Transaction History")), g(c,0,1,2));
+            add(btn("Account Summary",     ()-> info("Open Account Summary")),     g(c,0,2,2));
+            add(btn("Fund Transfer",       ()-> info("Open Fund Transfer")),       g(c,0,3,2));
+            add(btn("Deposit / Withdraw",  ()-> info("Open Deposit/Withdraw")),    g(c,0,4,2));
+            add(btn("Back",                ()-> go("customer")),                   g(c,0,5,2));
+        }
+    }
+    class CustomerProfile extends JPanel {
+        CustomerProfile(){
+            super(new GridBagLayout()); setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Personal Profile"), g(c,0,0,2));
+
+            add(btn("Update Personal Information", ()-> info("Open Update Info")), g(c,0,1,2));
+            add(btn("Change Password",             ()-> info("Open Change Password")), g(c,0,2,2));
+            add(btn("Back",                        ()-> go("customer")), g(c,0,3,2));
+        }
+    }
+
+    // ---------- Teller ----------
+    class TellerDashboard extends JPanel {
+        TellerDashboard(){
+            super(new GridBagLayout()); setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Teller Dashboard"), g(c,0,0,2));
+
+            add(btn("Manage Customers", ()-> go("teller_manage")), g(c,0,1,2));
+            add(btn("Logout", ()-> go("login")), g(c,0,2,2));
+        }
+    }
+    class TellerManageCustomers extends JPanel {
+        TellerManageCustomers(){
+            super(new GridBagLayout()); setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Manage Customers"), g(c,0,0,2));
+
+            add(btn("View Customer Information", ()-> info("Open View Customer Information")), g(c,0,1,2));
+            add(btn("View All Transactions",     ()-> info("Open All Transactions")),         g(c,0,2,2));
+            add(btn("Back",                       ()-> go("teller")),                          g(c,0,3,2));
+        }
+    }
+
+    // ---------- Admin ----------
+    class AdminDashboard extends JPanel {
+        AdminDashboard(){
+            super(new GridBagLayout()); setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Admin Dashboard"), g(c,0,0,2));
+
+            add(btn("User Management", ()-> go("admin_user_mgmt")), g(c,0,1,2));
+            add(btn("Logout", ()-> go("login")), g(c,0,2,2));
+        }
+    }
+    class AdminUserMgmt extends JPanel {
+        AdminUserMgmt(){
+            super(new GridBagLayout()); setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("User Management"), g(c,0,0,2));
+
+            add(btn("Create Accounts",        ()-> info("Open Create Accounts")), g(c,0,1,2));
+            add(btn("Reset Account Passwords",()-> info("Open Reset Passwords")), g(c,0,2,2));
+            add(btn("Deactivate Accounts",    ()-> info("Open Deactivate Accounts")), g(c,0,3,2));
+            add(btn("View All Transactions",  ()-> info("Open All Transactions")), g(c,0,4,2));
+            add(btn("Back",                   ()-> go("admin")), g(c,0,5,2));
+        }
+    }
+
+    // ---------- UI helpers ----------
+    private static GridBagConstraints gbc(){ GridBagConstraints c=new GridBagConstraints();
+        c.insets=new Insets(6,6,6,6); c.anchor=GridBagConstraints.WEST; c.fill=GridBagConstraints.HORIZONTAL; c.weightx=1; return c; }
+    private static GridBagConstraints g(GridBagConstraints c,int x,int y,int w){ GridBagConstraints n=(GridBagConstraints)c.clone();
+        n.gridx=x; n.gridy=y; n.gridwidth=w; return n; }
+    private static JButton btn(String t, Runnable r){ return new JButton(new AbstractAction(t){ @Override public void actionPerformed(ActionEvent e){ r.run(); }}); }
+    private static JLabel title(String t){ JLabel l=new JLabel(t); l.setFont(l.getFont().deriveFont(Font.BOLD,20f)); return l; }
+    private static Border pad(){ return BorderFactory.createEmptyBorder(16,16,16,16); }
+    private static void row(JPanel p, GridBagConstraints base, int r, String lab, JComponent field) {
+        // label
+        GridBagConstraints c = (GridBagConstraints) base.clone();
+        c.gridy = r; c.gridx = 0; c.weightx = 0; c.fill = GridBagConstraints.NONE;
+        c.insets = new Insets(12, 12, 12, 24);   // ↑ top,left,bottom,RIGHT GAP (24)
+        p.add(new JLabel(lab), c);
+
+        // field
+        c = (GridBagConstraints) base.clone();
+        c.gridy = r; c.gridx = 1; c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(12, 96, 12, 12);
+        p.add(field, c);
+    }
+
+    private static void toast(String m){ JOptionPane.showMessageDialog(null,m,"Notice",JOptionPane.WARNING_MESSAGE); }
+    private static void info(String m){ JOptionPane.showMessageDialog(null,m,"Info",JOptionPane.INFORMATION_MESSAGE); }
+}
+

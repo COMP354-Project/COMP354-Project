@@ -1,7 +1,7 @@
 package example;
 
-import auth.core.Role;
-import auth.exceptions.AuthentificationException;
+import auth.core.User;
+import auth.exceptions.InvalidAuthenticationException;
 import auth.exceptions.TimeOutException;
 import bank.Account;
 import core.Action;
@@ -12,8 +12,6 @@ public class DivisionAction extends Action {
     private int quotient;
     private int remainder;
 
-    private boolean isAuthorized;
-
     @Override
     public void prepare() throws DivisionByZeroException, TimeOutException {
         // Division by zero!
@@ -21,7 +19,7 @@ public class DivisionAction extends Action {
             throw new RuntimeException();
         }
 
-        if (!isAuthorized) {
+        if (!isAuthorized()) {
             // Sometimes the connection times out, thus revisit the authentification of the user
             throw new TimeOutException();
         }
@@ -35,18 +33,13 @@ public class DivisionAction extends Action {
     }
 
     @Override
-    public void authorize(Role role, Account account) throws AuthentificationException {
+    public void authorize(User user, Account account) throws InvalidAuthenticationException {
         /*
            Authentify user with an account in the database
            If valid, set isAuthorized to true
            If invalid, throw AuthentificationException
          */
-        throw new AuthentificationException();
-    }
-
-    @Override
-    public boolean isAuthorized() {
-        return false;
+        throw new InvalidAuthenticationException();
     }
 
     public double getDividend() {
