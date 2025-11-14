@@ -1,7 +1,7 @@
 package auth.exceptions;
 
 public class TimeOutException extends RuntimeException{
-    private final String ERROR_MESSAGE = "Error! Wrong email or password.";
+    private final String ERROR_MESSAGE = "System timed out.";
 
     @Override
     public String getMessage() {
