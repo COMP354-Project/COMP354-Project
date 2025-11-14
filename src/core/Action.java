@@ -9,6 +9,7 @@ import javax.naming.AuthenticationException;
  * An action is an operation of the banking system (similar to an use case)
  */
 public abstract class Action implements Authorizable {
+
     /***
      * Abstract function that fetch attributes from an instance of an action and prepare all data needed for execution.
      * An action is an operation that encapsulate everything it needs: data, functions, and injection of other utility classes.
@@ -20,4 +21,9 @@ public abstract class Action implements Authorizable {
      * Abstract function that execute the prepared action. Can be synchronized
      */
     abstract public void execute();
+
+    @Override
+    public boolean isAuthorized() {
+        return false;
+    }
 }
