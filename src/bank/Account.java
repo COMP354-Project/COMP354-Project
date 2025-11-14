@@ -12,19 +12,11 @@ public abstract class Account {
     protected Customer customer;
     protected List<Transaction> transactions;
     protected double balance;
-    protected AccountStatus accountStatus;
-
-
-    public enum AccountStatus{
-        INACTIVE,
-        ACTIVE;
-    }
 
     public Account(Customer customer) {;
         this.accountId = UUID.randomUUID().toString();
         this.customer = customer;
         this.transactions = new ArrayList<>();
-        this.accountStatus = AccountStatus.ACTIVE;
     }
 
     public String getAccountID() {
@@ -53,7 +45,8 @@ public abstract class Account {
 
 
     public double getBalance(){
-        return balance;
+        // TODO
+        return 0.0;
     }
 
     @Override
