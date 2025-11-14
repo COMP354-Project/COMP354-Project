@@ -1,7 +1,7 @@
 package example;
 
 import auth.core.User;
-import auth.exceptions.UserAuthenticationException;
+import auth.exceptions.InvalidAuthenticationException;
 import auth.exceptions.TimeOutException;
 import bank.Account;
 import core.Action;
@@ -33,13 +33,13 @@ public class DivisionAction extends Action {
     }
 
     @Override
-    public void authorize(User user, Account account) throws UserAuthenticationException {
+    public void authorize(User user, Account account) throws InvalidAuthenticationException {
         /*
            Authentify user with an account in the database
            If valid, set isAuthorized to true
            If invalid, throw AuthentificationException
          */
-        throw new UserAuthenticationException();
+        throw new InvalidAuthenticationException();
     }
 
     public double getDividend() {

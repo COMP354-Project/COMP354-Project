@@ -1,7 +1,7 @@
 package example;
 
 import auth.core.User;
-import auth.exceptions.UserAuthenticationException;
+import auth.exceptions.InvalidAuthenticationException;
 import auth.exceptions.TimeOutException;
 import auth.core.Customer;
 
@@ -25,7 +25,7 @@ public class MockMain {
         try {
             mockAction.authorize(new User() {
             }, new ExampleAccount(new Customer("jack.sparrow@carribean.sea.com","12345","Jack","Sparrow")));
-        } catch (UserAuthenticationException e) {
+        } catch (InvalidAuthenticationException e) {
             // Display bad authentification error, redirect flow of execution based on the activity diagram or use case diagram
             displayErrorGUI(e);
         }
