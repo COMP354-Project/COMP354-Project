@@ -1,0 +1,7 @@
+{
+  "users": [
+    { "user_id": "admin@bank.com", "password": "admin123",  "role": "Admin" },
+    { "user_id": "teller01",       "password": "teller123", "role": "Teller" },
+    { "user_id": "4111111111111",  "password": "cust12345", "role": "Customer" }
+  ]
+}
