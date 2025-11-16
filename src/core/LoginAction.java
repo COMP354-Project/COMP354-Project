@@ -18,7 +18,7 @@ public class LoginAction extends Action{
 
     @Override
     public void execute() throws InvalidAuthenticationException {
-        DatabaseSingleton.db.getDataBase();
+        DatabaseSingleton.getDataBase();
 
         // IF NOT FOUND IN DATABASE
         throw new InvalidAuthenticationException();

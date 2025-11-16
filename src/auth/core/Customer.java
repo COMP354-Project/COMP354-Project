@@ -1,6 +1,8 @@
 package auth.core;
 
 
+import auth.exceptions.InvalidInputException;
+
 import java.util.Objects;
 
 
@@ -15,7 +17,13 @@ public class Customer extends User {
 
     public Customer(String email, String password, String firstName, String lastName) {
         setEmail(email);
-        setPassword(password);
+        try {
+            setPassword(password);
+        } catch (InvalidInputException e) {
+            // This should never happen as password is already validated before creating a Customer
+            System.out.println("Unexpected error: invalid password format.");
+        }
+//        setPassword(password);
         setFirstName(firstName);
         setLastName(lastName);
     }

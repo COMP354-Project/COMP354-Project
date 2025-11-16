@@ -10,23 +10,29 @@ import bank.Saving;
 import bank.Transaction;
 import auth.core.*;
 import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import database.LocalDateTimeAdapter;
+import database.TransactionAdapter;
+import database.AccountAdapter;
 
 /**
  * A singleton injection of the database instance
  */
 public class DatabaseSingleton {
     private static DatabaseSingleton db;
-    private AccountData accountData;
-    private UserData userData;
-    private TransitionData transitionData;
-    private BranchData branchData;
+//    private AccountData accountData;
+//    private UserData userData;
+//    private TransactionData transactionData;
+//    private BranchData branchData;
 
     private DatabaseSingleton() {
-        this.accountData = AccountData.getAccountData();
-        this.userData = UserData.getUserData();
-        this.transitionData = TransitionData.getTransitionData();
-        this.branchData = BranchData.getBranchData();
+//        this.userData = UserData.getUserData();
+//        this.branchData = BranchData.getBranchData();
+//        this.accountData = AccountData.getAccountData();
+//        this.transactionData = TransactionData.getTransactionData();
     }
 
     public static DatabaseSingleton getDataBase() {
@@ -89,12 +95,53 @@ public class DatabaseSingleton {
     public boolean updateUserInfo(User user) {
         return false;
     }
+
+    public static void main(String[] args) {
+        Customer cust1 = new Customer("abc@gmail.com", "password", "John", "Doe");
+        Customer cust2 = new Customer("def@gmail.com", "password", "John", "Joe");
+
+        Account acc1 = new Chequing(cust1);
+        Account acc2 = new Chequing(cust2);
+
+        Transaction tx1 = new Transaction(acc1, acc2, LocalDateTime.now(), 100.0);
+
+        acc1.addTransaction(tx1);
+        acc2.addTransaction(tx1);
+
+        HashMap<String, Account> accounts = new HashMap<>();
+        accounts.put(acc1.getAccountID(), acc1);
+        accounts.put(acc2.getAccountID(), acc2);
+        // print JSON string representation of the account
+        Gson accountGson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Transaction.class, new TransactionAdapter())
+                .setPrettyPrinting()
+                .create();
+        String ajson = accountGson.toJson(accounts);
+        System.out.println(ajson);
+
+        Gson transactionGson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Account.class, new AccountAdapter())
+                .setPrettyPrinting()
+                .create();
+        String tjson = transactionGson.toJson(tx1);
+        System.out.println(tjson);
+
+
+    }
 }
 
+/**
+ * AccountData class implementing FileProcessor interface
+ * */
 class AccountData implements FileProcessor{
     private static AccountData ad;
+    private HashMap<String, Account> accounts;
 
-    private AccountData() {}
+    private AccountData() {
+        this.load();
+    }
 
     public static AccountData getAccountData() {
         if (ad == null) {
@@ -114,10 +161,17 @@ class AccountData implements FileProcessor{
     }
 }
 
+/**
+ * UserData class implementing FileProcessor interface.
+ * This class loads and manages user data where users are Customer, Teller, or Admin.
+ * */
 class UserData implements FileProcessor{
     private static UserData rd;
+    private HashMap<String, User> users;
 
-    private UserData() {}
+    private UserData() {
+        this.load();
+    }
 
     public static UserData getUserData() {
         if (rd == null) {
@@ -137,12 +191,20 @@ class UserData implements FileProcessor{
     }
 }
 
-class TransitionData implements FileProcessor{
-    private static TransitionData td;
-    private TransitionData() {}
-    public static TransitionData getTransitionData() {
+/**
+ * TransactionData class implementing FileProcessor interface
+ * */
+class TransactionData implements FileProcessor{
+    private static TransactionData td;
+    private HashMap<String, Transaction> transactions;
+
+    private TransactionData() {
+        this.load();
+    }
+
+    public static TransactionData getTransactionData() {
         if (td == null) {
-            td = new TransitionData();
+            td = new TransactionData();
         }
         return td;
     }
@@ -158,9 +220,17 @@ class TransitionData implements FileProcessor{
     }
 }
 
+/**
+ * UserData class implementing FileProcessor interface
+ * */
 class BranchData implements FileProcessor{
     private static BranchData bd;
-    private BranchData() {}
+    private HashMap<String, Branch> branches;
+
+    private BranchData() {
+        this.load();
+    }
+
     public static BranchData getBranchData() {
         if (bd == null) {
             bd = new BranchData();
