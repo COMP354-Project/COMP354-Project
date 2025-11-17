@@ -40,10 +40,6 @@ public abstract class Account {
         this.accountId = id;
     }
 
-    public void setAccountStatus(AccountStatus status) {
-        this.accountStatus = status;
-    }
-
     public String getAccountID() {
         return accountId;
     }
