@@ -46,4 +46,12 @@ public class Transaction {
         Transaction that = (Transaction) o;
         return Objects.equals(id, that.id);
     }
+
+    public String toString() {
+        return "Transaction ID: " + id +
+               ", Sender Account ID: " + sender.getAccountID() +
+               ", Receiver Account ID: " + receiver.getAccountID() +
+               ", Time of Transaction: " + timeOfTransaction.toString() +
+               ", Amount: " + amount;
+    }
 }

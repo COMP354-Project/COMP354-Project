@@ -8,9 +8,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 public abstract class Account {
-    protected final String accountId;
+//    protected final String accountId;
+    protected String accountId;
     protected Customer customer;
     protected List<Transaction> transactions;
+//    protected transient List<Transaction> transactions;
     protected double balance;
     protected AccountStatus accountStatus;
 
@@ -25,6 +27,14 @@ public abstract class Account {
         this.customer = customer;
         this.transactions = new ArrayList<>();
         this.accountStatus = AccountStatus.ACTIVE;
+    }
+
+    public void setAccountId(String id) {
+        this.accountId = id;
+    }
+
+    public void setAccountStatus(AccountStatus status) {
+        this.accountStatus = status;
     }
 
     public String getAccountID() {
@@ -56,12 +66,25 @@ public abstract class Account {
         return balance;
     }
 
+    public AccountStatus getAccountStatus(){
+        return accountStatus;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
         Account account = (Account) o;
         return Objects.equals(accountId, account.accountId);
+    }
+
+    @Override
+    public String toString() {
+        return
+                "accountId=" + accountId +
+                ", customer=" + customer +
+                ", balance=" + balance +
+                ", accountStatus=" + accountStatus;
     }
 }
 

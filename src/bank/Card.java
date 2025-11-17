@@ -34,5 +34,10 @@ public class Card extends Account {
     public double getCreditUsage() {
         return creditUsage;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", Credit Limit: " + creditLimit + ", Credit Usage: " + creditUsage;
+    }
 }
 

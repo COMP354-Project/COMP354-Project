@@ -1,25 +1,72 @@
 package database;
 
-import bank.Account;
-import com.google.gson.TypeAdapter;
+import auth.core.Customer;
+import bank.*;
+import com.google.gson.*;
 
-import java.io.IOException;
+import java.lang.reflect.Type;
 
-public class AccountAdapter extends  TypeAdapter<Account> {
+public class AccountAdapter implements JsonSerializer<Account>, JsonDeserializer<Account> {
+
     @Override
-    public void write(com.google.gson.stream.JsonWriter out, Account value) throws IOException {
-        // Implementation for serializing Account object to JSON
-        if (value == null) {
-            out.nullValue();
+    public JsonElement serialize(Account account, Type typeOfSrc, JsonSerializationContext context) {
+        JsonObject obj = new JsonObject();
+
+        obj.addProperty("accountId", account.getAccountID());
+        obj.add("customer", context.serialize(account.getCustomer()));
+        obj.addProperty("balance", account.getBalance());
+        obj.addProperty("accountStatus", account.getAccountStatus().toString());
+
+        // Add the type field (concrete class name)
+        if (account instanceof Chequing) {
+            obj.addProperty("type", "Chequing");
+        } else if (account instanceof Saving) {
+            obj.addProperty("type", "Saving");
+        } else if (account instanceof Card) {
+            obj.addProperty("creditLimit", ((Card) account).getCreditLimit());
+            obj.addProperty("creditUsage", ((Card) account).getCreditUsage());
+            obj.addProperty("type", "Card");
         }
-        else {
-            out.value(value.getAccountID());
+        else{
+            obj.addProperty("type", "Account");
         }
+
+        return obj;
     }
 
     @Override
-    public Account read(com.google.gson.stream.JsonReader in) {
-        // Implementation for deserializing JSON to Account object
-        return null;
+    public Account deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+        // Implement if you need to read accounts back from JSON.
+        // Minimal stub: return null or construct specific Account subclass based on "type".
+        Account acc = null;
+        JsonObject obj = json.getAsJsonObject();
+        String type = obj.has("type") ? obj.get("type").getAsString() : null;
+        // Instantiate appropriate subclass (Chequing, Savings, ...) based on `type`.
+        // then populate fields (customer, balance, accountStatus, transactions -> ids).
+        switch (type) {
+            case "Chequing":
+                acc = new Chequing(context.deserialize(obj.get("customer"), Customer.class));
+                acc.setAccountId(obj.get("accountId").getAsString());
+                acc.setAccountStatus(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
+                break;
+            case "Saving":
+                acc = new Saving(context.deserialize(obj.get("customer"), Customer.class));
+                acc.setAccountId(obj.get("accountId").getAsString());
+                acc.setAccountStatus(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
+                break;
+            case "Card":
+                acc = new Card(context.deserialize(obj.get("customer"), Customer.class), 0.0);
+                acc.setAccountId(obj.get("accountId").getAsString());
+                acc.setAccountStatus(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
+                ((Card) acc).setCreditLimit(obj.get("creditLimit").getAsDouble());
+                // Assuming there's a method to set credit usage
+                // card.setCreditUsage(obj.get("creditUsage").getAsDouble());
+                break;
+            default:
+                // Handle unknown type or base Account if needed
+                break;
+        }
+        return acc;
     }
 }

@@ -1,0 +1,60 @@
+{
+  "de95f3dc-e216-4304-8afd-27cbb3396f50": {
+    "id": "de95f3dc-e216-4304-8afd-27cbb3396f50",
+    "sender": {
+      "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
+      "customer": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "abc@gmail.com",
+        "password": "password"
+      },
+      "balance": 0.0,
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "9501e3ad-e672-434c-935f-c926d3a2e949",
+      "customer": {
+        "firstName": "John",
+        "lastName": "Joe",
+        "email": "def@gmail.com",
+        "password": "password"
+      },
+      "balance": 0.0,
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "timeOfTransaction": "2025-11-16T22:39:56.045141500",
+    "amount": 100.0
+  },
+  "9cafa5b7-4d0f-40d6-82e1-2c6f22d5d9ce": {
+    "id": "9cafa5b7-4d0f-40d6-82e1-2c6f22d5d9ce",
+    "sender": {
+      "accountId": "9501e3ad-e672-434c-935f-c926d3a2e949",
+      "customer": {
+        "firstName": "John",
+        "lastName": "Joe",
+        "email": "def@gmail.com",
+        "password": "password"
+      },
+      "balance": 0.0,
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
+      "customer": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "abc@gmail.com",
+        "password": "password"
+      },
+      "balance": 0.0,
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "timeOfTransaction": "2025-11-16T22:39:56.049369500",
+    "amount": 99.0
+  }
+}

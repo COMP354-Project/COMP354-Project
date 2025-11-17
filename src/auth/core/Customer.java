@@ -59,5 +59,10 @@ public class Customer extends User {
         result = 31 * result + Objects.hashCode(lastName);
         return result;
     }
+
+    public String toString() {
+        return "firstName=" + firstName +
+               ", lastName=" + lastName;
+    }
 }
 
