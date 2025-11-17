@@ -6,6 +6,23 @@ import com.google.gson.*;
 
 import java.lang.reflect.Type;
 
+/**
+ * <p>Custom Gson adapter for serializing and deserializing Account objects,
+ * including their specific subclasses (Chequing, Saving, Card). </p>
+ *
+ * <p>During serialization, it adds a "type" field to indicate the concrete class.</p>
+ * <p>During deserialization, it reads the "type" field to instantiate the correct subclass.</p>
+ *
+ * <p>Account's <em>transaction</em> field is ignored during serialization to avoid circular referencing with Transaction, which leads to infinite recursion.
+ * However, the list of transactions will be loaded when the Transaction objects are loaded to memory.</p>
+ *
+ * @see Account
+ * @see Chequing
+ * @see Saving
+ * @see Card
+ *
+ * @author Cong Minh Le
+ */
 public class AccountAdapter implements JsonSerializer<Account>, JsonDeserializer<Account> {
 
     @Override
@@ -48,20 +65,18 @@ public class AccountAdapter implements JsonSerializer<Account>, JsonDeserializer
             case "Chequing":
                 acc = new Chequing(context.deserialize(obj.get("customer"), Customer.class));
                 acc.setAccountId(obj.get("accountId").getAsString());
-                acc.setAccountStatus(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
+                acc.setActivity(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
                 break;
             case "Saving":
                 acc = new Saving(context.deserialize(obj.get("customer"), Customer.class));
                 acc.setAccountId(obj.get("accountId").getAsString());
-                acc.setAccountStatus(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
+                acc.setActivity(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
                 break;
             case "Card":
                 acc = new Card(context.deserialize(obj.get("customer"), Customer.class), 0.0);
                 acc.setAccountId(obj.get("accountId").getAsString());
-                acc.setAccountStatus(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
+                acc.setActivity(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
                 ((Card) acc).setCreditLimit(obj.get("creditLimit").getAsDouble());
-                // Assuming there's a method to set credit usage
-                // card.setCreditUsage(obj.get("creditUsage").getAsDouble());
                 break;
             default:
                 // Handle unknown type or base Account if needed

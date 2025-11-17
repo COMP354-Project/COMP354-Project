@@ -14,8 +14,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * A singleton injection of the database instance
- */
+ * <p><em>DatabaseSingleton</em> provides public methods to manipulate and retrieve data on the program's <em>Account, Transaction, Branch & User</em> objects.</p>
+ * <p>It uses the Singleton design pattern to ensure that only one instance of the database exists throughout the application lifecycle.</p>
+ * <p>The class encapsulates data handlers for each object type, which are responsible for loading and saving data to JSON files.</p>
+ * <p>Public APIs are provided to interact with the data, such as retrieving accounts by username or ID, adding new accounts or transactions, and filtering transactions by date range or time.</p
+ * <p>This design ensures centralized data management and consistency across the application.</p>
+ * <p>The subcomponents of DatabaseSingleton includes:</p>
+ * <ul>
+ *     <li><em>AccountData</em>: manages Account database by updating, adding, retrieving, etc.</li>
+ *     <li><em>TransactionData</em>: manages Transaction database, provides operations such as adding, filtering and retrieving.</li>
+ *     <li><em>UserData</em>: Manages user data (Customer, Teller, Admin), including loading from and saving to JSON files.</li>
+ *     <li><em>BranchData</em>: Manages branch data, including loading from and saving to JSON files.</li>
+ * </ul>
+ *
+ * @author Cong Minh Le (40264100)
+ * */
 public class DatabaseSingleton {
     private static DatabaseSingleton db;
     private final AccountData accountData;
@@ -167,7 +180,6 @@ public class DatabaseSingleton {
 
     public static void main(String[] args) {
         DatabaseSingleton db = DatabaseSingleton.getDatabase();
-        db.printAccounts();
     }
 }
 
