@@ -127,11 +127,19 @@ public abstract class Account {
 
     @Override
     public String toString() {
-        return
-                "accountId=" + accountId +
-                ", customer=" + customer +
-                ", balance=" + balance +
-                ", accountStatus=" + accountStatus;
+        String res = "Account ID: " + accountId + "\n" +
+                     "Account Type: " + this.getClass().getSimpleName() + "\n" +
+                     "Customer: " + customer.getFirstName() + " " + customer.getLastName() + "\n"
+                + "Transactions: \n";
+        if (transactions.isEmpty()) {
+            res += "- No transactions\n";
+        }
+        for (Transaction t : transactions) {
+            res += "- " + t.toString() + "\n";
+        }
+        res += "Balance: " + balance + "\n" +
+                "Account Status: " + accountStatus + "\n";
+        return res;
     }
 }
 

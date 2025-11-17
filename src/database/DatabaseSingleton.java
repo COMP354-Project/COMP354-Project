@@ -5,7 +5,6 @@ import com.google.gson.*;
 import auth.core.*;
 import com.google.gson.reflect.TypeToken;
 
-import javax.xml.crypto.Data;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.io.FileWriter;
@@ -80,7 +79,7 @@ public class DatabaseSingleton {
     }
 
     /**
-     * Add a new account to the database.
+     * Add a new account to the database. This method should be invoked every time an Action related to creating an account is performed.
      * @param account The Account object to be added.
      * */
     public void addAccount(Account account) {
@@ -93,7 +92,7 @@ public class DatabaseSingleton {
     }
 
     /**
-     * Add a new transaction to the database.
+     * Add a new transaction to the database. This method should be invoked every time an Action related to creating a transaction is performed.
      * @param transaction The Transaction object to be added.
      * */
     public void addTransaction(Transaction transaction) {
@@ -136,7 +135,7 @@ public class DatabaseSingleton {
     }
 
     /**
-     * Update an existing account in the database.
+     * Update an existing account in the database. This method should be invoked every time an Action related to updating an account is performed.
      * @param account The Account object with updated information.
      * */
     public void updateAccount(Account account) {
@@ -169,7 +168,6 @@ public class DatabaseSingleton {
     public static void main(String[] args) {
         DatabaseSingleton db = DatabaseSingleton.getDatabase();
         db.printAccounts();
-        db.printTransactions();
     }
 }
 
@@ -212,6 +210,13 @@ class AccountData implements FileProcessor{
         }
 
         // Load transactions into each account
+        for (Account account : this.accounts.values()) {
+            ArrayList<Transaction> accountTransactions = TransactionData.getTransactionData()
+                    .getTransactionsByAccountId(account.getAccountID());
+            for (Transaction transaction : accountTransactions) {
+                account.addTransaction(transaction);
+            }
+        }
     }
 
     @Override
