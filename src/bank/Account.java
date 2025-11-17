@@ -28,6 +28,14 @@ public abstract class Account {
         this.accountStatus = AccountStatus.ACTIVE;
     }
 
+    public Account (String accountId, Customer customer,List<Transaction> transactions, double balance){ //Parametrized
+        this.accountId = accountId;
+        this.customer = customer;
+        this.transactions = transactions;
+        this.balance = balance;
+        this.accountStatus = AccountStatus.ACTIVE;
+    }
+
     public String getAccountID() {
         return accountId;
     }
