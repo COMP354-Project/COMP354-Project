@@ -5,12 +5,19 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Transaction {
+    public enum TransactionStatus {
+        EXECUTED,
+        VOIDED,
+        PENDING,
+        FAILED
+    }
     //test
     private final String id;
     private final Account sender;
     private final Account receiver;
     private final LocalDateTime timeOfTransaction;
     private final double amount;
+    private TransactionStatus status;
 
     public Transaction(Account sender, Account receiver, LocalDateTime timeOfTransaction, double amount) {
         this.id = UUID.randomUUID().toString();
@@ -18,6 +25,7 @@ public class Transaction {
         this.receiver = receiver;
         this.timeOfTransaction = timeOfTransaction;
         this.amount = amount;
+        this.status = TransactionStatus.PENDING;
     }
 
     public String getId() {
@@ -38,6 +46,14 @@ public class Transaction {
 
     public double getAmount() {
         return amount;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
+    }
+
+    public TransactionStatus getStatus() {
+        return status;
     }
 
     @Override

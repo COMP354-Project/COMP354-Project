@@ -14,6 +14,10 @@ public class LoginAction extends Action{
 
     @Override
     public void prepare() throws InvalidAuthenticationException, InvalidInputException {
+        if (password.isEmpty() || email.isEmpty()){
+            throw new IllegalArgumentException();
+        }
+        //^^^ is that it for the prepare()?
     }
 
     @Override
