@@ -4,36 +4,29 @@ import auth.core.Customer;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import core.exceptions.InsufficientFundsException;
+import core.exceptions.InvalidAccountException;
 import core.exceptions.InvalidInputException;
 import auth.exceptions.TimeOutException;
 import bank.Account;
 import bank.Branch;
 import bank.Transaction;
+import database.DatabaseSingleton;
 
-public class TransactionAction extends Action {
+public class ExecuteTransactionAction extends Action {
+    // Initialize database
+    DatabaseSingleton db;
     //Data needed to prepare
     private User user;
-    private Account sourceAccount;
-    private Account destinationAccount; //Optional for destination
     private Transaction transactionDetails;
     private Branch branch; //use to check for fraud? not used for anything for now
 
-
-    //Flags
-    private boolean prepared;
-    private boolean executed;
+    public ExecuteTransactionAction() {
+        this.db = DatabaseSingleton.getDatabase();
+    }
 
     //Setup phase
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public void setSourceAccount(Account sourceAccount) {
-        this.sourceAccount = sourceAccount;
-    }
-
-    public void setDestinationAccount(Account destinationAccount) {
-        this.destinationAccount = destinationAccount;
     }
 
     public void setTransactionDetails(Transaction transaction) {
@@ -49,19 +42,28 @@ public class TransactionAction extends Action {
     @Override
     public void prepare() throws InvalidAuthenticationException, TimeOutException, InvalidInputException {
         //Validate inputted data
-        if (user == null || sourceAccount == null || transactionDetails == null | destinationAccount == null) {
+        if (user == null || transactionDetails.getSender() == null || transactionDetails == null | transactionDetails.getReceiver() == null) {
             throw new InvalidInputException();
         }
-        if (sourceAccount == destinationAccount) { //checks for sending money to the same account (should work for multiple accounts of different types)
+        if (transactionDetails.getSender() == transactionDetails.getReceiver()) { //checks for sending money to the same account (should work for multiple accounts of different types)
             throw new InvalidInputException();
         }
+
+
         //Flag check
         // Authorize the action
         // If not authorized, this line of code will throw exception
-        authorize(user, sourceAccount);
+
+        try {
+            authorize(user, transactionDetails.getSender());
+        } catch (InvalidAccountException e) {
+            // The edge case, where user select an account but the account gets deleted.
+            throw new InvalidInputException();
+        }
+
 
         // Check if this line needs
-        // TODO: delete if the exception throws correctly
+        // TODO: delete if the exception throws correctly #MU
 //        if (authorized != AUTH_STATUS.AUTHORIZED){ //checks for the state of the authorization
 //            throw new IllegalStateException();
 //        }
@@ -69,43 +71,29 @@ public class TransactionAction extends Action {
         if (transactionDetails.getAmount() <= 0) {
             throw new InsufficientFundsException();
         }
-        if (sourceAccount.getBalance() < 0) {
+        if (transactionDetails.getSender().getBalance() < 0) {
             throw new InsufficientFundsException();
         }
-        if (sourceAccount.getBalance() < transactionDetails.getAmount()) {
+        if (transactionDetails.getSender().getBalance() < transactionDetails.getAmount()) {
             throw new InsufficientFundsException();
         }
-        prepared = true;
     }
 
     @Override
     public void execute() {
-        if (!prepared) {
-            throw new IllegalStateException();
-        }
-
-        double amount = transactionDetails.getAmount();
-
-        //sourceAccount.addTransaction(transactionDetails); //uncomment when needed.
-        destinationAccount.addTransaction(transactionDetails);
-
-        //Not sure how money is actually managed for now, can be removed later
-        sourceAccount.send(amount);
-        destinationAccount.receive(amount);
-
-        System.out.println(sourceAccount.getFullName() + " has sented" + transactionDetails.getAmount() + "$ to " + destinationAccount.getFullName() + ".");
-
-        transactionDetails.setStatus(Transaction.TransactionStatus.EXECUTED);
-
-        //Do the transfers?
-
-        executed = true;
+        transactionDetails.getSender().addTransaction(transactionDetails); //uncomment when needed.
+        transactionDetails.getReceiver().addTransaction(transactionDetails);
+        db.addTransaction(transactionDetails);
+        System.out.println("[" + transactionDetails.getSender().getFullName() + " has sent $" + transactionDetails.getAmount() + " to " + transactionDetails.getReceiver().getFullName() + "] \n");
     }
 
     @Override
-    public void authorize(User user, Account account) throws InvalidAuthenticationException {
-        if (user == null || account == null) {
+    public void authorize(User user, Account account) throws InvalidAuthenticationException, InvalidAccountException {
+        if (user == null) {
             throw new InvalidAuthenticationException();
+        }
+        if (account == null) {
+            throw new InvalidAccountException();
         }
 
         // Case: if user is a customer
@@ -118,10 +106,5 @@ public class TransactionAction extends Action {
             throw new InvalidAuthenticationException();
         }
         System.out.println("Transaction ID (" + transactionDetails.getId() + ") has been approved.");
-    }
-
-
-    public boolean wasExecuted() {
-        return executed;
     }
 }

@@ -6,10 +6,8 @@ import java.util.UUID;
 
 public class Transaction {
     public enum TransactionStatus {
-        EXECUTED,
+        ACTIVE,
         VOIDED,
-        PENDING,
-        FAILED
     }
     //test
     private final String id;
@@ -25,7 +23,7 @@ public class Transaction {
         this.receiver = receiver;
         this.timeOfTransaction = timeOfTransaction;
         this.amount = amount;
-        this.status = TransactionStatus.PENDING;
+        this.status = TransactionStatus.ACTIVE;
     }
 
     public String getId() {
@@ -70,4 +68,6 @@ public class Transaction {
                ", Time of Transaction: " + timeOfTransaction.toString() +
                ", Amount: " + amount;
     }
+
+
 }

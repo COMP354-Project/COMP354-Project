@@ -118,6 +118,21 @@ public class DatabaseSingleton {
     }
 
     /**
+     * Revert an existing transaction.
+     * used for test only, don't remove transactions, void them instead
+     * @author Wang Mu Tian
+     * @param transaction The Transaction object to be removed.
+     * */
+    public void revertTransaction(Transaction transaction){
+        boolean status = this.transactionData.deleteTransaction(transaction);
+        if (status) {
+            System.out.println("Transaction reverted successfully.");
+        } else {
+            System.out.println("Transaction doesn't exists.");
+        }
+    }
+
+    /**
      * Retrieve all transactions for a given account ID.
      * @param accountID The ID of the account whose transactions are to be retrieved.
      * @return An ArrayList of Transaction objects associated with the given account ID.
@@ -411,6 +426,15 @@ class TransactionData implements FileProcessor {
         }
         this.transactions.put(transaction.getId(), transaction);
         this.save(); // Save changes to file
+        return true;
+    }
+
+    public boolean deleteTransaction(Transaction transaction){
+        if (!this.transactions.containsKey(transaction.getId())) {
+            return false;
+        }
+        this.transactions.remove(transaction.getId());
+        this.save();
         return true;
     }
 

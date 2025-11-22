@@ -7,7 +7,6 @@
       "email": "ghi@gmail.com",
       "password": "password"
     },
-    "balance": 0.0,
     "accountStatus": "ACTIVE",
     "creditLimit": 1500.0,
     "creditUsage": 0.0,
@@ -21,7 +20,6 @@
       "email": "abc@gmail.com",
       "password": "password"
     },
-    "balance": 100.0,
     "accountStatus": "ACTIVE",
     "type": "Chequing"
   },
@@ -33,7 +31,6 @@
       "email": "jjj@gmail.com",
       "password": "password"
     },
-    "balance": 20.0,
     "accountStatus": "ACTIVE",
     "type": "Saving"
   },
@@ -45,7 +42,6 @@
       "email": "def@gmail.com",
       "password": "password"
     },
-    "balance": 0.0,
     "accountStatus": "ACTIVE",
     "type": "Chequing"
   }

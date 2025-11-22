@@ -9,7 +9,6 @@
         "email": "abc@gmail.com",
         "password": "password"
       },
-      "balance": 0.0,
       "accountStatus": "ACTIVE",
       "type": "Chequing"
     },
@@ -21,7 +20,6 @@
         "email": "def@gmail.com",
         "password": "password"
       },
-      "balance": 0.0,
       "accountStatus": "ACTIVE",
       "type": "Chequing"
     },
@@ -38,7 +36,6 @@
         "email": "def@gmail.com",
         "password": "password"
       },
-      "balance": 0.0,
       "accountStatus": "ACTIVE",
       "type": "Chequing"
     },
@@ -50,11 +47,10 @@
         "email": "abc@gmail.com",
         "password": "password"
       },
-      "balance": 0.0,
       "accountStatus": "ACTIVE",
       "type": "Chequing"
     },
     "timeOfTransaction": "2025-11-16T22:39:56.049369500",
-    "amount": 99.0
+    "amount": 2000.0
   }
 }
