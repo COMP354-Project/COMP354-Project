@@ -1,17 +1,14 @@
 package core;
 
 import auth.core.Customer;
-import auth.core.Teller;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
-import auth.exceptions.InvalidInputException;
+import core.exceptions.InsufficientFundsException;
+import core.exceptions.InvalidInputException;
 import auth.exceptions.TimeOutException;
 import bank.Account;
 import bank.Branch;
 import bank.Transaction;
-
-import javax.management.relation.Role;
-import javax.naming.AuthenticationException;
 
 public class TransactionAction extends Action {
     //Data needed to prepare
@@ -52,31 +49,31 @@ public class TransactionAction extends Action {
     @Override
     public void prepare() throws InvalidAuthenticationException, TimeOutException, InvalidInputException {
         //Validate inputted data
-        if (user == null || sourceAccount == null || transactionDetails == null) {
+        if (user == null || sourceAccount == null || transactionDetails == null | destinationAccount == null) {
             throw new InvalidInputException();
         }
-        if (sourceAccount == destinationAccount){ //checks for sending money to the same account (should work for multiple accounts of different types)
-            throw new IllegalArgumentException();
+        if (sourceAccount == destinationAccount) { //checks for sending money to the same account (should work for multiple accounts of different types)
+            throw new InvalidInputException();
         }
-
         //Flag check
         // Authorize the action
+        // If not authorized, this line of code will throw exception
         authorize(user, sourceAccount);
 
-        if (authorized != AUTH_STATUS.AUTHORIZED){ //checks for the state of the authorization
-            throw new IllegalStateException();
-        }
+        // Check if this line needs
+        // TODO: delete if the exception throws correctly
+//        if (authorized != AUTH_STATUS.AUTHORIZED){ //checks for the state of the authorization
+//            throw new IllegalStateException();
+//        }
+
         if (transactionDetails.getAmount() <= 0) {
-            throw new IllegalArgumentException();
+            throw new InsufficientFundsException();
         }
         if (sourceAccount.getBalance() < 0) {
-            throw new RuntimeException();
+            throw new InsufficientFundsException();
         }
-        if (sourceAccount.getBalance() < transactionDetails.getAmount()){
-            throw new IllegalArgumentException();
-        }
-        if (destinationAccount == null) {
-            throw new RuntimeException();
+        if (sourceAccount.getBalance() < transactionDetails.getAmount()) {
+            throw new InsufficientFundsException();
         }
         prepared = true;
     }
@@ -117,11 +114,9 @@ public class TransactionAction extends Action {
                 authorized = AUTH_STATUS.AUTHORIZED;
                 return;
             }
-        }
-        else {
+        } else {
             throw new InvalidAuthenticationException();
         }
-
         System.out.println("Transaction ID (" + transactionDetails.getId() + ") has been approved.");
     }
 

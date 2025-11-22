@@ -1,6 +1,6 @@
 package auth.core;
 
-import auth.exceptions.InvalidInputException;
+import core.exceptions.InvalidInputException;
 
 import java.util.Objects;
 

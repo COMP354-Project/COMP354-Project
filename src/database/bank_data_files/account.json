@@ -21,7 +21,7 @@
       "email": "abc@gmail.com",
       "password": "password"
     },
-    "balance": 0.0,
+    "balance": 100.0,
     "accountStatus": "ACTIVE",
     "type": "Chequing"
   },
@@ -33,7 +33,7 @@
       "email": "jjj@gmail.com",
       "password": "password"
     },
-    "balance": 0.0,
+    "balance": 20.0,
     "accountStatus": "ACTIVE",
     "type": "Saving"
   },
