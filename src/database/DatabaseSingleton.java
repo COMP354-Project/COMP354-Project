@@ -88,7 +88,7 @@ public class DatabaseSingleton {
     }
 
     public User getUserByEmail(String email) {
-        return null;
+        return this.accountData.getAccountByEmail(email).getCustomer();
     }
 
     /**
@@ -290,6 +290,15 @@ class AccountData implements FileProcessor{
             }
         }
         return null;
+    }
+
+    public Account getAccountByEmail(String email){
+         for (Account account : this.accounts.values()) {
+            if (account.getCustomer().getEmail().equals(email)) {
+                return account;
+            }
+        }
+         return null;
     }
 
     public boolean addAccount(Account account) {

@@ -10,7 +10,7 @@ public class LoginAction extends Action {
     private String password;
     private String email;
 
-    private User user;
+    private User authentifiedUser;
 
     @Override
     public void prepare() throws InvalidInputException {
@@ -30,6 +30,9 @@ public class LoginAction extends Action {
         if (!user.getPassword().equals(password)) {
             throw new InvalidAuthenticationException();
         }
+
+        // Assign authentified user
+        this.authentifiedUser = user;
     }
 
     @Override
@@ -54,6 +57,6 @@ public class LoginAction extends Action {
     }
 
     public User getAuthenticatedUser() {
-        return user;
+        return authentifiedUser;
     }
 }
