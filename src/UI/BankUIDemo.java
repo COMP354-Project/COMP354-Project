@@ -2,16 +2,23 @@ package UI;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.nio.file.*;
 import java.util.*;
 import java.util.List;
 
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
+import bank.Transaction;
 import com.google.gson.*;
 import core.LoginAction;
+import core.ViewTransactionAction;
+import core.exceptions.InvalidAccountException;
+import database.DatabaseSingleton;
 
 // ---------- Models / Store (users + roles from JSON) ----------
 //class User {
@@ -65,6 +72,7 @@ public class BankUIDemo {
         root.add(new CustomerDashboard(), "customer");
         root.add(new CustomerAccountInfo(), "cust_account");
         root.add(new CustomerProfile(), "cust_profile");
+        root.add(new TransactionHistory(), "cust_profile_trans");
 
         // teller
         root.add(new TellerDashboard(), "teller");
@@ -161,6 +169,7 @@ public class BankUIDemo {
         }
     }
 
+
     class CustomerAccountInfo extends JPanel {
         CustomerAccountInfo() {
             super(new GridBagLayout());
@@ -168,12 +177,119 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("Account Information"), g(c, 0, 0, 2));
 
-            add(btn("Transaction History", () -> info("Open Transaction History")), g(c, 0, 1, 2));
+            add(btn("Transaction History", () -> {
+                go("cust_profile_trans");
+
+
+            }));
             add(btn("Account Summary", () -> info("Open Account Summary")), g(c, 0, 2, 2));
             add(btn("Fund Transfer", () -> info("Open Fund Transfer")), g(c, 0, 3, 2));
             add(btn("Deposit / Withdraw", () -> info("Open Deposit/Withdraw")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
         }
+    }
+
+
+    class TransactionHistory extends JPanel {
+        final String titleText = "Transaction History";
+        final TransactionTable tableModel = new TransactionTable();
+        final JTable viewTable = new JTable(tableModel);
+
+        // Initialize the panel to see the transaction history of an account
+        TransactionHistory() {
+            super(new GridBagLayout());
+            setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+            GridBagConstraints c = gbc();
+
+            // ----- Title -----
+            JLabel title = new JLabel(this.titleText);
+            title.setFont(title.getFont().deriveFont(Font.BOLD, 20f));
+            add(title, g(c, 0, 0, 2));
+
+            // ----- Table -----
+            viewTable.setFillsViewportHeight(true);
+            viewTable.setAutoCreateRowSorter(true);
+
+            JScrollPane scroll = new JScrollPane(viewTable);
+            GridBagConstraints tableC = g(c, 0, 1, 2);
+            tableC.weighty = 1;
+            tableC.fill = GridBagConstraints.BOTH;
+            add(scroll, tableC);
+
+            // ----- Footer Buttons -----
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton backBtn = new JButton("Back");
+            JButton extraBtn = new JButton("Action"); // you can change this
+
+            actions.add(extraBtn);
+            actions.add(backBtn);
+
+            add(actions, g(c, 0, 2, 2));
+
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    initialize();   // ← RUN UPDATE HERE
+                }
+            });
+        }
+
+
+        public void initialize() {
+            // Setup data
+            ViewTransactionAction viewTransactionAction = new ViewTransactionAction();
+            viewTransactionAction.setUser(currentUser);
+            viewTransactionAction.setAccountViewed(DatabaseSingleton.getDatabase().getAccountByUser(currentUser));
+            try {
+                viewTransactionAction.execute();
+            } catch (InvalidAuthenticationException | InvalidAccountException e) {
+                // TODO: Manage edge cases and error cases
+                throw new RuntimeException(e);
+            }
+            tableModel.setTransactions(viewTransactionAction.getListOfTransactions());
+        }
+
+        class TransactionTable extends AbstractTableModel {
+            private final String[] columns = {
+                    "Date", "Description", "Type", "Amount", "Balance"
+            };
+
+            private List<Transaction> data = new ArrayList<>();
+
+            public void setTransactions(List<Transaction> data) {
+                this.data = data;
+                fireTableDataChanged(); // tells JTable to repaint
+            }
+
+            @Override
+            public int getRowCount() {
+                return data.size();
+            }
+
+            @Override
+            public int getColumnCount() {
+                return columns.length;
+            }
+
+            @Override
+            public String getColumnName(int column) {
+                return columns[column];
+            }
+
+            @Override
+            public Object getValueAt(int rowIndex, int columnIndex) {
+                Transaction t = data.get(rowIndex);
+                return switch (columnIndex) {
+                    case 0 -> t.getId();
+                    case 1 -> t.getSender();
+                    case 2 -> t.getReceiver();
+                    case 3 -> t.getAmount();
+                    case 4 -> t.getTimeOfTransaction();
+                    default -> "";
+                };
+            }
+        }
+
+
     }
 
     class CustomerProfile extends JPanel {

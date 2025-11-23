@@ -91,6 +91,10 @@ public class DatabaseSingleton {
         return this.accountData.getAccountByEmail(email).getCustomer();
     }
 
+    public Account getAccountByUser(User user){
+        return this.accountData.getAccountByEmail(user.getEmail());
+    }
+
     /**
      * Add a new account to the database. This method should be invoked every time an Action related to creating an account is performed.
      * @param account The Account object to be added.
