@@ -7,14 +7,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.nio.file.*;
 import java.util.*;
 import java.util.List;
 
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.Transaction;
-import com.google.gson.*;
 import core.LoginAction;
 import core.ViewTransactionAction;
 import core.exceptions.InvalidAccountException;
@@ -177,11 +175,7 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("Account Information"), g(c, 0, 0, 2));
 
-            add(btn("Transaction History", () -> {
-                go("cust_profile_trans");
-
-
-            }));
+            add(btn("Transaction History", () -> go("cust_profile_trans")));
             add(btn("Account Summary", () -> info("Open Account Summary")), g(c, 0, 2, 2));
             add(btn("Fund Transfer", () -> info("Open Fund Transfer")), g(c, 0, 3, 2));
             add(btn("Deposit / Withdraw", () -> info("Open Deposit/Withdraw")), g(c, 0, 4, 2));
@@ -189,7 +183,14 @@ public class BankUIDemo {
         }
     }
 
-
+    /***
+     * TransactionHistory
+     * UI Panel + fetching transactions + data refresh trigger
+     * updateData() - fetch the data from database through {@link ViewTransactionAction}
+     * addComponentListener() + componentShown() - refresh data when this panel is displayed (through go())
+     * @see ViewTransactionAction
+     * @author Wang Mu Tian
+     */
     class TransactionHistory extends JPanel {
         final String titleText = "Transaction History";
         final TransactionTable tableModel = new TransactionTable();
@@ -226,15 +227,15 @@ public class BankUIDemo {
 
             add(actions, g(c, 0, 2, 2));
 
+            // Fetch trigger
             addComponentListener(new ComponentAdapter() {
                 public void componentShown(ComponentEvent e) {
-                    initialize();   // ← RUN UPDATE HERE
+                    updateData();   // ← RUN UPDATE HERE
                 }
             });
         }
 
-
-        public void initialize() {
+        public void updateData() {
             // Setup data
             ViewTransactionAction viewTransactionAction = new ViewTransactionAction();
             viewTransactionAction.setUser(currentUser);
@@ -249,10 +250,7 @@ public class BankUIDemo {
         }
 
         class TransactionTable extends AbstractTableModel {
-            private final String[] columns = {
-                    "Date", "Description", "Type", "Amount", "Balance"
-            };
-
+            private final String[] columns = {"Date", "Description", "Type", "Amount", "Balance"};
             private List<Transaction> data = new ArrayList<>();
 
             public void setTransactions(List<Transaction> data) {
@@ -288,8 +286,6 @@ public class BankUIDemo {
                 };
             }
         }
-
-
     }
 
     class CustomerProfile extends JPanel {
