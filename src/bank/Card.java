@@ -1,6 +1,7 @@
 package bank;
 
 import auth.core.Customer;
+import core.exceptions.InsufficientFundsException;
 
 public class Card extends Account {
 
@@ -12,7 +13,7 @@ public class Card extends Account {
         super(customer);
 
         if (creditLimit < 0) {
-            throw new IllegalArgumentException("Credit limit cannot be negative");
+            throw new InsufficientFundsException();
         }
 
         this.creditLimit = creditLimit;
@@ -22,7 +23,7 @@ public class Card extends Account {
 
     public void setCreditLimit(double newCreditLimit){
         if (newCreditLimit < 0) {
-            throw new IllegalArgumentException("Credit limit cannot be negative");
+            throw new InsufficientFundsException();
         }
         this.creditLimit = newCreditLimit;
     }
