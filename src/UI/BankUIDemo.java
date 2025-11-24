@@ -7,12 +7,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.Transaction;
+import com.google.gson.Gson;
+
 import core.LoginAction;
 import core.ViewTransactionAction;
 import core.exceptions.InvalidAccountException;
@@ -222,9 +225,9 @@ public class BankUIDemo {
             JButton backBtn = new JButton("Back");
             JButton extraBtn = new JButton("Action"); // you can change this
 
+            backBtn.addActionListener(e -> go("customer"));
             actions.add(extraBtn);
             actions.add(backBtn);
-
             add(actions, g(c, 0, 2, 2));
 
             // Fetch trigger
