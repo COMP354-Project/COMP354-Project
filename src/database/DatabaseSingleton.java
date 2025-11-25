@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import database.exceptions.*;
 
 /**
@@ -29,7 +30,7 @@ import database.exceptions.*;
  * </ul>
  *
  * @author Cong Minh Le (40264100)
- * */
+ */
 public class DatabaseSingleton {
     private static DatabaseSingleton db;
     private final AccountData accountData;
@@ -75,17 +76,17 @@ public class DatabaseSingleton {
 
     /**
      * Retrieve account(s) by their username. Since a user can have multiple accounts, this method returns a list of accounts.
+     *
      * @param username The username of the account to be retrieved.
      * @return The ArrayList of Account objects with the specified username, or null if not found.
-     * */
+     */
     public ArrayList<Account> getAccountsByUserName(String username) {
         // Implementation to get account by username
         ArrayList<Account> res = null;
         try {
             res = this.accountData.getAccountsByUserName(username);
             System.out.println(res.size() + " accounts with username " + username + " retrieved successfully.");
-        }
-        catch (InvalidUsernameException e) {
+        } catch (InvalidUsernameException e) {
             System.out.println(e.getMessage());
         }
         return res;
@@ -111,9 +112,10 @@ public class DatabaseSingleton {
 
     /**
      * Retrieve an account by its ID.
+     *
      * @param id The ID of the account to be retrieved.
      * @return The Account object with the specified ID, or null if not found.
-     * */
+     */
     public Account getAccountByID(String id) {
         Account res = null;
         try {
@@ -127,16 +129,16 @@ public class DatabaseSingleton {
 
     /**
      * Retrieve a transaction by its ID.
+     *
      * @param transactionID The ID of the transaction to be retrieved.
      * @return The Transaction object with the specified ID, or null if not found.
-     * */
+     */
     public Transaction getTransactionById(String transactionID) {
         Transaction res = null;
         try {
             res = this.transactionData.getTransactionById(transactionID);
             System.out.println("Transaction with ID " + transactionID + " retrieved successfully.");
-        }
-        catch (TransactionNotFoundException e) {
+        } catch (TransactionNotFoundException e) {
             System.out.println(e.getMessage());
         }
         return res;
@@ -150,7 +152,7 @@ public class DatabaseSingleton {
         return this.userData.getUserByEmail(email);
     }
 
-    public Account getAccountByUser(User user){
+    public Account getAccountByUser(User user) {
         return this.accountData.getAccountByEmail(user.getEmail());
     }
 
@@ -169,8 +171,9 @@ public class DatabaseSingleton {
 
     /**
      * Add a new account to the database. This method should be invoked every time an Action related to creating an account is performed.
+     *
      * @param account The Account object to be added.
-     * */
+     */
     public void addAccount(Account account) {
         try {
             this.accountData.addAccount(account);
@@ -182,8 +185,9 @@ public class DatabaseSingleton {
 
     /**
      * Add a new transaction to the database. This method should be invoked every time an Action related to creating a transaction is performed.
+     *
      * @param transaction The Transaction object to be added.
-     * */
+     */
     public void addTransaction(Transaction transaction) {
         try {
             this.transactionData.addTransaction(transaction);
@@ -196,10 +200,11 @@ public class DatabaseSingleton {
     /**
      * Revert an existing transaction.
      * used for test only, don't remove transactions, void them instead
-     * @author Wang Mu Tian
+     *
      * @param transaction The Transaction object to be removed.
-     * */
-    public void revertTransaction(Transaction transaction){
+     * @author Wang Mu Tian
+     */
+    public void revertTransaction(Transaction transaction) {
         boolean status = this.transactionData.deleteTransaction(transaction);
         if (status) {
             System.out.println("Transaction reverted successfully.");
@@ -210,20 +215,22 @@ public class DatabaseSingleton {
 
     /**
      * Retrieve all transactions for a given account ID.
+     *
      * @param accountID The ID of the account whose transactions are to be retrieved.
      * @return An ArrayList of Transaction objects associated with the given account ID.
-     * */
+     */
     public ArrayList<Transaction> getTransactionsByAccountID(String accountID) {
         return this.transactionData.getTransactionsByAccountId(accountID);
     }
 
     /**
      * Filter transactions for a given account that occurred within the specified date range.
+     *
      * @param accountID The ID of the account whose transactions are to be filtered.
-     * @param start The start LocalDateTime of the date range.
-     * @param end The end LocalDateTime of the date range.
+     * @param start     The start LocalDateTime of the date range.
+     * @param end       The end LocalDateTime of the date range.
      * @return An ArrayList of Transaction objects that occurred within the specified date range. Return null if none found.
-     * */
+     */
     public ArrayList<Transaction> filterTransactionsByDateRange(String accountID, LocalDateTime start, LocalDateTime end) {
         ArrayList<Transaction> res = null;
         try {
@@ -238,10 +245,11 @@ public class DatabaseSingleton {
 
     /**
      * Filter transactions for a given account that occurred after the specified time.
+     *
      * @param accountID The ID of the account whose transactions are to be filtered.
-     * @param time The LocalDateTime after which transactions should be included.
+     * @param time      The LocalDateTime after which transactions should be included.
      * @return An ArrayList of Transaction objects that occurred after the specified time, return null if none found.
-     * */
+     */
     public ArrayList<Transaction> filterTransactionsByTime(String accountID, LocalDateTime time) {
         ArrayList<Transaction> res = null;
         try {
@@ -256,8 +264,9 @@ public class DatabaseSingleton {
 
     /**
      * Update an existing account in the database. This method should be invoked every time an Action related to updating an account is performed.
+     *
      * @param account The Account object with updated information.
-     * */
+     */
     public void updateAccount(Account account) {
         try {
             this.accountData.updateAccount(account);
@@ -287,14 +296,14 @@ public class DatabaseSingleton {
 
     /**
      * Print all accounts in the database.
-     * */
+     */
     public void printAccounts() {
         this.accountData.printAccounts();
     }
 
     /**
      * Print all transactions in the database.
-     * */
+     */
     public void printTransactions() {
         this.transactionData.printTransactions();
     }
@@ -310,8 +319,8 @@ public class DatabaseSingleton {
 
 /**
  * AccountData class implementing FileProcessor interface
- * */
-class AccountData implements FileProcessor{
+ */
+class AccountData implements FileProcessor {
     private static AccountData ad;
     private static final String PATH = "src/database/bank_data_files/account.json";
     HashMap<String, Account> accounts;
@@ -336,8 +345,7 @@ class AccountData implements FileProcessor{
             fr = new FileReader(PATH);
             this.accounts = getGson().fromJson(fr, a_type);
             fr.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("Error reading from file: " + e.getMessage());
         }
 
@@ -356,8 +364,7 @@ class AccountData implements FileProcessor{
             fw = new FileWriter(PATH);
             getGson().toJson(this.accounts, a_type, fw);
             fw.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());
         }
     }
@@ -409,19 +416,20 @@ class AccountData implements FileProcessor{
         else throw new InvalidEmailException("No account found with email: " + email);
     }
 
-    public Account getAccountByEmail(String email){
-         for (Account account : this.accounts.values()) {
+    // Used to find customer from user
+    public Account getAccountByEmail(String email) {
+        for (Account account : this.accounts.values()) {
             if (account.getCustomer().getEmail().equals(email)) {
                 return account;
             }
         }
-         return null;
+        throw new UserNotFoundException("No user found with email: " + email);
     }
 
     public void addAccount(Account account) throws AccountAlreadyExistedException {
         if (this.accounts.containsKey(account.getAccountID())) {
             throw new AccountAlreadyExistedException("Account with ID " + account.getAccountID() + " already exists."
-            + " Please use a different ID, or update the existing account.");
+                    + " Please use a different ID, or update the existing account.");
         }
         this.accounts.put(account.getAccountID(), account);
         this.save(); // Save changes to file
@@ -450,8 +458,8 @@ class AccountData implements FileProcessor{
 /**
  * UserData class implementing FileProcessor interface.
  * This class loads and manages user data where users are Customer, Teller, or Admin.
- * */
-class UserData implements FileProcessor{
+ */
+class UserData implements FileProcessor {
     private static UserData rd;
     private static final String PATH = "src/database/bank_data_files/user.json";
     HashMap<String, User> users;
@@ -609,7 +617,7 @@ class UserData implements FileProcessor{
 
 /**
  * TransactionData class implementing FileProcessor interface
- * */
+ */
 class TransactionData implements FileProcessor {
     private static TransactionData td;
     private static final String PATH = "src/database/bank_data_files/transaction.json";
@@ -737,8 +745,7 @@ class TransactionData implements FileProcessor {
                 throw new TransactionNotFoundException("Account ID " + accountID + " has no associated transactions or doesn't exist.");
             }
             return result;
-        }
-        catch (InvalidAccountIDException e) {
+        } catch (InvalidAccountIDException e) {
             throw new InvalidAccountIDException("Account ID " + accountID + " is invalid.");
         }
     }
@@ -755,9 +762,9 @@ class TransactionData implements FileProcessor {
         ArrayList<Transaction> result = new ArrayList<>();
         for (Transaction transaction : this.transactions.values()) {
             if ((transaction.getSender().getAccountID().equals(accountID) ||
-                 transaction.getReceiver().getAccountID().equals(accountID)) &&
-                (transaction.getTimeOfTransaction().isAfter(start) || transaction.getTimeOfTransaction().isEqual(start)) &&
-                (transaction.getTimeOfTransaction().isBefore(end) || transaction.getTimeOfTransaction().isEqual(end))) {
+                    transaction.getReceiver().getAccountID().equals(accountID)) &&
+                    (transaction.getTimeOfTransaction().isAfter(start) || transaction.getTimeOfTransaction().isEqual(start)) &&
+                    (transaction.getTimeOfTransaction().isBefore(end) || transaction.getTimeOfTransaction().isEqual(end))) {
                 result.add(transaction);
             }
         }

@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
 import com.google.gson.Gson;
 
+import core.ExecuteTransactionAction;
 import core.LoginAction;
 import core.ProfileAction;
 import core.ViewTransactionAction;
@@ -57,8 +59,8 @@ public class BankUIDemo {
     private final JFrame frame = new JFrame("Bank");
     private final CardLayout cards = new CardLayout();
     private final JPanel root = new JPanel(cards);
-    private String currentRole = null;
-    private User currentUser;
+    private String currentRole;
+    protected User currentUser;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BankUIDemo().start());
@@ -72,9 +74,14 @@ public class BankUIDemo {
 
         // customer
         root.add(new CustomerDashboard(), "customer");
+
+        // customer account info
         root.add(new CustomerAccountInfo(), "cust_account");
+        root.add(new TransactionHistory(), "cust_account_transactions");
+        root.add(new CustomerAccountSummary(), "cust_account_summary");
+        //customer personal info
         root.add(new CustomerProfile(), "cust_profile");
-        root.add(new TransactionHistory(), "cust_profile_trans");
+
 
         // teller
         root.add(new TellerDashboard(), "teller");
@@ -83,6 +90,10 @@ public class BankUIDemo {
         // admin
         root.add(new AdminDashboard(), "admin");
         root.add(new AdminUserMgmt(), "admin_user_mgmt");
+
+        // Fund transfer & Withdraw/Deposit
+        root.add(new FundTransfer(), "fund_transfer");
+        root.add(new WithdrawDeposit(), "withdraw_deposit");
 
         cards.show(root, "login");
         frame.setContentPane(root);
@@ -120,6 +131,12 @@ public class BankUIDemo {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     doLogin();
+                    switch (currentUser.getClass().getSimpleName().toLowerCase()) {
+                        case "customer" -> go("customer");
+                        case "teller" -> go("teller");
+                        case "admin" -> go("admin");
+                        default -> toast("Unknown role: " + currentRole);
+                    }
                 }
             });
             JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -140,7 +157,8 @@ public class BankUIDemo {
             try {
                 loginAction.execute();
             } catch (InvalidAuthenticationException e) {
-                toast("Invalid credentials");
+                toast(e.getMessage());
+                return;
             }
             currentUser = loginAction.getAuthenticatedUser();
 
@@ -152,15 +170,8 @@ public class BankUIDemo {
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
                 toast("Could not load account info");
             }
-            root.add(new CustomerAccountSummary(profileAction), "account_summary");
 
 
-            switch (currentUser.getClass().getSimpleName().toLowerCase()) {
-                case "customer" -> go("customer");
-                case "teller" -> go("teller");
-                case "admin" -> go("admin");
-                default -> toast("Unknown role: " + currentRole);
-            }
         }
     }
 
@@ -190,11 +201,12 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("Account Information"), g(c, 0, 0, 2));
 
-            add(btn("Transaction History", () -> go("cust_profile_trans")));
-            add(btn("Account Summary", () -> go("account_summary")), g(c, 0, 2, 2));
+            add(btn("Transaction History", () -> go("cust_account_transactions")));
+            add(btn("Account Summary", () -> go("cust_account_summary")), g(c, 0, 2, 2));
             add(btn("Fund Transfer", () -> info("Open Fund Transfer")), g(c, 0, 3, 2));
             add(btn("Deposit / Withdraw", () -> info("Open Deposit/Withdraw")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
+
         }
     }
 
@@ -203,62 +215,114 @@ public class BankUIDemo {
      *
      */
     class CustomerAccountSummary extends JPanel {
-        private final ProfileAction profile;
-        private Account currentAccount;
+        private ProfileAction profile;
 
-        CustomerAccountSummary(ProfileAction profile){
+        CustomerAccountSummary() {
             super(new GridBagLayout());
-            this.profile = profile;
-
             setBorder(pad());
-            GridBagConstraints c = gbc();
-
-            add(title("Account Summary"), g(c, 0, 0, 2));
-            if (currentUser != null){
-                displaySummary(c);
-            }
-
-            add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
-        }
-
-        private void displaySummary(GridBagConstraints c) {
-            try {
-                profile.execute(); // fetch the account
-                currentAccount = profile.getUserAccount();
-
-                if (currentAccount != null) {
-                    add(new JLabel("Account Number: " + currentAccount.getAccountID()), g(c, 0, 1, 2));
-                    if (currentAccount instanceof Card){ //Credit Card
-                        Card cc = (Card) currentAccount;
-                        add(new JLabel("Account Type: Credit Card"), g(c, 0, 2, 2));
-                        add(new JLabel("Credit Limit: $" + cc.getCreditLimit()), g(c, 0, 3, 2));
-                        add(new JLabel("Credit Usage: $" + cc.getCreditUsage()), g(c, 0, 4, 2));
-                    }else if (currentAccount instanceof Saving){ //Saving
-                        add(new JLabel("Account Type: Saving"), g(c, 0, 2, 2));
-                        add(new JLabel("Balance: $" + currentAccount.getBalance()), g(c, 0, 3, 2));
-                    }else{//Chequing
-                        add(new JLabel("Account Type: Chequing"), g(c, 0, 2, 2));
-                        add(new JLabel("Balance: $" + currentAccount.getBalance()), g(c, 0, 3, 2));
-                    }
-                } else {
-                    add(new JLabel("No account found"), g(c, 0, 1, 2));
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    displaySummary();   // ← RUN UPDATE HERE
+                    revalidate();
+                    repaint();
                 }
+            });
+        }
 
+        private void displaySummary() {
+            profile = new ProfileAction();
+            profile.setCurrentUser(currentUser);
+            try {
+                profile.execute();
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
-                add(new JLabel("Error fetching account info"), g(c, 0, 1, 2));
+                throw new RuntimeException(e);
+            }
+
+            GridBagConstraints c = gbc();
+            add(title("Account Summary"), g(c, 0, 0, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
+            if (profile.getUserAccount() != null) {
+                add(new JLabel("Account Number: " + profile.getUserAccount().getAccountID()), g(c, 0, 1, 2));
+                if (profile.getUserAccount() instanceof Card) { //Credit Card
+                    Card cc = (Card) profile.getUserAccount();
+                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 2, 2));
+                    add(new JLabel("Credit Limit: $" + cc.getCreditLimit()), g(c, 0, 3, 2));
+                    add(new JLabel("Credit Usage: $" + cc.getCreditUsage()), g(c, 0, 4, 2));
+                } else if (profile.getUserAccount() instanceof Saving) { //Saving
+                    add(new JLabel("Account Type: Saving"), g(c, 0, 2, 2));
+                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 3, 2));
+                } else {//Chequing
+                    add(new JLabel("Account Type: Chequing"), g(c, 0, 2, 2));
+                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 3, 2));
+                }
+            } else {
+                add(new JLabel("No account found"), g(c, 0, 1, 2));
             }
         }
+
     }
 
     class FundTransfer extends JPanel {
+        JTextField recipientAccount = new JTextField(22);
+        JTextField amountInput = new JTextField(22);
+
         FundTransfer() {
             super(new GridBagLayout());
             setBorder(pad());
             GridBagConstraints c = gbc();
             add(title("Fund Transfer"), g(c, 0, 0, 2));
 
+            c.gridy = 0;
+            c.gridwidth = 2;
 
-            add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
+            row(this, c, 1, "Recipient: ", recipientAccount);
+            row(this, c, 2, "Amount: ", amountInput);
+            /**
+            try{
+                double amount = Double.parseDouble(amountInput.getText());
+                Account destinationAcc = DatabaseSingleton.getDatabase().getAccountByID(recipientAccount.getText());
+                Transaction transaction = new Transaction(currentAccount, destinationAcc, LocalDateTime.now(), amount);
+
+                ExecuteTransactionAction sendAction = new ExecuteTransactionAction();
+                sendAction.setUser(currentUser);
+                sendAction.setTransactionDetails(transaction);
+                sendAction.execute();
+
+            } catch (Exception e) {
+                toast("Invalid amount");
+            }
+             */
+
+
+            add(btn("Confirm", () -> info("Transaction sent")), g(c, 0, 4, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
+        }
+    }
+
+    class WithdrawDeposit extends JPanel {
+        String[] choices = {"Withdraw", "Deposit"};
+        JComboBox<String> box = new JComboBox<>(choices);
+        JTextField amountInput = new JTextField(22);
+
+
+        WithdrawDeposit() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Withdraw/Deposit"), g(c, 0, 0, 2));
+            add(box, g(c, 0, 1, 2));
+            row(this, c, 2, "Amount: ", amountInput);
+            /**
+            try{
+                double amount = Double.parseDouble(amountInput.getText());
+
+            } catch (Exception e) {
+                toast("Invalid amount");
+            }
+             */
+
+            add(btn("Confirm", () ->info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
         }
     }
 
@@ -299,10 +363,8 @@ public class BankUIDemo {
             // ----- Footer Buttons -----
             JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             JButton backBtn = new JButton("Back");
-            JButton extraBtn = new JButton("Action"); // you can change this
 
-            backBtn.addActionListener(e -> go("customer"));
-            actions.add(extraBtn);
+            backBtn.addActionListener(e -> go("cust_account"));
             actions.add(backBtn);
             add(actions, g(c, 0, 2, 2));
 
