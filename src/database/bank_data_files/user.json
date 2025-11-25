@@ -1,0 +1,40 @@
+{
+  "admin@gmail.com": {
+    "email": "admin@gmail.com",
+    "password": "adminPass",
+    "type": "Admin"
+  },
+  "teller@gmail.com": {
+    "email": "teller@gmail.com",
+    "password": "tellerPass",
+    "type": "Teller"
+  },
+  "ghi@gmail.com": {
+    "email": "ghi@gmail.com",
+    "password": "password",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "type": "Customer"
+  },
+  "abc@gmail.com": {
+    "email": "abc@gmail.com",
+    "password": "password",
+    "firstName": "Joseph",
+    "lastName": "Joestar",
+    "type": "Customer"
+  },
+  "jjj@gmail.com": {
+    "email": "jjj@gmail.com",
+    "password": "password",
+    "firstName": "Jimmy",
+    "lastName": "Neutron",
+    "type": "Customer"
+  },
+  "def@gmail.com": {
+    "email": "def@gmail.com",
+    "password": "password",
+    "firstName": "John",
+    "lastName": "Joe",
+    "type": "Customer"
+  }
+}

@@ -53,8 +53,6 @@ public class AccountAdapter implements JsonSerializer<Account>, JsonDeserializer
     @Override
     public Account deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-        // Implement if you need to read accounts back from JSON.
-        // Minimal stub: return null or construct specific Account subclass based on "type".
         Account acc = null;
         JsonObject obj = json.getAsJsonObject();
         String type = obj.has("type") ? obj.get("type").getAsString() : null;

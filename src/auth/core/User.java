@@ -8,7 +8,7 @@ public abstract class User {
     protected String email;
     protected String password;
 
-    protected void setPassword(String password) throws InvalidInputException {
+    public void setPassword(String password) throws InvalidInputException {
         // TODO Password format verification (bellow nmb of characters, not-allowed symbols, etc...)
         if (false) {
             throw new InvalidInputException();
@@ -42,5 +42,9 @@ public abstract class User {
         int result = Objects.hashCode(email);
         result = 31 * result + Objects.hashCode(password);
         return result;
+    }
+
+    public String toString(){
+        return "User email: " + this.email + "\nUser password: " + this.password;
     }
 }

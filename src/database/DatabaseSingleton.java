@@ -33,12 +33,12 @@ import database.exceptions.*;
 public class DatabaseSingleton {
     private static DatabaseSingleton db;
     private final AccountData accountData;
-//    private final UserData userData;
+    private final UserData userData;
     private final TransactionData transactionData;
 //    private final BranchData branchData;
 
     private DatabaseSingleton() {
-//        this.userData = UserData.getUserData();
+        this.userData = UserData.getUserData();
 //        this.branchData = BranchData.getBranchData();
         this.accountData = AccountData.getAccountData();
         this.transactionData = TransactionData.getTransactionData();
@@ -129,11 +129,24 @@ public class DatabaseSingleton {
     }
 
     public User getUserByEmail(String email) {
-        return this.accountData.getAccountByEmail(email).getCustomer();
+        return this.userData.getUserByEmail(email);
     }
 
     public Account getAccountByUser(User user){
         return this.accountData.getAccountByEmail(user.getEmail());
+    }
+
+    /**
+     * Add a new user to the database. This method should be invoked every time an Action related to creating a user is performed.
+     * @param user The User object to be added.
+     * */
+    public void addUser(User user) {
+        try {
+            this.userData.addUser(user);
+            System.out.println("User added to database successfully.");
+        } catch (UserAlreadyExistedException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     /**
@@ -252,6 +265,13 @@ public class DatabaseSingleton {
      * */
     public void printTransactions() {
         this.transactionData.printTransactions();
+    }
+
+    /**
+     * Print all users in the database.
+     * */
+    public void printUsers() {
+        this.userData.printUsers();
     }
 
 }
@@ -381,6 +401,7 @@ class UserData implements FileProcessor{
     private static UserData rd;
     private static final String PATH = "src/database/bank_data_files/user.json";
     private HashMap<String, User> users;
+    private static final Type u_type = new TypeToken<HashMap<String, User>>() {}.getType();
 
     private UserData() {
         this.load();
@@ -395,17 +416,67 @@ class UserData implements FileProcessor{
 
     @Override
     public void load() {
+        // Load user data from JSON file into users HashMap
+        FileReader fr = null;
+        try {
+            fr = new FileReader(PATH);
+            this.users = getGson().fromJson(fr, u_type);
+            fr.close();
+        }
+        catch (IOException e) {
+            System.err.println("Error reading from file: " + e.getMessage());
+        }
 
+        // If accounts is null (e.g., file was empty), initialize it as an empty HashMap
+        if (this.users == null || this.users.isEmpty()) {
+            this.users = new HashMap<>();
+        }
     }
 
     @Override
     public void save() {
-
+        // Save users HashMap data into JSON file
+        FileWriter fw;
+        try {
+            fw = new FileWriter(PATH);
+            getGson().toJson(this.users, u_type, fw);
+            fw.close();
+        }
+        catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
     }
 
     @Override
     public Gson getGson() {
-        return null;
+        return new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(User.class, new UserAdapter())
+                .create();
+    }
+
+    public User getUserByEmail(String email) throws UserNotFoundException {
+        for (User user : this.users.values()) {
+            if (user.getEmail().equals(email)) {
+                return user;
+            }
+        }
+        throw new UserNotFoundException("User with email " + email + " not found.");
+    }
+
+    public void addUser(User user) throws UserAlreadyExistedException {
+        if (this.users.containsKey(user.getEmail())) {
+            throw new UserAlreadyExistedException("User with email " + user.getEmail() + " already exists."
+                    + " Please use a different email.");
+        }
+        this.users.put(user.getEmail(), user);
+        this.save(); // Save changes to file
+    }
+
+    public void printUsers() {
+        for (String key : this.users.keySet()) {
+            System.out.println(users.get(key));
+        }
     }
 }
 
@@ -432,7 +503,7 @@ class TransactionData implements FileProcessor {
 
     @Override
     public void load() {
-        // Load account data from JSON file into accounts HashMap
+        // Load transaction data from JSON file into transactions HashMap
         FileReader fr = null;
         try {
             fr = new FileReader(PATH);

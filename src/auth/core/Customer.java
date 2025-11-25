@@ -61,8 +61,8 @@ public class Customer extends User {
     }
 
     public String toString() {
-        return "firstName=" + firstName +
-               ", lastName=" + lastName;
+        return super.toString() + "\nFirst Name: " + firstName +
+               "\nLast Name: " + lastName;
     }
 }
 
