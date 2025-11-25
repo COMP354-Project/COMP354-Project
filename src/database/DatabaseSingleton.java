@@ -4,7 +4,6 @@ import bank.*;
 import com.google.gson.*;
 import auth.core.*;
 import com.google.gson.reflect.TypeToken;
-import database.exceptions.*;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -13,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import database.exceptions.*;
 
 /**
  * <p><em>DatabaseSingleton</em> provides public methods to manipulate and retrieve data on the program's <em>Account, Transaction, Branch & User</em> objects.</p>
@@ -129,7 +129,11 @@ public class DatabaseSingleton {
     }
 
     public User getUserByEmail(String email) {
-        return null;
+        return this.accountData.getAccountByEmail(email).getCustomer();
+    }
+
+    public Account getAccountByUser(User user){
+        return this.accountData.getAccountByEmail(user.getEmail());
     }
 
     /**
@@ -155,6 +159,21 @@ public class DatabaseSingleton {
             System.out.println("Transaction added to database successfully.");
         } catch (TransactionAlreadyExistedException e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Revert an existing transaction.
+     * used for test only, don't remove transactions, void them instead
+     * @author Wang Mu Tian
+     * @param transaction The Transaction object to be removed.
+     * */
+    public void revertTransaction(Transaction transaction){
+        boolean status = this.transactionData.deleteTransaction(transaction);
+        if (status) {
+            System.out.println("Transaction reverted successfully.");
+        } else {
+            System.out.println("Transaction doesn't exists.");
         }
     }
 
@@ -326,6 +345,15 @@ class AccountData implements FileProcessor{
         else throw new InvalidUsernameException("No account found with username: " + username);
     }
 
+    public Account getAccountByEmail(String email){
+         for (Account account : this.accounts.values()) {
+            if (account.getCustomer().getEmail().equals(email)) {
+                return account;
+            }
+        }
+         return null;
+    }
+
     public void addAccount(Account account) throws AccountAlreadyExistedException {
         if (this.accounts.containsKey(account.getAccountID())) {
             throw new AccountAlreadyExistedException("Account with ID " + account.getAccountID() + " already exists."
@@ -461,6 +489,15 @@ class TransactionData implements FileProcessor {
         }
         this.transactions.put(transaction.getId(), transaction);
         this.save(); // Save changes to file
+    }
+
+    public boolean deleteTransaction(Transaction transaction){
+        if (!this.transactions.containsKey(transaction.getId())) {
+            return false;
+        }
+        this.transactions.remove(transaction.getId());
+        this.save();
+        return true;
     }
 
     public ArrayList<Transaction> getTransactionsByAccountId(String accountID) throws TransactionNotFoundException, InvalidAccountIDException {

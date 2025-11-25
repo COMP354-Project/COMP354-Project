@@ -2,7 +2,8 @@ package core;
 
 import auth.Authorizable;
 import auth.exceptions.InvalidAuthenticationException;
-import auth.exceptions.InvalidInputException;
+import core.exceptions.InvalidAccountException;
+import core.exceptions.InvalidInputException;
 import database.DatabaseSingleton;
 
 /**
@@ -22,7 +23,7 @@ public abstract class Action implements Authorizable {
     /***
      * Abstract function that execute the prepared action. Can be synchronized
      */
-    abstract public void execute() throws InvalidAuthenticationException;
+    abstract public void execute() throws InvalidAuthenticationException, InvalidAccountException;
 
     @Override
     public boolean isAuthorized() {

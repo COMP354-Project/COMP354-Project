@@ -31,7 +31,6 @@ public class AccountAdapter implements JsonSerializer<Account>, JsonDeserializer
 
         obj.addProperty("accountId", account.getAccountID());
         obj.add("customer", context.serialize(account.getCustomer()));
-        obj.addProperty("balance", account.getBalance());
         obj.addProperty("accountStatus", account.getAccountStatus().toString());
 
         // Add the type field (concrete class name)

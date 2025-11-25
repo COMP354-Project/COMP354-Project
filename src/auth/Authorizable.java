@@ -4,6 +4,7 @@ import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.Account;
 import core.Action;
+import core.exceptions.InvalidAccountException;
 
 public interface Authorizable {
 
@@ -20,7 +21,7 @@ public interface Authorizable {
      * @throws InvalidAuthenticationException Throws when user enters the wrong identification info (email,password).
      * @see Action
      */
-    void authorize(User user, Account account) throws InvalidAuthenticationException;
+    void authorize(User user, Account account) throws InvalidAuthenticationException, InvalidAccountException;
 
     /**
      * @return Return "true" is the user has already inputted the information and is authorized to execute an action.

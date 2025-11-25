@@ -2,36 +2,42 @@ package core;
 
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
-import auth.exceptions.InvalidInputException;
+import core.exceptions.InvalidInputException;
 import bank.Account;
 import database.DatabaseSingleton;
 
-public class LoginAction extends Action{
+public class LoginAction extends Action {
     private String password;
     private String email;
 
-    private User user;
+    private User authentifiedUser;
 
     @Override
-    public void prepare() throws InvalidAuthenticationException, InvalidInputException {
-        if (password.isEmpty() || email.isEmpty()){
-            throw new IllegalArgumentException();
+    public void prepare() throws InvalidInputException {
+        if (password.isEmpty() || email.isEmpty()) {
+            throw new InvalidInputException();
         }
         //^^^ is that it for the prepare()?
+        // Yes
     }
 
     @Override
     public void execute() throws InvalidAuthenticationException {
-        DatabaseSingleton.getDatabase();
+        User user = DatabaseSingleton.getDatabase().getUserByEmail(email);
+        if (user == null) {
+            throw new InvalidAuthenticationException();
+        }
+        if (!user.getPassword().equals(password)) {
+            throw new InvalidAuthenticationException();
+        }
 
-        // IF NOT FOUND IN DATABASE
-        throw new InvalidAuthenticationException();
-        // Mix and match in database
+        // Assign authentified user
+        this.authentifiedUser = user;
     }
 
     @Override
     public void authorize(User user, Account account) throws InvalidAuthenticationException {
-
+        // NO NEED TO AUTHORIZE
     }
 
     public String getPassword() {
@@ -51,6 +57,6 @@ public class LoginAction extends Action{
     }
 
     public User getAuthenticatedUser() {
-        return user;
+        return authentifiedUser;
     }
 }
