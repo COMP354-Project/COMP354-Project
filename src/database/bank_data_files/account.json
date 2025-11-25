@@ -7,6 +7,7 @@
       "email": "ghi@gmail.com",
       "password": "password"
     },
+    "balance": 0.0,
     "accountStatus": "ACTIVE",
     "creditLimit": 1500.0,
     "creditUsage": 0.0,
@@ -20,17 +21,7 @@
       "email": "abc@gmail.com",
       "password": "password"
     },
-    "accountStatus": "ACTIVE",
-    "type": "Chequing"
-  },
-  "3f43efea-93b1-4f87-9bb3-40bcdcf5eb87": {
-    "accountId": "3f43efea-93b1-4f87-9bb3-40bcdcf5eb87",
-    "customer": {
-      "firstName": "Mutian",
-      "lastName": "Wang",
-      "email": "mutian.wang@hotmail.com",
-      "password": "12345"
-    },
+    "balance": 0.0,
     "accountStatus": "ACTIVE",
     "type": "Chequing"
   },
@@ -42,6 +33,7 @@
       "email": "jjj@gmail.com",
       "password": "password"
     },
+    "balance": 0.0,
     "accountStatus": "ACTIVE",
     "type": "Saving"
   },
@@ -53,6 +45,7 @@
       "email": "def@gmail.com",
       "password": "password"
     },
+    "balance": 0.0,
     "accountStatus": "ACTIVE",
     "type": "Chequing"
   }

@@ -147,7 +147,8 @@ public class BankUIDemo {
             try {
                 loginAction.execute();
             } catch (InvalidAuthenticationException e) {
-                toast("Invalid credentials");
+                toast(e.getMessage());
+                return;
             }
             currentUser = loginAction.getAuthenticatedUser();
 
