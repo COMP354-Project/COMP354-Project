@@ -59,9 +59,8 @@ public class BankUIDemo {
     private final JFrame frame = new JFrame("Bank");
     private final CardLayout cards = new CardLayout();
     private final JPanel root = new JPanel(cards);
-    private String currentRole = null;
-    private User currentUser;
-    private Account currentAccount;
+    private String currentRole;
+    protected User currentUser;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BankUIDemo().start());
@@ -75,9 +74,14 @@ public class BankUIDemo {
 
         // customer
         root.add(new CustomerDashboard(), "customer");
+
+        // customer account info
         root.add(new CustomerAccountInfo(), "cust_account");
+        root.add(new TransactionHistory(), "cust_account_transactions");
+        root.add(new CustomerAccountSummary(), "cust_account_summary");
+        //customer personal info
         root.add(new CustomerProfile(), "cust_profile");
-        root.add(new TransactionHistory(), "cust_profile_trans");
+
 
         // teller
         root.add(new TellerDashboard(), "teller");
@@ -127,6 +131,12 @@ public class BankUIDemo {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     doLogin();
+                    switch (currentUser.getClass().getSimpleName().toLowerCase()) {
+                        case "customer" -> go("customer");
+                        case "teller" -> go("teller");
+                        case "admin" -> go("admin");
+                        default -> toast("Unknown role: " + currentRole);
+                    }
                 }
             });
             JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -160,15 +170,8 @@ public class BankUIDemo {
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
                 toast("Could not load account info");
             }
-            root.add(new CustomerAccountSummary(profileAction), "account_summary");
 
 
-            switch (currentUser.getClass().getSimpleName().toLowerCase()) {
-                case "customer" -> go("customer");
-                case "teller" -> go("teller");
-                case "admin" -> go("admin");
-                default -> toast("Unknown role: " + currentRole);
-            }
         }
     }
 
@@ -198,10 +201,10 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("Account Information"), g(c, 0, 0, 2));
 
-            add(btn("Transaction History", () -> go("cust_profile_trans")));
-            add(btn("Account Summary", () -> go("account_summary")), g(c, 0, 2, 2));
-            add(btn("Fund Transfer", () -> go("fund_transfer")), g(c, 0, 3, 2));
-            add(btn("Deposit / Withdraw", () -> go("withdraw_deposit")), g(c, 0, 4, 2));
+            add(btn("Transaction History", () -> go("cust_account_transactions")));
+            add(btn("Account Summary", () -> go("cust_account_summary")), g(c, 0, 2, 2));
+            add(btn("Fund Transfer", () -> info("Open Fund Transfer")), g(c, 0, 3, 2));
+            add(btn("Deposit / Withdraw", () -> info("Open Deposit/Withdraw")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
 
         }
@@ -212,50 +215,51 @@ public class BankUIDemo {
      *
      */
     class CustomerAccountSummary extends JPanel {
-        private final ProfileAction profile;
+        private ProfileAction profile;
 
-        CustomerAccountSummary(ProfileAction profile){
+        CustomerAccountSummary() {
             super(new GridBagLayout());
-            this.profile = profile;
-
             setBorder(pad());
-            GridBagConstraints c = gbc();
-
-            add(title("Account Summary"), g(c, 0, 0, 2));
-            if (currentUser != null){
-                displaySummary(c);
-            }
-
-            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
-        }
-
-        private void displaySummary(GridBagConstraints c) {
-            try {
-                profile.execute(); // fetch the account
-                currentAccount = profile.getUserAccount();
-
-                if (currentAccount != null) {
-                    add(new JLabel("Account Number: " + currentAccount.getAccountID()), g(c, 0, 1, 2));
-                    if (currentAccount instanceof Card){ //Credit Card
-                        Card cc = (Card) currentAccount;
-                        add(new JLabel("Account Type: Credit Card"), g(c, 0, 2, 2));
-                        add(new JLabel("Credit Limit: $" + cc.getCreditLimit()), g(c, 0, 3, 2));
-                        add(new JLabel("Credit Usage: $" + cc.getCreditUsage()), g(c, 0, 4, 2));
-                    }else if (currentAccount instanceof Saving){ //Saving
-                        add(new JLabel("Account Type: Saving"), g(c, 0, 2, 2));
-                        add(new JLabel("Balance: $" + currentAccount.getBalance()), g(c, 0, 3, 2));
-                    }else{//Chequing
-                        add(new JLabel("Account Type: Chequing"), g(c, 0, 2, 2));
-                        add(new JLabel("Balance: $" + currentAccount.getBalance()), g(c, 0, 3, 2));
-                    }
-                } else {
-                    add(new JLabel("No account found"), g(c, 0, 1, 2));
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    displaySummary();   // ← RUN UPDATE HERE
+                    revalidate();
+                    repaint();
                 }
+            });
+        }
 
+        private void displaySummary() {
+            profile = new ProfileAction();
+            profile.setCurrentUser(currentUser);
+            try {
+                profile.execute();
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
-                add(new JLabel("Error fetching account info"), g(c, 0, 1, 2));
+                throw new RuntimeException(e);
+            }
+
+            GridBagConstraints c = gbc();
+            add(title("Account Summary"), g(c, 0, 0, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
+            if (profile.getUserAccount() != null) {
+                add(new JLabel("Account Number: " + profile.getUserAccount().getAccountID()), g(c, 0, 1, 2));
+                if (profile.getUserAccount() instanceof Card) { //Credit Card
+                    Card cc = (Card) profile.getUserAccount();
+                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 2, 2));
+                    add(new JLabel("Credit Limit: $" + cc.getCreditLimit()), g(c, 0, 3, 2));
+                    add(new JLabel("Credit Usage: $" + cc.getCreditUsage()), g(c, 0, 4, 2));
+                } else if (profile.getUserAccount() instanceof Saving) { //Saving
+                    add(new JLabel("Account Type: Saving"), g(c, 0, 2, 2));
+                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 3, 2));
+                } else {//Chequing
+                    add(new JLabel("Account Type: Chequing"), g(c, 0, 2, 2));
+                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 3, 2));
+                }
+            } else {
+                add(new JLabel("No account found"), g(c, 0, 1, 2));
             }
         }
+
     }
 
     class FundTransfer extends JPanel {
@@ -360,7 +364,7 @@ public class BankUIDemo {
             JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             JButton backBtn = new JButton("Back");
 
-            backBtn.addActionListener(e -> go("customer"));
+            backBtn.addActionListener(e -> go("cust_account"));
             actions.add(backBtn);
             add(actions, g(c, 0, 2, 2));
 

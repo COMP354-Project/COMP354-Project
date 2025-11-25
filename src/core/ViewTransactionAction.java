@@ -7,10 +7,12 @@ import bank.Transaction;
 import core.exceptions.InvalidAccountException;
 import core.exceptions.InvalidInputException;
 import database.DatabaseSingleton;
+import database.exceptions.TransactionNotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ViewTransactionAction extends Action{
+public class ViewTransactionAction extends Action {
     // Parameters
     User user;
     Account accountViewed;
@@ -46,8 +48,14 @@ public class ViewTransactionAction extends Action{
 
     @Override
     public void execute() throws InvalidAuthenticationException, InvalidAccountException {
-        this.listOfTransactions = db.getTransactionsByAccountID(accountViewed.getAccountID());
+        try {
+            this.listOfTransactions = db.getTransactionsByAccountID(accountViewed.getAccountID());
+        } catch (TransactionNotFoundException exception) {
+            // Return empty list for display
+            this.listOfTransactions = new ArrayList<Transaction>();
+        }
     }
+
 
     @Override
     public void authorize(User user, Account account) throws InvalidAuthenticationException, InvalidAccountException {
