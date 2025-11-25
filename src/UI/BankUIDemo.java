@@ -203,8 +203,8 @@ public class BankUIDemo {
 
             add(btn("Transaction History", () -> go("cust_account_transactions")));
             add(btn("Account Summary", () -> go("cust_account_summary")), g(c, 0, 2, 2));
-            add(btn("Fund Transfer", () -> info("Open Fund Transfer")), g(c, 0, 3, 2));
-            add(btn("Deposit / Withdraw", () -> info("Open Deposit/Withdraw")), g(c, 0, 4, 2));
+            add(btn("Fund Transfer", () -> go("fund_transfer")), g(c, 0, 3, 2));
+            add(btn("Deposit / Withdraw", () -> go("withdraw_deposit")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
 
         }
@@ -338,6 +338,7 @@ public class BankUIDemo {
         final String titleText = "Transaction History";
         final TransactionTable tableModel = new TransactionTable();
         final JTable viewTable = new JTable(tableModel);
+        protected ViewTransactionAction viewTransactionAction;
 
         // Initialize the panel to see the transaction history of an account
         TransactionHistory() {
@@ -378,7 +379,7 @@ public class BankUIDemo {
 
         public void updateData() {
             // Setup data
-            ViewTransactionAction viewTransactionAction = new ViewTransactionAction();
+            viewTransactionAction = new ViewTransactionAction();
             viewTransactionAction.setUser(currentUser);
             viewTransactionAction.setAccountViewed(DatabaseSingleton.getDatabase().getAccountByUser(currentUser));
             try {
@@ -391,7 +392,7 @@ public class BankUIDemo {
         }
 
         class TransactionTable extends AbstractTableModel {
-            private final String[] columns = {"Date", "Description", "Type", "Amount", "Balance"};
+            private final String[] columns = {"Transaction ID", "Amount", "Time"};
             private List<Transaction> data = new ArrayList<>();
 
             public void setTransactions(List<Transaction> data) {
@@ -419,10 +420,8 @@ public class BankUIDemo {
                 Transaction t = data.get(rowIndex);
                 return switch (columnIndex) {
                     case 0 -> t.getId();
-                    case 1 -> t.getSender();
-                    case 2 -> t.getReceiver();
-                    case 3 -> t.getAmount();
-                    case 4 -> t.getTimeOfTransaction();
+                    case 1 -> t.getAmountForAccount(viewTransactionAction.getAccountViewed());
+                    case 2 -> t.getTimeOfTransaction();
                     default -> "";
                 };
             }

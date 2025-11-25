@@ -50,6 +50,14 @@ public class Transaction {
         this.status = status;
     }
 
+    public double getAmountForAccount(Account account) {
+        if (this.sender.equals(account)) {
+            return -this.amount;
+        } else {
+            return this.amount;
+        }
+    }
+
     public TransactionStatus getStatus() {
         return status;
     }
