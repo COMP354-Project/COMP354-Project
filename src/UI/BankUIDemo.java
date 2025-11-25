@@ -144,6 +144,7 @@ public class BankUIDemo {
             }
             currentUser = loginAction.getAuthenticatedUser();
 
+            //Loads the data to the profile action
             ProfileAction profileAction = new ProfileAction();
             profileAction.setCurrentUser(currentUser);
             try {
@@ -197,6 +198,10 @@ public class BankUIDemo {
         }
     }
 
+    /***
+     * Account Summary
+     *
+     */
     class CustomerAccountSummary extends JPanel {
         private final ProfileAction profile;
         private Account currentAccount;
@@ -243,8 +248,18 @@ public class BankUIDemo {
                 add(new JLabel("Error fetching account info"), g(c, 0, 1, 2));
             }
         }
+    }
+
+    class FundTransfer extends JPanel {
+        FundTransfer() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Fund Transfer"), g(c, 0, 0, 2));
 
 
+            add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
+        }
     }
 
     /***
