@@ -28,6 +28,10 @@ public class Card extends Account {
         this.creditLimit = newCreditLimit;
     }
 
+    public void setCreditUsage(double creditUsage){
+        this.creditUsage = creditUsage;
+    }
+
     public double getCreditLimit(){
         return this.creditLimit;
     }

@@ -63,10 +63,11 @@ public class Transaction {
 
     public String toString() {
         return "Transaction ID: " + id +
-               ", Sender Account ID: " + sender.getAccountID() +
-               ", Receiver Account ID: " + receiver.getAccountID() +
-               ", Time of Transaction: " + timeOfTransaction.toString() +
-               ", Amount: " + amount;
+               "\nSender Account ID: " + sender.getAccountID() +
+               "\nReceiver Account ID: " + receiver.getAccountID() +
+               "\nTime of Transaction: " + timeOfTransaction.toString() +
+               "\nAmount: " + amount+
+        "\nStatus: " + status + "\n";
     }
 
 

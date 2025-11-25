@@ -3,54 +3,56 @@
     "id": "de95f3dc-e216-4304-8afd-27cbb3396f50",
     "sender": {
       "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
-      "customer": {
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "abc@gmail.com",
-        "password": "password"
-      },
+      "customer": "abc@gmail.com",
       "accountStatus": "ACTIVE",
       "type": "Chequing"
     },
     "receiver": {
       "accountId": "9501e3ad-e672-434c-935f-c926d3a2e949",
-      "customer": {
-        "firstName": "John",
-        "lastName": "Joe",
-        "email": "def@gmail.com",
-        "password": "password"
-      },
-      "accountStatus": "ACTIVE",
+      "customer": "def@gmail.com",
+      "accountStatus": "INACTIVE",
       "type": "Chequing"
     },
     "timeOfTransaction": "2025-11-16T22:39:56.045141500",
-    "amount": 100.0
+    "amount": 100.0,
+    "status": "ACTIVE"
+  },
+  "1ce0d085-d887-4093-bb80-48b63c48ba57": {
+    "id": "1ce0d085-d887-4093-bb80-48b63c48ba57",
+    "sender": {
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "ACTIVE",
+      "type": "Saving"
+    },
+    "receiver": {
+      "accountId": "5b9dc767-b51a-4db0-a1d6-5f783f26a48f",
+      "customer": "ghi@gmail.com",
+      "accountStatus": "ACTIVE",
+      "creditLimit": 1500.0,
+      "creditUsage": 0.0,
+      "type": "Card"
+    },
+    "timeOfTransaction": "2025-11-24T23:00:20.839545900",
+    "amount": 50.0,
+    "status": "ACTIVE"
   },
   "9cafa5b7-4d0f-40d6-82e1-2c6f22d5d9ce": {
     "id": "9cafa5b7-4d0f-40d6-82e1-2c6f22d5d9ce",
     "sender": {
       "accountId": "9501e3ad-e672-434c-935f-c926d3a2e949",
-      "customer": {
-        "firstName": "John",
-        "lastName": "Joe",
-        "email": "def@gmail.com",
-        "password": "password"
-      },
-      "accountStatus": "ACTIVE",
+      "customer": "def@gmail.com",
+      "accountStatus": "INACTIVE",
       "type": "Chequing"
     },
     "receiver": {
       "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
-      "customer": {
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "abc@gmail.com",
-        "password": "password"
-      },
+      "customer": "abc@gmail.com",
       "accountStatus": "ACTIVE",
       "type": "Chequing"
     },
     "timeOfTransaction": "2025-11-16T22:39:56.049369500",
-    "amount": 2000.0
+    "amount": 2000.0,
+    "status": "ACTIVE"
   }
 }

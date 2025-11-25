@@ -92,6 +92,24 @@ public class DatabaseSingleton {
     }
 
     /**
+     * Retrieve account(s) by their email. Since a user can have multiple accounts, this method returns a list of accounts.
+     * @param email The email of the account to be retrieved.
+     * @return The ArrayList of Account objects with the specified email, or null if not found.
+     * */
+    public ArrayList<Account> getAccountsByEmail(String email) {
+        // Implementation to get account by username
+        ArrayList<Account> res = null;
+        try {
+            res = this.accountData.getAccountsByEmail(email);
+            System.out.println(res.size() + " accounts with email " + email + " retrieved successfully.");
+        }
+        catch (InvalidEmailException e) {
+            System.out.println(e.getMessage());
+        }
+        return res;
+    }
+
+    /**
      * Retrieve an account by its ID.
      * @param id The ID of the account to be retrieved.
      * @return The Account object with the specified ID, or null if not found.
@@ -249,8 +267,22 @@ public class DatabaseSingleton {
         }
     }
 
-    public boolean updateUserInfo(User user) {
-        return false;
+    public void updateUserInfo(User user) {
+        try {
+            this.userData.updateUserInfo(user);
+            System.out.println("User updated successfully.");
+        } catch (UserNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void updateUserEmail(String oldEmail, String newEmail) {
+        try {
+            this.userData.updateUserEmail(oldEmail, newEmail);
+            System.out.println("User email updated successfully.");
+        } catch (UserNotFoundException | UserAlreadyExistedException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     /**
@@ -282,7 +314,7 @@ public class DatabaseSingleton {
 class AccountData implements FileProcessor{
     private static AccountData ad;
     private static final String PATH = "src/database/bank_data_files/account.json";
-    private HashMap<String, Account> accounts;
+    HashMap<String, Account> accounts;
     private static final Type a_type = new TypeToken<HashMap<String, Account>>() {}.getType();
 
     private AccountData() {
@@ -365,6 +397,18 @@ class AccountData implements FileProcessor{
         else throw new InvalidUsernameException("No account found with username: " + username);
     }
 
+    public ArrayList<Account> getAccountsByEmail(String email) throws InvalidEmailException {
+        ArrayList<Account> res = new ArrayList<>();
+        for (Account account : this.accounts.values()) {
+            String mail = account.getCustomer().getEmail();
+            if (mail.equals(email)) {
+                res.add(account);
+            }
+        }
+        if (!res.isEmpty()) return res;
+        else throw new InvalidEmailException("No account found with email: " + email);
+    }
+
     public Account getAccountByEmail(String email){
          for (Account account : this.accounts.values()) {
             if (account.getCustomer().getEmail().equals(email)) {
@@ -389,6 +433,16 @@ class AccountData implements FileProcessor{
                     "If you want to add a new account, please use the corresponding method.");
         }
         this.accounts.put(account.getAccountID(), account);
+        // We will have to update Transaction database as well since transactions are linked to accounts
+        for (Transaction transaction : TransactionData.getTransactionData().transactions.values()) {
+            if (transaction.getSender().getAccountID().equals(account.getAccountID())) {
+                transaction.getSender().update(account);
+            }
+            if (transaction.getReceiver().getAccountID().equals(account.getAccountID())) {
+                transaction.getReceiver().update(account);
+            }
+            TransactionData.getTransactionData().save();
+        }
         this.save(); // Save changes to file
     }
 }
@@ -400,7 +454,7 @@ class AccountData implements FileProcessor{
 class UserData implements FileProcessor{
     private static UserData rd;
     private static final String PATH = "src/database/bank_data_files/user.json";
-    private HashMap<String, User> users;
+    HashMap<String, User> users;
     private static final Type u_type = new TypeToken<HashMap<String, User>>() {}.getType();
 
     private UserData() {
@@ -473,9 +527,82 @@ class UserData implements FileProcessor{
         this.save(); // Save changes to file
     }
 
+    /**
+     * Update the email of an existing user in the database. This method should be invoked every time an Action related to updating a user's email is performed.
+     * IMPORTANT: This method updates the email of the user across all related accounts and transactions. Use updateUserInfo method to update other user information.
+     * @param oldEmail The current email of the user.
+     * @param newEmail The new email to be set for the user.
+     * */
+    public void updateUserEmail(String oldEmail, String newEmail) throws UserNotFoundException, UserAlreadyExistedException {
+        if (!this.users.containsKey(oldEmail)) {
+            throw new UserNotFoundException("User with email " + oldEmail + " does not exist. " +
+                    "If you want to add a new user, please use the corresponding method.");
+        }
+        if (this.users.containsKey(newEmail)) {
+            throw new UserAlreadyExistedException("User with email " + newEmail + " already exists."
+                    + " Please use a different email.");
+        }
+        User user = this.users.remove(oldEmail);
+        user.setEmail(newEmail);
+        this.users.put(newEmail, user);
+
+        // Update accounts
+        for (Account account : AccountData.getAccountData().accounts.values()) {
+            if (account.getCustomer().getEmail().equals(oldEmail)) {
+                account.getCustomer().setEmail(newEmail);
+            }
+        }
+        AccountData.getAccountData().save();
+
+        // Update transactions
+        for (Transaction transaction : TransactionData.getTransactionData().transactions.values()) {
+            if (transaction.getSender().getCustomer().getEmail().equals(oldEmail)) {
+                transaction.getSender().getCustomer().setEmail(newEmail);
+            }
+            if (transaction.getReceiver().getCustomer().getEmail().equals(oldEmail)) {
+                transaction.getReceiver().getCustomer().setEmail(newEmail);
+            }
+        }
+        TransactionData.getTransactionData().save();
+        this.save(); // Save changes to file
+    }
+
+    /**
+     * Update an existing user in the database. This method should be invoked every time an Action related to updating a user information is performed.
+     * IMPORTANT: This method does NOT update the email of the user. To update email, please use updateUserEmail method.
+     * @param user The User object with updated information.
+     * */
+    public void updateUserInfo(User user) throws UserNotFoundException {
+        if (!this.users.containsKey(user.getEmail())) {
+            throw new UserNotFoundException("User with email " + user.getEmail() + " does not exist. " +
+                    "If you want to add a new user, please use the corresponding method.");
+        }
+        this.users.put(user.getEmail(), user);
+        // Update accounts
+        for (Account account : AccountData.getAccountData().accounts.values()) {
+            if (account.getCustomer().getEmail().equals(user.getEmail())) {
+                account.getCustomer().setEmail(user.getEmail());
+            }
+        }
+        AccountData.getAccountData().save();
+
+        // Update transactions
+        for (Transaction transaction : TransactionData.getTransactionData().transactions.values()) {
+            if (transaction.getSender().getCustomer().getEmail().equals(user.getEmail())) {
+                transaction.getSender().getCustomer().setEmail(user.getEmail());
+            }
+            if (transaction.getReceiver().getCustomer().getEmail().equals(user.getEmail())) {
+                transaction.getReceiver().getCustomer().setEmail(user.getEmail());
+            }
+        }
+        TransactionData.getTransactionData().save();
+        this.save(); // Save changes to file
+    }
+
     public void printUsers() {
         for (String key : this.users.keySet()) {
             System.out.println(users.get(key));
+            System.out.println();
         }
     }
 }
@@ -541,18 +668,31 @@ class TransactionData implements FileProcessor {
                 .create();
     }
 
+    /**
+     * Print all transactions in the database.
+     * */
     public void printTransactions() {
         for (String key : this.transactions.keySet()) {
             System.out.println(transactions.get(key));
         }
     }
 
+    /**
+     * Retrieve a transaction by its ID.
+     * @param transactionID The ID of the transaction to be retrieved.
+     * @return The Transaction object with the specified ID.
+     * @throws TransactionNotFoundException if the transaction with the specified ID is not found.
+     * */
     public Transaction getTransactionById(String transactionID) throws TransactionNotFoundException {
         Transaction res = this.transactions.get(transactionID);
         if (res != null) return res;
         else throw new TransactionNotFoundException("Transaction ID " + transactionID + " not found.");
     }
 
+    /**
+     * Add a new transaction to the database. This method should be invoked every time an Action related to creating a transaction is performed.
+     * @param transaction The Transaction object to be added.
+     * */
     public void addTransaction(Transaction transaction) throws TransactionAlreadyExistedException {
         if (this.transactions.containsKey(transaction.getId())) {
             throw new TransactionAlreadyExistedException("Transaction with ID " + transaction.getId() + " already exists."
@@ -562,6 +702,11 @@ class TransactionData implements FileProcessor {
         this.save(); // Save changes to file
     }
 
+    /**
+     * Delete an existing transaction from the database. This method should be invoked every time an Action related to deleting a transaction is performed.
+     * @param transaction The Transaction object to be deleted.
+     * @return true if the transaction was successfully deleted, false if the transaction does not exist.
+     * */
     public boolean deleteTransaction(Transaction transaction){
         if (!this.transactions.containsKey(transaction.getId())) {
             return false;
@@ -571,6 +716,13 @@ class TransactionData implements FileProcessor {
         return true;
     }
 
+    /**
+     * Retrieve all transactions for a given account ID.
+     * @param accountID The ID of the account whose transactions are to be retrieved.
+     * @return An ArrayList of Transaction objects associated with the given account ID.
+     * @throws TransactionNotFoundException if no transactions are found for the given account ID.
+     * @throws InvalidAccountIDException if the provided account ID is invalid.
+     * */
     public ArrayList<Transaction> getTransactionsByAccountId(String accountID) throws TransactionNotFoundException, InvalidAccountIDException {
         try {
             Account account = AccountData.getAccountData().getAccountById(accountID);
@@ -591,6 +743,14 @@ class TransactionData implements FileProcessor {
         }
     }
 
+    /**
+     * Filter transactions for a given account that occurred within the specified date range.
+     * @param accountID The ID of the account whose transactions are to be filtered.
+     * @param start The start LocalDateTime of the date range.
+     * @param end The end LocalDateTime of the date range.
+     * @return An ArrayList of Transaction objects that occurred within the specified date range.
+     * @throws TransactionNotFoundException if no transactions are found within the specified date range.
+     * */
     public ArrayList<Transaction> filterTransactionsByDateRange(String accountID, LocalDateTime start, LocalDateTime end) throws TransactionNotFoundException{
         ArrayList<Transaction> result = new ArrayList<>();
         for (Transaction transaction : this.transactions.values()) {
@@ -608,6 +768,13 @@ class TransactionData implements FileProcessor {
         return result;
     }
 
+    /**
+     * Filter transactions for a given account that occurred after the specified time.
+     * @param accountID The ID of the account whose transactions are to be filtered.
+     * @param time The LocalDateTime after which transactions should be included.
+     * @return An ArrayList of Transaction objects that occurred after the specified time.
+     * @throws TransactionNotFoundException if no transactions are found after the specified time.
+     * */
     public ArrayList<Transaction> filterTransactionsByTime(String accountID, LocalDateTime time) throws TransactionNotFoundException{
         ArrayList<Transaction> result = new ArrayList<>();
         for (Transaction transaction : this.transactions.values()) {
@@ -622,6 +789,21 @@ class TransactionData implements FileProcessor {
                     " after the specified time.");
         }
         return result;
+    }
+
+    /**
+     * Update an existing transaction in the database. This method should be invoked every time an Action related to updating a transaction is performed.
+     * @param transaction The Transaction object with updated information.
+     * @param status The new status to be set for the transaction.
+     * */
+    public void updateTransactionStatus(Transaction transaction, Transaction.TransactionStatus status) throws TransactionNotFoundException {
+        if (!this.transactions.containsKey(transaction.getId())) {
+            throw new TransactionNotFoundException("Transaction with ID " + transaction.getId() + " does not exist. " +
+                    "If you want to add a new transaction, please use the corresponding method.");
+        }
+        transaction.setStatus(status);
+        this.transactions.put(transaction.getId(), transaction);
+        this.save(); // Save changes to file
     }
 }
 

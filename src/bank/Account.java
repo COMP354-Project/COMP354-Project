@@ -30,8 +30,14 @@ public abstract class Account {
     public Account(String accountId, Customer customer, List<Transaction> transaction) { //Parametrized
         this.accountId = accountId;
         this.customer = customer;
-        this.transactions = transactions;
+        this.transactions = transaction;
         this.accountStatus = AccountStatus.ACTIVE;
+    }
+
+    public void update(Account account) {
+        this.customer = account.getCustomer();
+        this.transactions = account.getTransactions();
+        this.accountStatus = account.getAccountStatus();
     }
 
     public void setAccountId(String id) {

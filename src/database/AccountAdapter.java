@@ -1,6 +1,7 @@
 package database;
 
 import auth.core.Customer;
+import auth.core.User;
 import bank.*;
 import com.google.gson.*;
 
@@ -30,7 +31,7 @@ public class AccountAdapter implements JsonSerializer<Account>, JsonDeserializer
         JsonObject obj = new JsonObject();
 
         obj.addProperty("accountId", account.getAccountID());
-        obj.add("customer", context.serialize(account.getCustomer()));
+        obj.addProperty("customer", account.getCustomer().getEmail());
         obj.addProperty("accountStatus", account.getAccountStatus().toString());
 
         // Add the type field (concrete class name)
@@ -56,24 +57,24 @@ public class AccountAdapter implements JsonSerializer<Account>, JsonDeserializer
         Account acc = null;
         JsonObject obj = json.getAsJsonObject();
         String type = obj.has("type") ? obj.get("type").getAsString() : null;
-        // Instantiate appropriate subclass (Chequing, Savings, ...) based on `type`.
-        // then populate fields (customer, balance, accountStatus, transactions -> ids).
+        User user = UserData.getUserData().getUserByEmail(obj.get("customer").getAsString());
         switch (type) {
             case "Chequing":
-                acc = new Chequing(context.deserialize(obj.get("customer"), Customer.class));
+                acc = new Chequing((Customer) user);
                 acc.setAccountId(obj.get("accountId").getAsString());
                 acc.setActivity(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
                 break;
             case "Saving":
-                acc = new Saving(context.deserialize(obj.get("customer"), Customer.class));
+                acc = new Saving((Customer) user);
                 acc.setAccountId(obj.get("accountId").getAsString());
                 acc.setActivity(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
                 break;
             case "Card":
-                acc = new Card(context.deserialize(obj.get("customer"), Customer.class), 0.0);
+                acc = new Card((Customer) user, 0.0);
                 acc.setAccountId(obj.get("accountId").getAsString());
                 acc.setActivity(Account.AccountStatus.valueOf(obj.get("accountStatus").getAsString()));
                 ((Card) acc).setCreditLimit(obj.get("creditLimit").getAsDouble());
+                ((Card) acc).setCreditUsage(obj.get("creditUsage").getAsDouble());
                 break;
             default:
                 // Handle unknown type or base Account if needed
