@@ -52,5 +52,13 @@ public class Branch {
         Branch branch = (Branch) o;
         return Objects.equals(id, branch.id);
     }
+
+    @Override
+    public String toString() {
+        return "Branch ID: " + id + "\n" +
+               "Name: " + name + "\n" +
+               "Address: " + address + "\n" +
+               "Phone: " + phone + "\n";
+    }
 }
 
