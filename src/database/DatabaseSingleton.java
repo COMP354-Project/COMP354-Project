@@ -44,8 +44,6 @@ public class DatabaseSingleton {
         this.accountData = AccountData.getAccountData();
         this.transactionData = TransactionData.getTransactionData();
 
-        //
-
         // Load transactions into each account. This is only done once upon initialisation of the database.
         // Hence, no method is needed.
         for (Transaction transaction : this.transactionData.transactions.values()) {
@@ -442,6 +440,9 @@ class AccountData implements FileProcessor {
                 .create();
     }
 
+    /**
+     * Print all accounts in the database.
+     */
     public void printAccounts() {
         if (this.accounts.isEmpty()) {
             System.out.println("No accounts found in the database.");
@@ -452,12 +453,26 @@ class AccountData implements FileProcessor {
         }
     }
 
+    /**
+     * Retrieve an account by its ID.
+     *
+     * @param accountID The ID of the account to be retrieved.
+     * @return The Account object with the specified ID.
+     * @throws InvalidAccountIDException if the account ID is not found.
+     */
     public Account getAccountById(String accountID) throws InvalidAccountIDException {
         Account res = this.accounts.get(accountID);
         if (res != null) return res;
         else throw new InvalidAccountIDException("Account ID " + accountID + " not found.");
     }
 
+    /**
+     * Retrieve account(s) by their username. Since a user can have multiple accounts, this method returns a list of accounts.
+     *
+     * @param username The username of the account to be retrieved.
+     * @return The ArrayList of Account objects with the specified username.
+     * @throws InvalidUsernameException if no account with the specified username is found.
+     */
     public ArrayList<Account> getAccountsByUserName(String username) throws InvalidUsernameException {
         ArrayList<Account> res = new ArrayList<>();
         for (Account account : this.accounts.values()) {
@@ -472,6 +487,13 @@ class AccountData implements FileProcessor {
         else throw new InvalidUsernameException("No account found with username: " + username);
     }
 
+    /**
+     * Retrieve account(s) by their email. Since a user can have multiple accounts, this method returns a list of accounts.
+     *
+     * @param email The email of the account to be retrieved.
+     * @return The ArrayList of Account objects with the specified email.
+     * @throws InvalidEmailException if no account with the specified email is found.
+     */
     public ArrayList<Account> getAccountsByEmail(String email) throws InvalidEmailException {
         ArrayList<Account> res = new ArrayList<>();
         for (Account account : this.accounts.values()) {
@@ -484,7 +506,13 @@ class AccountData implements FileProcessor {
         else throw new InvalidEmailException("No account found with email: " + email);
     }
 
-    // Used to find customer from user
+    /**
+     * Retrieve an account by the customer's email.
+     *
+     * @param email The email of the customer whose account is to be retrieved.
+     * @return The Account object associated with the given email.
+     * @throws UserNotFoundException if no account with the specified email is found.
+     */
     public Account getAccountByEmail(String email) {
         for (Account account : this.accounts.values()) {
             if (account.getCustomer().getEmail().equals(email)) {
@@ -494,6 +522,12 @@ class AccountData implements FileProcessor {
         throw new UserNotFoundException("No user found with email: " + email);
     }
 
+    /**
+     * Add a new account to the database.
+     *
+     * @param account The Account object to be added.
+     * @throws AccountAlreadyExistedException if an account with the same ID already exists.
+     */
     public void addAccount(Account account) throws AccountAlreadyExistedException {
         if (this.accounts.containsKey(account.getAccountID())) {
             throw new AccountAlreadyExistedException("Account with ID " + account.getAccountID() + " already exists."
@@ -503,6 +537,12 @@ class AccountData implements FileProcessor {
         this.save(); // Save changes to file
     }
 
+    /**
+     * Update an existing account in the database.
+     *
+     * @param account The Account object with updated information.
+     * @throws AccountNotFoundException if the account to be updated does not exist.
+     */
     public void updateAccount(Account account) throws AccountNotFoundException {
         if (!this.accounts.containsKey(account.getAccountID())) {
             throw new AccountNotFoundException("Account with ID " + account.getAccountID() + " does not exist. " +
@@ -585,6 +625,13 @@ class UserData implements FileProcessor {
                 .create();
     }
 
+    /**
+     * Retrieve a user by their email.
+     *
+     * @param email The email of the user to be retrieved.
+     * @return The User object with the specified email.
+     * @throws UserNotFoundException if no user with the specified email is found.
+     */
     public User getUserByEmail(String email) throws UserNotFoundException {
         for (User user : this.users.values()) {
             if (user.getEmail().equals(email)) {
@@ -594,6 +641,12 @@ class UserData implements FileProcessor {
         throw new UserNotFoundException("User with email " + email + " not found.");
     }
 
+    /**
+     * Add a new user to the database.
+     *
+     * @param user The User object to be added.
+     * @throws UserAlreadyExistedException if a user with the same email already exists.
+     */
     public void addUser(User user) throws UserAlreadyExistedException {
         if (this.users.containsKey(user.getEmail())) {
             throw new UserAlreadyExistedException("User with email " + user.getEmail() + " already exists."
@@ -675,6 +728,9 @@ class UserData implements FileProcessor {
         this.save(); // Save changes to file
     }
 
+    /**
+     * Print all users in the database.
+     * */
     public void printUsers() {
         if (this.users.isEmpty()) {
             System.out.println("No users found in the database.");
