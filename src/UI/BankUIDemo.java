@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
 import com.google.gson.Gson;
 
+import core.ExecuteTransactionAction;
 import core.LoginAction;
 import core.ProfileAction;
 import core.ViewTransactionAction;
@@ -59,6 +61,7 @@ public class BankUIDemo {
     private final JPanel root = new JPanel(cards);
     private String currentRole = null;
     private User currentUser;
+    private Account currentAccount;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BankUIDemo().start());
@@ -83,6 +86,10 @@ public class BankUIDemo {
         // admin
         root.add(new AdminDashboard(), "admin");
         root.add(new AdminUserMgmt(), "admin_user_mgmt");
+
+        // Fund transfer & Withdraw/Deposit
+        root.add(new FundTransfer(), "fund_transfer");
+        root.add(new WithdrawDeposit(), "withdraw_deposit");
 
         cards.show(root, "login");
         frame.setContentPane(root);
@@ -192,9 +199,10 @@ public class BankUIDemo {
 
             add(btn("Transaction History", () -> go("cust_profile_trans")));
             add(btn("Account Summary", () -> go("account_summary")), g(c, 0, 2, 2));
-            add(btn("Fund Transfer", () -> info("Open Fund Transfer")), g(c, 0, 3, 2));
-            add(btn("Deposit / Withdraw", () -> info("Open Deposit/Withdraw")), g(c, 0, 4, 2));
+            add(btn("Fund Transfer", () -> go("fund_transfer")), g(c, 0, 3, 2));
+            add(btn("Deposit / Withdraw", () -> go("withdraw_deposit")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
+
         }
     }
 
@@ -204,7 +212,6 @@ public class BankUIDemo {
      */
     class CustomerAccountSummary extends JPanel {
         private final ProfileAction profile;
-        private Account currentAccount;
 
         CustomerAccountSummary(ProfileAction profile){
             super(new GridBagLayout());
@@ -218,7 +225,7 @@ public class BankUIDemo {
                 displaySummary(c);
             }
 
-            add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
         }
 
         private void displaySummary(GridBagConstraints c) {
@@ -251,14 +258,66 @@ public class BankUIDemo {
     }
 
     class FundTransfer extends JPanel {
+        JTextField recipientAccount = new JTextField(22);
+        JTextField amountInput = new JTextField(22);
+
         FundTransfer() {
             super(new GridBagLayout());
             setBorder(pad());
             GridBagConstraints c = gbc();
             add(title("Fund Transfer"), g(c, 0, 0, 2));
 
+            c.gridy = 0;
+            c.gridwidth = 2;
 
-            add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
+            row(this, c, 1, "Recipient: ", recipientAccount);
+            row(this, c, 2, "Amount: ", amountInput);
+            /**
+            try{
+                double amount = Double.parseDouble(amountInput.getText());
+                Account destinationAcc = DatabaseSingleton.getDatabase().getAccountByID(recipientAccount.getText());
+                Transaction transaction = new Transaction(currentAccount, destinationAcc, LocalDateTime.now(), amount);
+
+                ExecuteTransactionAction sendAction = new ExecuteTransactionAction();
+                sendAction.setUser(currentUser);
+                sendAction.setTransactionDetails(transaction);
+                sendAction.execute();
+
+            } catch (Exception e) {
+                toast("Invalid amount");
+            }
+             */
+
+
+            add(btn("Confirm", () -> info("Transaction sent")), g(c, 0, 4, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
+        }
+    }
+
+    class WithdrawDeposit extends JPanel {
+        String[] choices = {"Withdraw", "Deposit"};
+        JComboBox<String> box = new JComboBox<>(choices);
+        JTextField amountInput = new JTextField(22);
+
+
+        WithdrawDeposit() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Withdraw/Deposit"), g(c, 0, 0, 2));
+            add(box, g(c, 0, 1, 2));
+            row(this, c, 2, "Amount: ", amountInput);
+            /**
+            try{
+                double amount = Double.parseDouble(amountInput.getText());
+
+            } catch (Exception e) {
+                toast("Invalid amount");
+            }
+             */
+
+            add(btn("Confirm", () ->info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
         }
     }
 
@@ -299,10 +358,8 @@ public class BankUIDemo {
             // ----- Footer Buttons -----
             JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             JButton backBtn = new JButton("Back");
-            JButton extraBtn = new JButton("Action"); // you can change this
 
             backBtn.addActionListener(e -> go("customer"));
-            actions.add(extraBtn);
             actions.add(backBtn);
             add(actions, g(c, 0, 2, 2));
 
