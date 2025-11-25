@@ -16,6 +16,13 @@ public class Branch {
         this.phone = phone;
     }
 
+    public Branch(String id, String address, String name, String phone) {
+        this.id = id;
+        this.address = address;
+        this.name = name;
+        this.phone = phone;
+    }
+
     public String getId() {
         return id;
     }

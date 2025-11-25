@@ -36,11 +36,11 @@ public class DatabaseSingleton {
     private final AccountData accountData;
     private final UserData userData;
     private final TransactionData transactionData;
-//    private final BranchData branchData;
+    private final BranchData branchData;
 
     private DatabaseSingleton() {
         this.userData = UserData.getUserData();
-//        this.branchData = BranchData.getBranchData();
+        this.branchData = BranchData.getBranchData();
         this.accountData = AccountData.getAccountData();
         this.transactionData = TransactionData.getTransactionData();
 
@@ -144,14 +144,32 @@ public class DatabaseSingleton {
         return res;
     }
 
+    /**
+     * Retrieve a branch by its ID.
+     *
+     * @param branchID The ID of the branch to be retrieved.
+     * @return The Branch object with the specified ID.
+     */
     public Branch getBranchByID(String branchID) {
-        return null;
+        return this.branchData.getBranchByID(branchID);
     }
 
+    /**
+     * Retrieve a user by their email.
+     *
+     * @param email The email of the user to be retrieved.
+     * @return The User object with the specified email.
+     */
     public User getUserByEmail(String email) {
         return this.userData.getUserByEmail(email);
     }
 
+    /**
+     * Retrieve an account associated with a given user.
+     *
+     * @param user The User object whose account is to be retrieved.
+     * @return The Account object associated with the given user.
+     */
     public Account getAccountByUser(User user) {
         return this.accountData.getAccountByEmail(user.getEmail());
     }
@@ -179,6 +197,20 @@ public class DatabaseSingleton {
             this.accountData.addAccount(account);
             System.out.println("Account added to database successfully.");
         } catch (AccountAlreadyExistedException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Add a new branch to the database. This method should be invoked every time an Action related to creating a branch is performed.
+     *
+     * @param branch The Branch object to be added.
+     */
+    public void addBranch(Branch branch) {
+        try {
+            this.branchData.addBranch(branch);
+            System.out.println("Branch added to database successfully.");
+        } catch (BranchAlreadyExistedException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -276,6 +308,11 @@ public class DatabaseSingleton {
         }
     }
 
+    /**
+     * Update an existing user in the database. This method should be invoked every time an Action related to updating a user information is performed.
+     * IMPORTANT: This method does NOT update the email of the user. To update email, please use updateUserEmail method.
+     * @param user The User object with updated information.
+     * */
     public void updateUserInfo(User user) {
         try {
             this.userData.updateUserInfo(user);
@@ -285,11 +322,31 @@ public class DatabaseSingleton {
         }
     }
 
+    /**
+     * Update the email of an existing user in the database. This method should be invoked every time an Action related to updating a user's email is performed.
+     * IMPORTANT: This method updates the email of the user across all related accounts and transactions. Use updateUserInfo method to update other user information.
+     * @param oldEmail The current email of the user.
+     * @param newEmail The new email to be set for the user.
+     * */
     public void updateUserEmail(String oldEmail, String newEmail) {
         try {
             this.userData.updateUserEmail(oldEmail, newEmail);
             System.out.println("User email updated successfully.");
         } catch (UserNotFoundException | UserAlreadyExistedException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Update an existing branch in the database. This method should be invoked every time an Action related to updating a branch is performed.
+     *
+     * @param branch The Branch object with updated information.
+     */
+    public void updateBranch(Branch branch) {
+        try {
+            this.branchData.updateBranch(branch);
+            System.out.println("Branch updated successfully.");
+        } catch (BranchNotFoundException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -313,6 +370,13 @@ public class DatabaseSingleton {
      * */
     public void printUsers() {
         this.userData.printUsers();
+    }
+
+    /**
+     * Print all branches in the database.
+     * */
+    public void printBranches() {
+        this.branchData.printBranches();
     }
 
 }
@@ -379,6 +443,10 @@ class AccountData implements FileProcessor {
     }
 
     public void printAccounts() {
+        if (this.accounts.isEmpty()) {
+            System.out.println("No accounts found in the database.");
+            return;
+        }
         for (String key : this.accounts.keySet()) {
             System.out.println(accounts.get(key));
         }
@@ -608,6 +676,10 @@ class UserData implements FileProcessor {
     }
 
     public void printUsers() {
+        if (this.users.isEmpty()) {
+            System.out.println("No users found in the database.");
+            return;
+        }
         for (String key : this.users.keySet()) {
             System.out.println(users.get(key));
             System.out.println();
@@ -680,6 +752,10 @@ class TransactionData implements FileProcessor {
      * Print all transactions in the database.
      * */
     public void printTransactions() {
+        if (this.transactions.isEmpty()) {
+            System.out.println("No transactions found in the database.");
+            return;
+        }
         for (String key : this.transactions.keySet()) {
             System.out.println(transactions.get(key));
         }
@@ -867,6 +943,59 @@ class BranchData implements FileProcessor{
 
     @Override
     public Gson getGson() {
-        return null;
+        return new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+    }
+
+    /**
+     * Retrieve a branch by its ID.
+     * @param branchID The ID of the branch to be retrieved.
+     * @return The Branch object with the specified ID.
+     * @throws BranchNotFoundException if the branch with the specified ID is not found.
+     * */
+    public Branch getBranchByID(String branchID) throws BranchNotFoundException {
+        Branch res = this.branches.get(branchID);
+        if (res != null) return res;
+        else throw new BranchNotFoundException("Branch ID " + branchID + " not found.");
+    }
+
+    /**
+     * Print all branches in the database.
+     * */
+    public void printBranches() {
+        if (this.branches.isEmpty()) {
+            System.out.println("No branches found in the database.");
+            return;
+        }
+        for (String key : this.branches.keySet()) {
+            System.out.println(branches.get(key));
+        }
+    }
+
+    /**
+     * Add a new branch to the database. This method should be invoked every time an Action related to creating a branch is performed.
+     * @param branch The Branch object to be added.
+     * */
+    public void addBranch(Branch branch) throws BranchAlreadyExistedException {
+        if (this.branches.containsKey(branch.getId())) {
+            throw new BranchAlreadyExistedException("Branch with ID " + branch.getId() + " already exists."
+                    + " Please use a different ID, or update the existing branch.");
+        }
+        this.branches.put(branch.getId(), branch);
+        this.save(); // Save changes to file
+    }
+
+    /**
+     * Update an existing branch in the database. This method should be invoked every time an Action related to updating a branch is performed.
+     * @param branch The Branch object with updated information.
+     * */
+    public void updateBranch(Branch branch) throws BranchNotFoundException {
+        if (!this.branches.containsKey(branch.getId())) {
+            throw new BranchNotFoundException("Branch with ID " + branch.getId() + " does not exist. " +
+                    "If you want to add a new branch, please use the corresponding method.");
+        }
+        this.branches.put(branch.getId(), branch);
+        this.save(); // Save changes to file
     }
 }
