@@ -13,10 +13,11 @@ import java.util.List;
 
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
-import bank.Transaction;
+import bank.*;
 import com.google.gson.Gson;
 
 import core.LoginAction;
+import core.ProfileAction;
 import core.ViewTransactionAction;
 import core.exceptions.InvalidAccountException;
 import database.DatabaseSingleton;
@@ -141,8 +142,18 @@ public class BankUIDemo {
             } catch (InvalidAuthenticationException e) {
                 toast("Invalid credentials");
             }
-
             currentUser = loginAction.getAuthenticatedUser();
+
+            ProfileAction profileAction = new ProfileAction();
+            profileAction.setCurrentUser(currentUser);
+            try {
+                profileAction.execute(); // fetches userAccount
+            } catch (InvalidAuthenticationException | InvalidAccountException e) {
+                toast("Could not load account info");
+            }
+            root.add(new CustomerAccountSummary(profileAction), "account_summary");
+
+
             switch (currentUser.getClass().getSimpleName().toLowerCase()) {
                 case "customer" -> go("customer");
                 case "teller" -> go("teller");
@@ -179,11 +190,61 @@ public class BankUIDemo {
             add(title("Account Information"), g(c, 0, 0, 2));
 
             add(btn("Transaction History", () -> go("cust_profile_trans")));
-            add(btn("Account Summary", () -> info("Open Account Summary")), g(c, 0, 2, 2));
+            add(btn("Account Summary", () -> go("account_summary")), g(c, 0, 2, 2));
             add(btn("Fund Transfer", () -> info("Open Fund Transfer")), g(c, 0, 3, 2));
             add(btn("Deposit / Withdraw", () -> info("Open Deposit/Withdraw")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
         }
+    }
+
+    class CustomerAccountSummary extends JPanel {
+        private final ProfileAction profile;
+        private Account currentAccount;
+
+        CustomerAccountSummary(ProfileAction profile){
+            super(new GridBagLayout());
+            this.profile = profile;
+
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+
+            add(title("Account Summary"), g(c, 0, 0, 2));
+            if (currentUser != null){
+                displaySummary(c);
+            }
+
+            add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
+        }
+
+        private void displaySummary(GridBagConstraints c) {
+            try {
+                profile.execute(); // fetch the account
+                currentAccount = profile.getUserAccount();
+
+                if (currentAccount != null) {
+                    add(new JLabel("Account Number: " + currentAccount.getAccountID()), g(c, 0, 1, 2));
+                    if (currentAccount instanceof Card){ //Credit Card
+                        Card cc = (Card) currentAccount;
+                        add(new JLabel("Account Type: Credit Card"), g(c, 0, 2, 2));
+                        add(new JLabel("Credit Limit: $" + cc.getCreditLimit()), g(c, 0, 3, 2));
+                        add(new JLabel("Credit Usage: $" + cc.getCreditUsage()), g(c, 0, 4, 2));
+                    }else if (currentAccount instanceof Saving){ //Saving
+                        add(new JLabel("Account Type: Saving"), g(c, 0, 2, 2));
+                        add(new JLabel("Balance: $" + currentAccount.getBalance()), g(c, 0, 3, 2));
+                    }else{//Chequing
+                        add(new JLabel("Account Type: Chequing"), g(c, 0, 2, 2));
+                        add(new JLabel("Balance: $" + currentAccount.getBalance()), g(c, 0, 3, 2));
+                    }
+                } else {
+                    add(new JLabel("No account found"), g(c, 0, 1, 2));
+                }
+
+            } catch (InvalidAuthenticationException | InvalidAccountException e) {
+                add(new JLabel("Error fetching account info"), g(c, 0, 1, 2));
+            }
+        }
+
+
     }
 
     /***
