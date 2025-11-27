@@ -20,6 +20,11 @@ import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
 
 import core.*;
+import core.ExecuteTransactionAction;
+import core.LoginAction;
+import core.ProfileAction;
+import core.ViewTransactionAction;
+import core.exceptions.InsufficientFundsException;
 import core.exceptions.InvalidAccountException;
 import core.exceptions.InvalidInputException;
 import database.DatabaseSingleton;
@@ -63,6 +68,12 @@ public class BankUIDemo {
     protected User currentUser;
     private LoginPage loginPage;
     private ProfileAction profile;
+
+    //Unused currently (but meant for the fund transfer with multiple account under the user
+    private Account currentAccount;
+
+    //For the ATM
+    private static Account ATM;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BankUIDemo().start());
@@ -251,18 +262,20 @@ public class BankUIDemo {
             add(title("Account Summary"), g(c, 0, 0, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
             if (profile.getUserAccount() != null) {
-                add(new JLabel("Account Number: " + profile.getUserAccount().getAccountID()), g(c, 0, 1, 2));
+                add(new JLabel("Customer: " + profile.getUserAccount().getFullName()), g(c, 0, 1, 2));
+                add(new JLabel("Account Number: " + profile.getUserAccount().getAccountID()), g(c, 0, 2, 2));
+
                 if (profile.getUserAccount() instanceof Card) { //Credit Card
                     Card cc = (Card) profile.getUserAccount();
-                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 2, 2));
-                    add(new JLabel("Credit Limit: $" + cc.getCreditLimit()), g(c, 0, 3, 2));
-                    add(new JLabel("Credit Usage: $" + cc.getCreditUsage()), g(c, 0, 4, 2));
+                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 3, 2));
+                    add(new JLabel("Credit Limit: $" + cc.getCreditLimit()), g(c, 0, 4, 2));
+                    add(new JLabel("Credit Usage: $" + cc.getCreditUsage()), g(c, 0, 5, 2));
                 } else if (profile.getUserAccount() instanceof Saving) { //Saving
-                    add(new JLabel("Account Type: Saving"), g(c, 0, 2, 2));
-                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 3, 2));
+                    add(new JLabel("Account Type: Saving"), g(c, 0, 3, 2));
+                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 4, 2));
                 } else {//Chequing
-                    add(new JLabel("Account Type: Chequing"), g(c, 0, 2, 2));
-                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 3, 2));
+                    add(new JLabel("Account Type: Chequing"), g(c, 0, 3, 2));
+                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 4, 2));
                 }
             } else {
                 add(new JLabel("No account found"), g(c, 0, 1, 2));
@@ -272,7 +285,7 @@ public class BankUIDemo {
     }
 
     class FundTransferUI extends JPanel {
-        private Account currentAccount;
+        //private Account currentAccount;
         JComboBox<String> senderAccountSelector = new JComboBox<>();
 
         JTextField recipientEmail = new JTextField(22);
@@ -283,7 +296,6 @@ public class BankUIDemo {
         FundTransferUI() {
             super(new GridBagLayout());
             setBorder(pad());
-            GridBagConstraints c = gbc();
 
             addComponentListener(new ComponentAdapter() {
                 public void componentShown(ComponentEvent e) {
@@ -301,7 +313,6 @@ public class BankUIDemo {
             add(title("Fund Transfer"), g(c, 0, 0, 2));
             senderAccountSelector.setEnabled(true);
             row(this, c, 1, "Sender Account:", senderAccountSelector);
-
 
             row(this, c, 3, "Recipient: ", recipientEmail);
             JButton searchBtn = btn("Search", () -> {
@@ -340,12 +351,14 @@ public class BankUIDemo {
         private void fetchSenderAccount() {
             profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
-
             try {
+                profile.prepare();
                 profile.execute();
                 currentAccount = profile.getUserAccount();
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
-                throw new RuntimeException(e);
+                toast("System Timeout");
+            } catch (InvalidInputException e) {
+                toast("Invalid Input");
             }
         }
 
@@ -354,7 +367,7 @@ public class BankUIDemo {
                 String email = recipientEmail.getText().trim();
                 User recipient = DatabaseSingleton.getDatabase().getUserByEmail(email);
 
-                if (recipient == null) {
+                if (recipient == null){
                     toast("Email not found");
                     recipientAccountSelector.setEnabled(false);
                     recipientAccountSelector.removeAllItems();
@@ -362,7 +375,6 @@ public class BankUIDemo {
                 }
 
                 ArrayList<Account> accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
-
                 recipientAccountSelector.removeAllItems();
                 for (Account acc : accounts) {
                     if (acc instanceof Chequing) {
@@ -373,7 +385,6 @@ public class BankUIDemo {
                     } else {
                         recipientAccountSelector.addItem("Credit Card: " + acc.getAccountID());
                     }
-
                 }
                 recipientAccountSelector.setEnabled(true);
 
@@ -382,18 +393,15 @@ public class BankUIDemo {
             }
         }
 
-        private boolean conductTransfer() {
-            try {
+        private boolean conductTransfer(){
+            try{
 
                 double amount = Double.parseDouble(amountInput.getText());
-
                 String selected = (String) recipientAccountSelector.getSelectedItem();
                 String parts[] = selected.split(":");
 
                 Account destinationAcc = DatabaseSingleton.getDatabase().getAccountByID(parts[1].trim());
-
                 Transaction transaction = new Transaction(profile.getUserAccount(), destinationAcc, LocalDateTime.now(), amount);
-
                 ExecuteTransactionAction sendAction = new ExecuteTransactionAction();
                 sendAction.setUser(currentUser);
                 sendAction.setTransactionDetails(transaction);
@@ -427,10 +435,57 @@ public class BankUIDemo {
             add(box, g(c, 0, 1, 2));
             row(this, c, 2, "Amount: ", amountInput);
 
-            //Just need to adapt this part using the fundTransfer
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    try {
+                        profile = new ProfileAction();
+                        profile.setCurrentUser(currentUser);
+                        profile.execute();
+                        currentAccount = profile.getUserAccount();
+                    } catch (InvalidAuthenticationException | InvalidAccountException ie) {
+                        throw new RuntimeException(ie);
+                    }
+                    revalidate();
+                    repaint();
+                }
+            });
+            ATM = DatabaseSingleton.getDatabase().getAccountByID("8df41236-c149-4421-83e8-07a4e4618498");
 
-            add(btn("Confirm", () -> info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
+            add(btn("Confirm", () ->info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
+        }
+
+        private void WithdrawDeposit(){
+            String selected = (String) box.getSelectedItem();
+            double amount = Double.parseDouble(amountInput.getText());
+            ExecuteTransactionAction withdrawDepositAction = new ExecuteTransactionAction();
+            Transaction transaction;
+            String message;
+
+            if (Objects.equals(selected, "Deposit")){
+                    transaction = new Transaction(ATM, profile.getUserAccount(), LocalDateTime.now(), amount);
+                    withdrawDepositAction.setUser(currentUser);
+                    message = "Money Deposited";
+            }
+            else{
+                    transaction = new Transaction(profile.getUserAccount(), ATM, LocalDateTime.now(), amount);
+                    withdrawDepositAction.setUser(currentUser);
+                    message = "Money Withdrew";
+            }
+            try{
+                withdrawDepositAction.setTransactionDetails(transaction);
+                withdrawDepositAction.prepare();
+                withdrawDepositAction.execute();
+                toast(message);
+
+            } catch (InsufficientFundsException e){
+                toast("Insufficient Balance");
+            } catch (InvalidAuthenticationException iae){
+                toast("Invalid ID");
+            } catch (InvalidInputException iie){
+                toast("Invalid Input");
+            }
+
         }
     }
 

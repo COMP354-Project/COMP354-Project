@@ -52,5 +52,11 @@
     "customer": "gohgo@gmail.com",
     "accountStatus": "ACTIVE",
     "type": "Saving"
+  },
+  "8df41236-c149-4421-83e8-07a4e4618498": {
+    "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
+    "customer": "atm@bank.com",
+    "accountStatus": "ACTIVE",
+    "type": "Chequing"
   }
 }
