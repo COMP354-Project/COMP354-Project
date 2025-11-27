@@ -1,5 +1,6 @@
 package core;
 
+import auth.core.Admin;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.Account;
@@ -49,7 +50,12 @@ public class ViewTransactionAction extends Action {
     @Override
     public void execute() throws InvalidAuthenticationException, InvalidAccountException {
         try {
-            this.listOfTransactions = db.getTransactionsByAccountID(accountViewed.getAccountID());
+            if (accountViewed == null && user != null && user instanceof Admin) {
+                this.listOfTransactions = db.getTransactions();
+            }
+            else {
+                this.listOfTransactions = db.getTransactionsByAccountID(accountViewed.getAccountID());
+            }
         } catch (TransactionNotFoundException exception) {
             // Return empty list for display
             this.listOfTransactions = new ArrayList<Transaction>();
