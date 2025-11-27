@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
+import auth.core.Customer;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
@@ -62,6 +63,7 @@ public class BankUIDemo {
     private final JPanel root = new JPanel(cards);
     private String currentRole;
     protected User currentUser;
+    private LoginPage loginPage;
     private ProfileAction profile;
 
     public static void main(String[] args) {
@@ -72,7 +74,9 @@ public class BankUIDemo {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // pages
-        root.add(new LoginPage(), "login");
+        // Storing LoginPage instance for loginPage.reset() calls
+        loginPage = new LoginPage();
+        root.add(loginPage, "login");
 
         // customer
         root.add(new CustomerDashboard(), "customer");
@@ -164,16 +168,12 @@ public class BankUIDemo {
             }
             currentUser = loginAction.getAuthenticatedUser();
 
-//            //Loads the data to the profile action
-//            ProfileAction profileAction = new ProfileAction();
-//            profileAction.setCurrentUser(currentUser);
-//            try {
-//                profileAction.execute(); // fetches userAccount
-//            } catch (InvalidAuthenticationException | InvalidAccountException e) {
-//                toast("Could not load account info");
-//            }
+            //Loads the data to the profile action
+        }
 
-
+        void reset() {
+            tfUser.setText("");
+            pfPass.setText("");
         }
     }
 
@@ -187,7 +187,12 @@ public class BankUIDemo {
 
             JButton account = btn("Account Information", () -> go("cust_account"));
             JButton profile = btn("Personal Profile", () -> go("cust_profile"));
-            JButton logout = btn("Logout", () -> go("login"));
+            JButton logout = btn("Logout", () -> {
+                currentUser = null;
+                loginPage.reset();
+                go("login");
+
+            });
 
             add(account, g(c, 0, 1, 2));
             add(profile, g(c, 0, 2, 2));
@@ -555,7 +560,11 @@ public class BankUIDemo {
             add(title("Teller Dashboard"), g(c, 0, 0, 2));
 
             add(btn("Manage Customers", () -> go("teller_manage")), g(c, 0, 1, 2));
-            add(btn("Logout", () -> go("login")), g(c, 0, 2, 2));
+            add(btn("Logout", () -> {
+                currentUser = null;
+                loginPage.reset();
+                go("login");
+            }), g(c, 0, 2, 2));
         }
     }
 
@@ -581,7 +590,11 @@ public class BankUIDemo {
             add(title("Admin Dashboard"), g(c, 0, 0, 2));
 
             add(btn("User Management", () -> go("admin_user_mgmt")), g(c, 0, 1, 2));
-            add(btn("Logout", () -> go("login")), g(c, 0, 2, 2));
+            add(btn("Logout", () -> {
+                currentUser = null;
+                loginPage.reset();
+                go("login");
+            }), g(c, 0, 2, 2));
         }
     }
 
