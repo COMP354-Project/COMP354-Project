@@ -49,7 +49,6 @@ public class ExecuteTransactionAction extends Action {
             throw new InvalidInputException();
         }
 
-
         //Flag check
         // Authorize the action
         // If not authorized, this line of code will throw exception

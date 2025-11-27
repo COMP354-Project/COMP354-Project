@@ -11,11 +11,15 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
+import auth.core.Admin;
+import auth.core.Customer;
 import auth.core.Teller;
 import auth.core.User;
+import auth.exceptions.DuplicateAccountException;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
 
+import core.*;
 import core.ExecuteTransactionAction;
 import core.LoginAction;
 import core.ProfileAction;
@@ -100,6 +104,7 @@ public class BankUIDemo {
         // admin
         root.add(new AdminDashboard(), "admin");
         root.add(new AdminUserMgmt(), "admin_user_mgmt");
+        root.add(new AdminCreateAccount(), "admin_user_mgmt_create_account");
 
         // Fund transfer & Withdraw/Deposit
         root.add(new FundTransferUI(), "fund_transfer");
@@ -299,7 +304,7 @@ public class BankUIDemo {
             });
         }
 
-        private void TransferUI(){
+        private void TransferUI() {
             GridBagConstraints c = gbc();
             resetForm();
 
@@ -313,7 +318,7 @@ public class BankUIDemo {
                 findRecipient();
             });
 
-            add(searchBtn, g(c, 0, 4, 2) );
+            add(searchBtn, g(c, 0, 4, 2));
 
             // Account chooser (initially disabled)
             recipientAccountSelector.setEnabled(false);
@@ -326,7 +331,7 @@ public class BankUIDemo {
             add(btn("Back", () -> go("cust_account")), g(c, 0, 8, 2));
         }
 
-        private void resetForm(){
+        private void resetForm() {
             senderAccountSelector.removeAllItems();
             recipientEmail.setText("");
             recipientAccountSelector.removeAllItems();
@@ -334,14 +339,14 @@ public class BankUIDemo {
             amountInput.setText("");
 
             ArrayList<Account> myAccounts = DatabaseSingleton.getDatabase().getAccountsByEmail(currentUser.getEmail());
-            for (Account acc : myAccounts){
+            for (Account acc : myAccounts) {
                 senderAccountSelector.addItem(String.valueOf(acc.getAccountID()));
             }
         }
 
         //This part currently is redundant
         //Needs the proper fixes before it can work for many accounts of the same user
-        private void fetchSenderAccount(){
+        private void fetchSenderAccount() {
             profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
             try {
@@ -355,10 +360,11 @@ public class BankUIDemo {
             }
         }
 
-        private void findRecipient(){
+        private void findRecipient() {
             try {
                 String email = recipientEmail.getText().trim();
                 User recipient = DatabaseSingleton.getDatabase().getUserByEmail(email);
+
                 if (recipient == null){
                     toast("Email not found");
                     recipientAccountSelector.setEnabled(false);
@@ -368,26 +374,26 @@ public class BankUIDemo {
 
                 ArrayList<Account> accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
                 recipientAccountSelector.removeAllItems();
-                for(Account acc: accounts){
-                    if (acc instanceof Chequing){
+                for (Account acc : accounts) {
+                    if (acc instanceof Chequing) {
                         recipientAccountSelector.addItem("Chequing: " + acc.getAccountID());
                     }
-                    if (acc instanceof Saving){
+                    if (acc instanceof Saving) {
                         recipientAccountSelector.addItem("Saving: " + acc.getAccountID());
-                    }
-                    else{
+                    } else {
                         recipientAccountSelector.addItem("Credit Card: " + acc.getAccountID());
                     }
                 }
                 recipientAccountSelector.setEnabled(true);
 
-            }catch (Exception e){
+            } catch (Exception e) {
                 toast("Invalid destination account");
             }
         }
 
         private boolean conductTransfer(){
             try{
+
                 double amount = Double.parseDouble(amountInput.getText());
                 String selected = (String) recipientAccountSelector.getSelectedItem();
                 String parts[] = selected.split(":");
@@ -403,11 +409,10 @@ public class BankUIDemo {
                 toast("Transaction Sent");
                 return true; //signals the button
 
-            }catch (InvalidInputException ie){
+            } catch (InvalidInputException ie) {
                 toast("Invalid recipient");
                 return false;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 toast("Invalid amount");
                 return false; //signals the button
             }
@@ -444,8 +449,7 @@ public class BankUIDemo {
             });
             ATM = DatabaseSingleton.getDatabase().getAccountByID("8df41236-c149-4421-83e8-07a4e4618498");
 
-
-            add(btn("Confirm", this::WithdrawDeposit), g(c, 0, 4, 2));
+            add(btn("Confirm", () ->info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
         }
 
@@ -717,6 +721,8 @@ public class BankUIDemo {
     }
 
     // ---------- Admin ----------
+
+    // YO YO YO CHECK IT OUT, IT'S THE OMINIPOTENT ADMIN USER
     class AdminDashboard extends JPanel {
         AdminDashboard() {
             super(new GridBagLayout());
@@ -740,11 +746,181 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("User Management"), g(c, 0, 0, 2));
 
-            add(btn("Create Accounts", () -> info("Open Create Accounts")), g(c, 0, 1, 2));
+            add(btn("Create Accounts", () -> go("admin_user_mgmt_create_account")), g(c, 0, 1, 2));
             add(btn("Reset Account Passwords", () -> info("Open Reset Passwords")), g(c, 0, 2, 2));
             add(btn("Deactivate Accounts", () -> info("Open Deactivate Accounts")), g(c, 0, 3, 2));
             add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("admin")), g(c, 0, 5, 2));
+        }
+    }
+
+    class AdminUpdatePassword extends JPanel {
+        private JTextField emailField;
+        private JPasswordField oldPasswordField;
+        private JPasswordField newPasswordField;
+        private JPasswordField confirmPasswordField;
+
+        AdminUpdatePassword() {
+            super(new GridBagLayout());
+            setBorder(pad());
+
+            GridBagConstraints c = gbc();
+
+            // Title
+            add(title("Update Password"), g(c, 0, 0, 2));
+
+            // Email
+            add(new JLabel("Email:"), g(c, 0, 1, 1));
+            emailField = new JTextField(15);
+            add(emailField, g(c, 1, 1, 1));
+
+            // Old Password
+            add(new JLabel("Old Password:"), g(c, 0, 2, 1));
+            oldPasswordField = new JPasswordField(15);
+            add(oldPasswordField, g(c, 1, 2, 1));
+
+            // New Password
+            add(new JLabel("New Password:"), g(c, 0, 3, 1));
+            newPasswordField = new JPasswordField(15);
+            add(newPasswordField, g(c, 1, 3, 1));
+
+            // Confirm Password
+            add(new JLabel("Confirm Password:"), g(c, 0, 4, 1));
+            confirmPasswordField = new JPasswordField(15);
+            add(confirmPasswordField, g(c, 1, 4, 1));
+
+            // Update Password Button
+            add(btn("Update Password", this::onUpdatePassword),
+                    g(c, 0, 5, 2));
+
+            // Back Button
+            add(btn("Back", () -> go("admin")),
+                    g(c, 0, 6, 2));
+        }
+
+        private void onUpdatePassword() {
+            String email = emailField.getText().trim();
+            String oldPw = new String(oldPasswordField.getPassword());
+            String newPw = new String(newPasswordField.getPassword());
+            String confirmPw = new String(confirmPasswordField.getPassword());
+
+            // TODO: Add action logic here (AdminUpdatePasswordAction)
+        }
+    }
+
+
+    class AdminCreateAccount extends JPanel {
+        private JTextField lastNameField;
+        private JTextField firstNameField;
+        private JTextField passwordField;
+        private JTextField emailField;
+        private JComboBox<String> roleField;
+
+        AdminCreateAccount() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+
+            // Trigger update/reset whenever the panel becomes active
+            addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentShown(ComponentEvent e) {
+                    resetFields();    // ← refresh-ready hook
+                }
+            });
+
+            add(title("Account Creation"), g(c, 0, 0, 2));
+
+
+            // ----------------------------------------------------------------
+            // FORM FIELDS (xyw)
+            // ----------------------------------------------------------------
+
+            // inside constructor, after you have GridBagConstraints c = gbc();
+            // label
+            add(new JLabel("Role:"), g(c, 0, 3, 1));
+            roleField = new JComboBox<>(new String[]{
+                    Customer.class.getSimpleName(),
+                    Teller.class.getSimpleName(),
+                    Admin.class.getSimpleName()
+            });
+
+
+//            // --- First Name ---
+//            add(new JLabel("First Name:"), g(c, 0, 1, 1));
+//            firstNameField = new JTextField(15);
+//            add(firstNameField, g(c, 1, 1, 1));
+//
+//            // --- Last Name ---
+//            add(new JLabel("Last Name:"), g(c, 0, 2, 1));
+//            lastNameField = new JTextField(15);
+//            add(lastNameField, g(c, 1, 2, 1));
+
+            // --- Email ---
+            add(new JLabel("Email:"), g(c, 0, 1, 1));
+            emailField = new JTextField(15);
+            add(emailField, g(c, 1, 1, 1));
+
+            // --- Password ---
+            add(new JLabel("Password:"), g(c, 0, 2, 1));
+            passwordField = new JPasswordField(15);   // or new JTextField(15) if you prefer
+            add(passwordField, g(c, 1, 2, 1));
+
+            // --- Role ---
+            add(new JLabel("Role:"), g(c, 0, 3, 1));
+            roleField = new JComboBox<>(new String[]{
+                    Customer.class.getSimpleName(),
+                    Teller.class.getSimpleName(),
+                    Admin.class.getSimpleName()
+            });
+            add(roleField, g(c, 1, 3, 1));
+
+            // --- Create Button ---
+            add(btn("Create Account", this::onCreateAccount),
+                    g(c, 0, 6, 2));
+
+            // --- Back Button ---
+            add(btn("Back", () -> go("admin")),
+                    g(c, 0, 7, 2));
+
+        }
+
+        private void onCreateAccount() {
+//          String firstName = firstNameField.getText().trim();
+//          String lastName = lastNameField.getText().trim();
+            String email = emailField.getText().trim();
+            String password = passwordField.getText().trim();
+
+            String type = Objects.requireNonNull(roleField.getSelectedItem()).toString();
+
+            CreateUserAction action = new CreateUserAction();
+            User newUser = switch (type) {
+                case "Admin" -> new Admin();
+                case "Customer" -> new Customer();
+                case "Teller" -> new Teller();
+                default -> throw new IllegalStateException("Unexpected value: " + roleField);
+            };
+            newUser.setEmail(email);
+            try {
+                newUser.setPassword(password);
+            } catch (InvalidInputException e) {
+                throw new RuntimeException(e);
+            }
+            action.setUser(newUser);
+            try {
+                action.execute();
+                toast(CreateUserAction.MESSAGE);
+                resetFields(); // clean up after creation
+            } catch (InvalidAuthenticationException e) {
+                toast("No permission to create an user!");
+            } catch (InvalidAccountException e) {
+                toast("Duplicate email with another user!");
+            }
+        }
+
+        private void resetFields() {
+            passwordField.setText("");
+            emailField.setText("");
         }
     }
 

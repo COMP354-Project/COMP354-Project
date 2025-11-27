@@ -28,6 +28,10 @@ public class Customer extends User {
         setLastName(lastName);
     }
 
+    public Customer() {
+
+    }
+
     public String getFirstName() {
         return firstName;
     }
