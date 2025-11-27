@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.List;
 
 import auth.core.Customer;
+import auth.core.Teller;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
@@ -90,6 +91,7 @@ public class BankUIDemo {
         // teller
         root.add(new TellerDashboard(), "teller");
         root.add(new TellerManageCustomers(), "teller_manage");
+        root.add(new ViewBranchAccounts(), "teller_view_accounts");
 
         // admin
         root.add(new AdminDashboard(), "admin");
@@ -471,9 +473,97 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("Manage Customers"), g(c, 0, 0, 2));
 
-            add(btn("View Customer Information", () -> info("Open View Customer Information")), g(c, 0, 1, 2));
+            add(btn("View Customer Information", () -> go("teller_view_accounts")), g(c, 0, 1, 2));
             add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 2, 2));
             add(btn("Back", () -> go("teller")), g(c, 0, 3, 2));
+        }
+    }
+
+    class ViewBranchAccounts extends JPanel {
+        private JComboBox<String> accountDropdown;
+        private JLabel accountDetailsLabel;
+
+        ViewBranchAccounts() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Customer Information"), g(c, 0, 0, 2));
+
+            // Dropdown to select account
+            add(new JLabel("Select Account:"), g(c, 0, 1, 1));
+            accountDropdown = new JComboBox<>();
+            add(accountDropdown, g(c, 1, 1, 1));
+
+            // Display account details
+            accountDetailsLabel = new JLabel("Select an account to view details");
+            add(accountDetailsLabel, g(c, 0, 2, 2));
+
+            // View button
+            add(btn("View Details", this::displayAccountDetails), g(c, 0, 3, 2));
+            add(btn("Back", () -> {
+                // clear fields to avoid leaking data to another session of teller
+                clearFields();
+                go("teller_manage");
+            }), g(c, 0, 4, 2));
+
+            // Load accounts when panel is shown
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    loadAccountsInBranch();
+                }
+            });
+        }
+
+        private void clearFields() {
+            accountDropdown.removeAllItems();
+            accountDetailsLabel.setText("Select an account to view details");
+        }
+
+        private void loadAccountsInBranch() {
+            accountDropdown.removeAllItems();
+            try {
+                String tellerBranchID = ((Teller) currentUser).getBranchID();
+                ArrayList<Account> accounts = DatabaseSingleton.getDatabase()
+                        .getAccountsByBranch(tellerBranchID);
+
+                if (accounts.isEmpty()) {
+                    toast("No accounts found in this branch.");
+                    return;
+                }
+
+                for (Account account : accounts) {
+                    String displayText = account.getAccountID() + " - " +
+                            account.getCustomer().getFirstName() + " " +
+                            account.getCustomer().getLastName() + " (" +
+                            account.getClass().getSimpleName() + ")";
+                    accountDropdown.addItem(displayText);
+                }
+            } catch (Exception e) {
+                toast("Error loading accounts: " + e.getMessage());
+            }
+        }
+
+        private void displayAccountDetails() {
+            // Display selected account info
+            if (accountDropdown.getSelectedItem() == null) {
+                toast("Please select an account");
+                return;
+            }
+
+            String selected = (String) accountDropdown.getSelectedItem();
+            String accountID = selected.split(" - ")[0];
+
+            try {
+                Account account = DatabaseSingleton.getDatabase().getAccountByID(accountID);
+                String details = "<html><b>Account ID: " + account.getAccountID() + "</b><br>" +
+                        "Customer: " + account.getCustomer().getFirstName() + " "
+                        + account.getCustomer().getLastName() + "<br>" +
+                        "Account Type: " + account.getClass().getSimpleName() + "<br>" +
+                        "Balance: $" + account.getBalance() + "</html>";
+                accountDetailsLabel.setText(details);
+            } catch (Exception e) {
+                toast("Error retrieving account details: " + e.getMessage());
+            }
         }
     }
 

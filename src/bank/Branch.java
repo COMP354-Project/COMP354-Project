@@ -1,5 +1,6 @@
 package bank;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -8,12 +9,14 @@ public class Branch {
     private String address;
     private String name;
     private String phone;
+    private ArrayList<String> accountIds;
 
     public Branch(String address, String name, String phone) {
         this.id = UUID.randomUUID().toString();
         this.address = address;
         this.name = name;
         this.phone = phone;
+        this.accountIds = new ArrayList<>();
     }
 
     public Branch(String id, String address, String name, String phone) {
@@ -21,6 +24,7 @@ public class Branch {
         this.address = address;
         this.name = name;
         this.phone = phone;
+        this.accountIds = new ArrayList<>();
     }
 
     public String getId() {
@@ -39,6 +43,8 @@ public class Branch {
         return phone;
     }
 
+    public ArrayList<String> getAccountIds() { return accountIds; }
+
     public void setAddress(String address) {
         this.address = address;
     }
@@ -50,6 +56,8 @@ public class Branch {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
+    public void setAccountIds(ArrayList<String> accountIds) { this.accountIds = accountIds; }
 
     @Override
     public boolean equals(Object o) {
@@ -64,7 +72,8 @@ public class Branch {
         return "Branch ID: " + id + "\n" +
                "Name: " + name + "\n" +
                "Address: " + address + "\n" +
-               "Phone: " + phone + "\n";
+               "Phone: " + phone + "\n" +
+                "Accounts: " + (accountIds != null ? accountIds.size() : 0) + "\n";
     }
 }
 

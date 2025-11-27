@@ -118,7 +118,8 @@ public class DatabaseSingleton {
         Account res = null;
         try {
             res = this.accountData.getAccountById(id);
-            System.out.println("Account with ID " + id + " retrieved successfully.");
+            // Commenting this line to avoid console log spam
+            //System.out.println("Account with ID " + id + " retrieved successfully.");
         } catch (InvalidAccountIDException e) {
             System.out.println(e.getMessage());
         }
@@ -170,6 +171,36 @@ public class DatabaseSingleton {
      */
     public Account getAccountByUser(User user) {
         return this.accountData.getAccountByEmail(user.getEmail());
+    }
+
+    /**
+     * Retrieve all accounts in a specific branch.
+     *
+     * @param branchID The ID of the branch whose accounts are to be retrieved.
+     * @return An ArrayList of Account objects in the specified branch.
+     */
+    public ArrayList<Account> getAccountsByBranch(String branchID) {
+        ArrayList<Account> branchAccounts = new ArrayList<>();
+        try {
+            Branch branch = branchData.getBranchByID(branchID);
+
+            if (branch == null || branch.getAccountIds().isEmpty()) {
+                return branchAccounts;
+            }
+
+            // For each account ID in the branch, get the account
+            for (String accountID : branch.getAccountIds()) {
+                try {
+                    Account account = accountData.getAccountById(accountID);
+                    branchAccounts.add(account);
+                } catch (Exception e) {
+                    System.err.println("Error fetching account " + accountID + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching accounts by branch: " + e.getMessage());
+        }
+        return branchAccounts;
     }
 
     /**

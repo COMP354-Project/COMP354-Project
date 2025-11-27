@@ -18,9 +18,22 @@
     "password": "adminPass",
     "type": "Admin"
   },
-  "teller@gmail.com": {
-    "email": "teller@gmail.com",
+  "teller1@gmail.com": {
+    "email": "teller1@gmail.com",
     "password": "tellerPass",
+    "branchID": "6879aad4-4df2-4e32-b500-2d4fc6721189",
+    "type": "Teller"
+  },
+  "teller2@gmail.com": {
+    "email": "teller2@gmail.com",
+    "password": "tellerPass",
+    "branchID": "e8da72ca-8182-491a-aaf1-40c3faffd22e",
+    "type": "Teller"
+  },
+  "teller3@gmail.com": {
+    "email": "teller3@gmail.com",
+    "password": "tellerPass",
+    "branchID": "f2868d14-c831-43be-960a-44a6bb7828f4",
     "type": "Teller"
   },
   "jjj@gmail.com": {

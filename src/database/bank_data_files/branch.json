@@ -3,18 +3,32 @@
     "id": "6879aad4-4df2-4e32-b500-2d4fc6721189",
     "address": "456 Elm St",
     "name": "Code Review Credit Union",
-    "phone": "555-5678"
+    "phone": "555-5678",
+    "accountIds": [
+      "bf30216d-cc75-4c3f-9718-4aca2554b5d3",
+      "5b9dc767-b51a-4db0-a1d6-5f783f26a48f",
+      "30f49d9c-0b0b-49bd-a511-84d2e648daf5"
+    ]
   },
   "e8da72ca-8182-491a-aaf1-40c3faffd22e": {
     "id": "e8da72ca-8182-491a-aaf1-40c3faffd22e",
     "address": "789 Oak St",
     "name": "Debugging Depository",
-    "phone": "555-9012"
+    "phone": "555-9012",
+    "accountIds": [
+      "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "ae4a0409-772c-4212-94a8-4b6d8cf9aedc",
+      "9501e3ad-e672-434c-935f-c926d3a2e949"
+    ]
   },
   "f2868d14-c831-43be-960a-44a6bb7828f4": {
     "id": "f2868d14-c831-43be-960a-44a6bb7828f4",
     "address": "123 Main St",
     "name": "Compile Last Minute Bank",
-    "phone": "555-1234"
+    "phone": "555-1234",
+    "accountIds": [
+      "6def6aff-f656-4922-94f0-7fe125745696",
+      "b91addd5-0885-4294-a808-554d24abcedc"
+    ]
   }
 }

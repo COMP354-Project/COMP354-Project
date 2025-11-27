@@ -20,6 +20,7 @@ public class UserAdapter  implements JsonSerializer<User>, JsonDeserializer<User
             obj.addProperty("lastName", ((Customer) user).getLastName());
             obj.addProperty("type", "Customer");
         } else if (user instanceof Teller) {
+            obj.addProperty("branchID", ((Teller) user).getBranchID());
             obj.addProperty("type", "Teller");
         } else if (user instanceof Admin) {
             obj.addProperty("type", "Admin");
@@ -49,6 +50,8 @@ public class UserAdapter  implements JsonSerializer<User>, JsonDeserializer<User
                 catch (InvalidInputException e) {
                     System.out.println("Invalid password format for Teller user.");
                 }
+                // is there a better way to do this?
+                ((Teller) user).setBranchID(obj.get("branchID").getAsString());
                 break;
             case "Admin":
                 user = new Admin();
