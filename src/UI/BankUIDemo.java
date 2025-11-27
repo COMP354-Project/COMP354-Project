@@ -356,7 +356,7 @@ public class BankUIDemo {
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
                 toast("System Timeout");
             } catch (InvalidInputException e) {
-                toast("Fraud alert");
+                toast("Invalid Input");
             }
         }
 
@@ -477,11 +477,11 @@ public class BankUIDemo {
                 toast(message);
 
             } catch (InsufficientFundsException e){
-                toast("no money");
+                toast("Insufficient Balance");
             } catch (InvalidAuthenticationException iae){
-                toast("you fraud");
+                toast("Invalid ID");
             } catch (InvalidInputException iie){
-                toast("learn to type");
+                toast("Invalid Input");
             }
 
         }
