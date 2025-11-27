@@ -352,8 +352,8 @@ public class BankUIDemo {
             }
         }
 
-        //This part currently is redundant
-        //Needs the proper fixes before it can work for many accounts of the same user
+
+        //Needs the proper fixes before it can work for many accounts of the same user (currently 1-1 relation)
         private void fetchSenderAccount() {
             profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
