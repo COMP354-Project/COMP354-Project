@@ -15,11 +15,7 @@ public abstract class User {
 
     }
 
-    public void setPassword(String password) throws InvalidInputException {
-        // TODO Password format verification (bellow nmb of characters, not-allowed symbols, etc...)
-        if (false) {
-            throw new InvalidInputException();
-        }
+    public void setPassword(String password) {
         this.password = password;
     }
 
