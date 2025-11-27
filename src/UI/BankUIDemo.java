@@ -108,8 +108,9 @@ public class BankUIDemo {
         root.add(new AdminDashboard(), "admin");
         root.add(new AdminUserMgmt(), "admin_user_mgmt");
         root.add(new AdminCreateAccount(), "admin_user_mgmt_create_account");
-        root.add(new AdminViewTransactions(), "admin_view_transactions");
+        root.add(new AdminViewTransactions(), "admin_user_mgmt_view_transactions");
         root.add(new AdminUpdatePassword(), "admin_user_mgmt_update_password");
+        root.add(new AdminDeactivateAccount(), "admin_user_mgmt_deactivate_account");
 
         // Fund transfer & Withdraw/Deposit
         root.add(new FundTransferUI(), "fund_transfer");
@@ -755,9 +756,8 @@ public class BankUIDemo {
 
             add(btn("Create Accounts", () -> go("admin_user_mgmt_create_account")), g(c, 0, 1, 2));
             add(btn("Reset Account Passwords", () -> go("admin_user_mgmt_update_password")), g(c, 0, 2, 2));
-            add(btn("Deactivate Accounts", () -> info("Open Deactivate Accounts")), g(c, 0, 3, 2));
-//            add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 4, 2));
-            add(btn("View All Transactions", () -> go("admin_view_transactions")), g(c, 0, 4, 2));
+            add(btn("Deactivate Account", () -> go("admin_user_mgmt_deactivate_account")), g(c, 0, 3, 2));
+            add(btn("View All Transactions", () -> go("admin_user_mgmt_view_transactions")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("admin")), g(c, 0, 5, 2));
         }
     }
@@ -1013,6 +1013,142 @@ public class BankUIDemo {
         private void resetFields() {
             passwordField.setText("");
             emailField.setText("");
+        }
+    }
+
+    class AdminDeactivateAccount extends JPanel {
+        private JTextField emailField;
+        private JLabel emailLabel;
+        private JLabel accountLabel;
+        private final AccountsComboBox accountsDropDown = new AccountsComboBox();
+        protected DeactivateAccountAction deactivateAccountAction;
+        private ArrayList<Account> accounts;
+        private Account selectedAccount;
+        AdminDeactivateAccount() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Deactivate Account"), g(c, 0, 0, 2));
+
+            // UI components for this page:
+            // - A text field for user input (the email of the account to deactivate)
+            // - A dropdown to select accounts associated with that email (customer)
+            // - A "Deactivate" button to perform the action
+            emailField = new JTextField(22);
+            emailLabel = new JLabel("Customer Email: ");
+            add(emailLabel, g(c, 0, 1, 1));
+            add(emailField, g(c, 1, 1, 1));
+            add(btn("Search", () -> {
+                String email = emailField.getText().trim();
+                loadAccounts(email);
+            }), g(c, 0, 2, 2));
+
+            accountLabel = new JLabel("Select Account: ");
+            add(accountLabel, g(c, 0, 3, 1));
+            add(accountsDropDown, g(c, 1, 3, 1));
+
+            add(btn("Deactivate Account", () -> {
+                selectedAccount = accountsDropDown.getSelectedAccount();
+                if (selectedAccount.getAccountStatus() == Account.AccountStatus.INACTIVE){
+                    toast("Account has already been deactivated.");
+                    resetFields();
+                    return;
+                }
+                if (selectedAccount == null) {
+                    toast("No account selected!");
+                    resetFields();
+                    return;
+                }
+                deactivateAccountAction = new DeactivateAccountAction(currentUser, selectedAccount);
+                try {
+                    deactivateAccountAction.execute();
+                    info("Account Deactivated!");
+                } catch (InvalidAuthenticationException e) {
+                    toast("No permission to deactivate account!");
+                } catch (InvalidAccountException e) {
+                    toast("Account deactivation failed!");
+                }
+                resetFields();
+            }), g(c, 0, 4, 2));
+            add(btn("Back", () -> {
+                go("admin_user_mgmt");
+                resetFields();
+            }), g(c, 0, 5, 2));
+        }
+
+        private void loadAccounts(String email) {
+            accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
+            accountsDropDown.setAccounts(accounts);
+            revalidate();
+            repaint();
+        }
+
+        private void resetFields() {
+            emailField.setText("");
+            accountsDropDown.setAccounts(new ArrayList<>());
+        }
+
+        static class AccountsComboBox extends JComboBox<Account> {
+            private final DefaultComboBoxModel<Account> model;
+
+            public AccountsComboBox() {
+                super();
+                model = new DefaultComboBoxModel<>();
+                setModel(model);
+
+                setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public java.awt.Component getListCellRendererComponent(
+                            JList<?> list,
+                            Object value,
+                            int index,
+                            boolean isSelected,
+                            boolean cellHasFocus) {
+
+                        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                        if (value instanceof Account a) {
+                            setText(getDisplayText(a));
+                        } else {
+                            setText("");
+                        }
+                        return this;
+                    }
+                });
+            }
+
+            /**
+             * Replace all accounts in the combo box.
+             */
+            public void setAccounts(List<Account> accounts) {
+                model.removeAllElements();
+                if (accounts == null) return;
+                for (Account a : accounts) {
+                    model.addElement(a);
+                }
+                if (model.getSize() > 0) {
+                    setSelectedIndex(0);
+                }
+            }
+
+            /**
+             * Returns the Account currently selected, or null.
+             */
+            public Account getSelectedAccount() {
+                Object sel = getSelectedItem();
+                return (sel instanceof Account) ? (Account) sel : null;
+            }
+
+            /**
+             * Helper to decide what text gets shown for each Account in the dropdown.
+             * Adjust this for your actual Account fields.
+             */
+            private String getDisplayText(Account a) {
+                return a.getAccountID() + " - " +
+                        a.getCustomer().getFirstName() + " " +
+                        a.getCustomer().getLastName() + " (" +
+                        a.getClass().getSimpleName() + ") - " + a.getAccountStatus();
+            }
         }
     }
 

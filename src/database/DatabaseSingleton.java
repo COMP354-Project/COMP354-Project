@@ -6,6 +6,7 @@ import auth.core.*;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.sql.Array;
 import java.time.LocalDateTime;
 import java.io.FileWriter;
 import java.io.FileReader;
@@ -299,6 +300,15 @@ public class DatabaseSingleton {
      */
     public ArrayList<User> getAllUsers() {
         return this.userData.getAllUsers();
+    }
+
+    /**
+     * Retrieve all Customer-type users in the database.
+     *
+     * @return An ArrayList of all Customer objects in the database.
+     */
+    public ArrayList<User> getAllCustomers() {
+        return this.userData.getAllCustomers();
     }
 
     /**
@@ -797,6 +807,24 @@ class UserData implements FileProcessor {
             return new ArrayList<>();
         }
         return new ArrayList<>(this.users.values());
+    }
+
+    /**
+     * Retrieve all Customer-type users in the database.
+     *
+     * @return An ArrayList of all Customer objects in the database.
+     */
+    public ArrayList<User> getAllCustomers() {
+        ArrayList<User> customers = new ArrayList<>();
+        for (User user : this.users.values()) {
+            if (user instanceof Customer) {
+                customers.add(user);
+            }
+        }
+        if (customers.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return customers;
     }
 
     /**
