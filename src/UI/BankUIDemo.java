@@ -108,6 +108,7 @@ public class BankUIDemo {
         root.add(new AdminDashboard(), "admin");
         root.add(new AdminUserMgmt(), "admin_user_mgmt");
         root.add(new AdminCreateAccount(), "admin_user_mgmt_create_account");
+        root.add(new AdminViewTransactions(), "admin_view_transactions");
         root.add(new AdminUpdatePassword(), "admin_user_mgmt_update_password");
 
         // Fund transfer & Withdraw/Deposit
@@ -755,7 +756,8 @@ public class BankUIDemo {
             add(btn("Create Accounts", () -> go("admin_user_mgmt_create_account")), g(c, 0, 1, 2));
             add(btn("Reset Account Passwords", () -> go("admin_user_mgmt_update_password")), g(c, 0, 2, 2));
             add(btn("Deactivate Accounts", () -> info("Open Deactivate Accounts")), g(c, 0, 3, 2));
-            add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 4, 2));
+//            add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 4, 2));
+            add(btn("View All Transactions", () -> go("admin_view_transactions")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("admin")), g(c, 0, 5, 2));
         }
     }
@@ -1011,6 +1013,89 @@ public class BankUIDemo {
         private void resetFields() {
             passwordField.setText("");
             emailField.setText("");
+        }
+    }
+
+    class AdminViewTransactions extends JPanel {
+        // The transactions to be displayed
+        final TransactionTable tableModel = new TransactionTable();
+        final JTable viewTable = new JTable(tableModel);
+        protected ViewTransactionAction viewTransactionAction;
+
+        AdminViewTransactions() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("All Transactions"), g(c, 0, 0, 2));
+
+            // ----- Table -----
+            viewTable.setFillsViewportHeight(true);
+            viewTable.setAutoCreateRowSorter(true);
+
+            JScrollPane scroll = new JScrollPane(viewTable);
+            GridBagConstraints tableC = g(c, 0, 1, 2);
+            tableC.weighty = 1;
+            tableC.fill = GridBagConstraints.BOTH;
+            add(scroll, tableC);
+
+            add(btn("Back", () -> go("admin_user_mgmt")), g(c, 0, 2, 2));
+
+            // Fetch trigger
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    updateData();   // ← RUN UPDATE HERE
+                }
+            });
+        }
+
+        public void updateData() {
+            // Setup data
+            viewTransactionAction = new ViewTransactionAction();
+            viewTransactionAction.setUser(currentUser);
+            viewTransactionAction.setAccountViewed(null);
+            try {
+                viewTransactionAction.execute();
+            } catch (InvalidAuthenticationException | InvalidAccountException e) {
+                // TODO: Manage edge cases and error cases
+                throw new RuntimeException(e);
+            }
+            tableModel.setTransactions(viewTransactionAction.getListOfTransactions());
+        }
+
+        class TransactionTable extends AbstractTableModel {
+            private final String[] columns = {"Transaction ID", "Amount", "Time"};
+            private List<Transaction> data = new ArrayList<>();
+
+            public void setTransactions(List<Transaction> data) {
+                this.data = data;
+                fireTableDataChanged(); // tells JTable to repaint
+            }
+
+            @Override
+            public int getRowCount() {
+                return data.size();
+            }
+
+            @Override
+            public int getColumnCount() {
+                return columns.length;
+            }
+
+            @Override
+            public String getColumnName(int column) {
+                return columns[column];
+            }
+
+            @Override
+            public Object getValueAt(int rowIndex, int columnIndex) {
+                Transaction t = data.get(rowIndex);
+                return switch (columnIndex) {
+                    case 0 -> t.getId();
+                    case 1 -> t.getAmountForAccount(viewTransactionAction.getAccountViewed());
+                    case 2 -> t.getTimeOfTransaction();
+                    default -> "";
+                };
+            }
         }
     }
 
