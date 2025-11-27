@@ -23,9 +23,6 @@ public class ProfileAction extends Action {
         if (!(currentUser instanceof Customer) && !tellerFlag){ //might need to be removed
             throw new InvalidInputException(); //might change later
         }
-        if (userAccount == null){
-            throw new InvalidInputException(); //might change later
-        }
 
     }
 

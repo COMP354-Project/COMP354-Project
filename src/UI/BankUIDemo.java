@@ -16,7 +16,6 @@ import auth.core.Admin;
 import auth.core.Customer;
 import auth.core.Teller;
 import auth.core.User;
-import auth.exceptions.DuplicateAccountException;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
 
@@ -102,7 +101,8 @@ public class BankUIDemo {
         // teller
         root.add(new TellerDashboard(), "teller");
         root.add(new TellerManageCustomers(), "teller_manage");
-        root.add(new ViewBranchAccounts(), "teller_view_accounts");
+        root.add(new TellerViewAccounts(), "teller_view_accounts");
+        root.add(new TellerViewTransactions(), "teller_view_transactions");
 
         // admin
         root.add(new AdminDashboard(), "admin");
@@ -353,8 +353,8 @@ public class BankUIDemo {
             }
         }
 
-        //This part currently is redundant
-        //Needs the proper fixes before it can work for many accounts of the same user
+
+        //Needs the proper fixes before it can work for many accounts of the same user (currently 1-1 relation)
         private void fetchSenderAccount() {
             profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
@@ -366,6 +366,8 @@ public class BankUIDemo {
                 toast("System Timeout");
             } catch (InvalidInputException e) {
                 toast("Invalid Input");
+            }catch (Exception e){
+                toast("Other exceptions");
             }
         }
 
@@ -490,6 +492,8 @@ public class BankUIDemo {
                 toast("Invalid ID");
             } catch (InvalidInputException iie) {
                 toast("Invalid Input");
+            } catch (InvalidAccountException e) {
+                toast("Invalid account");
             }
 
         }
@@ -635,16 +639,16 @@ public class BankUIDemo {
             add(title("Manage Customers"), g(c, 0, 0, 2));
 
             add(btn("View Customer Information", () -> go("teller_view_accounts")), g(c, 0, 1, 2));
-            add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 2, 2));
+            add(btn("View All Transactions", () -> go("teller_view_transactions")), g(c, 0, 2, 2));
             add(btn("Back", () -> go("teller")), g(c, 0, 3, 2));
         }
     }
 
-    class ViewBranchAccounts extends JPanel {
+    class TellerViewAccounts extends JPanel {
         private JComboBox<String> accountDropdown;
         private JLabel accountDetailsLabel;
 
-        ViewBranchAccounts() {
+        TellerViewAccounts() {
             super(new GridBagLayout());
             setBorder(pad());
             GridBagConstraints c = gbc();
@@ -728,6 +732,114 @@ public class BankUIDemo {
         }
     }
 
+    class TellerViewTransactions extends JPanel {
+        final String titleText = "Branch Transactions";
+        final BranchTransactionTable tableModel = new BranchTransactionTable();
+        final JTable viewTable = new JTable(tableModel);
+        protected ViewTransactionAction viewTransactionAction;
+
+        TellerViewTransactions() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+
+            // Title
+            JLabel title = new JLabel(this.titleText);
+            title.setFont(title.getFont().deriveFont(Font.BOLD, 20f));
+            add(title, g(c, 0, 0, 2));
+
+            // Table
+            viewTable.setFillsViewportHeight(true);
+            viewTable.setAutoCreateRowSorter(true);
+
+            JScrollPane scroll = new JScrollPane(viewTable);
+            GridBagConstraints tableC = g(c, 0, 1, 2);
+            tableC.weighty  = 1;
+            tableC.fill = GridBagConstraints.BOTH;
+            add(scroll, tableC);
+
+            //add(btn("Back", () -> go("teller_manage")), g(c, 0, 2, 2));
+
+            // Footer Buttons
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton backBtn = new JButton("Back");
+            backBtn.addActionListener(e -> go("teller_manage"));
+            actions.add(backBtn);
+            add(actions, g(c, 0, 2, 2));
+
+            // Fetch trigger
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    loadBranchTransactions();
+                }
+            });
+        }
+        private void loadBranchTransactions() {
+            try {
+                String tellerBranchID = ((Teller)currentUser).getBranchID();
+                Branch tellerBranch = DatabaseSingleton.getDatabase().getBranchByID(tellerBranchID);
+                ArrayList<Account> accounts = DatabaseSingleton.getDatabase()
+                        .getAccountsByBranch(tellerBranchID);
+                List<Transaction> allTransactions = new ArrayList<>();
+
+                for (Account account : accounts) {
+                    viewTransactionAction = new ViewTransactionAction();
+                    viewTransactionAction.setUser(currentUser);
+                    viewTransactionAction.setAccountViewed(account);
+                    viewTransactionAction.execute();
+
+                    // Filter transactions - only add if account is in branch
+                    for (Transaction t : viewTransactionAction.getListOfTransactions()) {
+                        Account transactionAccount = t.getSender();
+                        if (transactionAccount != null && tellerBranch.getAccountIds().contains(transactionAccount.getAccountID())) {
+                            allTransactions.add(t);
+                        }
+                    }
+                }
+
+                tableModel.setTransactions(allTransactions);
+            } catch (InvalidAuthenticationException | InvalidAccountException e) {
+                toast("Error loading accounts: " + e.getMessage());
+            }
+        }
+
+        class BranchTransactionTable extends AbstractTableModel {
+            private final String[] columns = {"Transaction ID", "Sender ID", "Amount", "Time"};
+            private List<Transaction> data = new ArrayList<>();
+
+            public void setTransactions(List<Transaction> data) {
+                this.data = data;
+                fireTableDataChanged();
+            }
+
+            @Override
+            public int getRowCount() {
+                return data.size();
+            }
+
+            @Override
+            public int getColumnCount() {
+                return columns.length;
+            }
+
+            @Override
+            public String getColumnName(int column) {
+                return columns[column];
+            }
+
+            @Override
+            public Object getValueAt(int rowIndex, int columnIndex) {
+                Transaction t = data.get(rowIndex);
+                return switch (columnIndex) {
+                    case 0 -> t.getId();
+                    case 1 -> t.getSender().getAccountID();
+                    case 2 -> t.getAmount();
+                    case 3 -> t.getTimeOfTransaction();
+                    default -> "";
+                };
+            }
+        }
+    }
     // ---------- Admin ----------
 
     // YO YO YO CHECK IT OUT, IT'S THE OMINIPOTENT ADMIN USER
