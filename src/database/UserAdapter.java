@@ -6,7 +6,7 @@ import core.exceptions.InvalidInputException;
 
 import java.lang.reflect.Type;
 
-public class UserAdapter  implements JsonSerializer<User>, JsonDeserializer<User> {
+public class UserAdapter implements JsonSerializer<User>, JsonDeserializer<User> {
     @Override
     public JsonElement serialize(User user, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject obj = new JsonObject();
@@ -27,6 +27,7 @@ public class UserAdapter  implements JsonSerializer<User>, JsonDeserializer<User
         }
         return obj;
     }
+
     @Override
     public User deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         User user = null;
@@ -44,24 +45,14 @@ public class UserAdapter  implements JsonSerializer<User>, JsonDeserializer<User
             case "Teller":
                 user = new Teller();
                 user.setEmail(obj.get("email").getAsString());
-                try {
-                    user.setPassword(obj.get("password").getAsString());
-                }
-                catch (InvalidInputException e) {
-                    System.out.println("Invalid password format for Teller user.");
-                }
+                user.setPassword(obj.get("password").getAsString());
                 // is there a better way to do this?
                 ((Teller) user).setBranchID(obj.get("branchID").getAsString());
                 break;
             case "Admin":
                 user = new Admin();
                 user.setEmail(obj.get("email").getAsString());
-                try {
-                    user.setPassword(obj.get("password").getAsString());
-                }
-                catch (InvalidInputException e) {
-                    System.out.println("Invalid password format for Admin user.");
-                }
+                user.setPassword(obj.get("password").getAsString());
                 break;
             default:
                 // Handle unknown type or base Account if needed

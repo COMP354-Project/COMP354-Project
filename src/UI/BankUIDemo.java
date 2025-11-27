@@ -3,6 +3,7 @@ package UI;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
+import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
@@ -108,6 +109,7 @@ public class BankUIDemo {
         root.add(new AdminUserMgmt(), "admin_user_mgmt");
         root.add(new AdminCreateAccount(), "admin_user_mgmt_create_account");
         root.add(new AdminViewTransactions(), "admin_view_transactions");
+        root.add(new AdminUpdatePassword(), "admin_user_mgmt_update_password");
 
         // Fund transfer & Withdraw/Deposit
         root.add(new FundTransferUI(), "fund_transfer");
@@ -149,6 +151,9 @@ public class BankUIDemo {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     doLogin();
+                    if (currentUser == null) {
+                        return; // Block dashboard access before login successfully.
+                    }
                     switch (currentUser.getClass().getSimpleName().toLowerCase()) {
                         case "customer" -> go("customer");
                         case "teller" -> go("teller");
@@ -347,8 +352,8 @@ public class BankUIDemo {
             }
         }
 
-        //This part currently is redundant
-        //Needs the proper fixes before it can work for many accounts of the same user
+
+        //Needs the proper fixes before it can work for many accounts of the same user (currently 1-1 relation)
         private void fetchSenderAccount() {
             profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
@@ -360,6 +365,8 @@ public class BankUIDemo {
                 toast("System Timeout");
             } catch (InvalidInputException e) {
                 toast("Invalid Input");
+            }catch (Exception e){
+                toast("Other exceptions");
             }
         }
 
@@ -368,7 +375,7 @@ public class BankUIDemo {
                 String email = recipientEmail.getText().trim();
                 User recipient = DatabaseSingleton.getDatabase().getUserByEmail(email);
 
-                if (recipient == null){
+                if (recipient == null) {
                     toast("Email not found");
                     recipientAccountSelector.setEnabled(false);
                     recipientAccountSelector.removeAllItems();
@@ -394,8 +401,8 @@ public class BankUIDemo {
             }
         }
 
-        private boolean conductTransfer(){
-            try{
+        private boolean conductTransfer() {
+            try {
 
                 double amount = Double.parseDouble(amountInput.getText());
                 String selected = (String) recipientAccountSelector.getSelectedItem();
@@ -452,39 +459,40 @@ public class BankUIDemo {
             });
             ATM = DatabaseSingleton.getDatabase().getAccountByID("8df41236-c149-4421-83e8-07a4e4618498");
 
-            add(btn("Confirm", () ->info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
+            add(btn("Confirm", () -> info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
         }
 
-        private void WithdrawDeposit(){
+        private void WithdrawDeposit() {
             String selected = (String) box.getSelectedItem();
             double amount = Double.parseDouble(amountInput.getText());
             ExecuteTransactionAction withdrawDepositAction = new ExecuteTransactionAction();
             Transaction transaction;
             String message;
 
-            if (Objects.equals(selected, "Deposit")){
-                    transaction = new Transaction(ATM, profile.getUserAccount(), LocalDateTime.now(), amount);
-                    withdrawDepositAction.setUser(currentUser);
-                    message = "Money Deposited";
+            if (Objects.equals(selected, "Deposit")) {
+                transaction = new Transaction(ATM, profile.getUserAccount(), LocalDateTime.now(), amount);
+                withdrawDepositAction.setUser(currentUser);
+                message = "Money Deposited";
+            } else {
+                transaction = new Transaction(profile.getUserAccount(), ATM, LocalDateTime.now(), amount);
+                withdrawDepositAction.setUser(currentUser);
+                message = "Money Withdrew";
             }
-            else{
-                    transaction = new Transaction(profile.getUserAccount(), ATM, LocalDateTime.now(), amount);
-                    withdrawDepositAction.setUser(currentUser);
-                    message = "Money Withdrew";
-            }
-            try{
+            try {
                 withdrawDepositAction.setTransactionDetails(transaction);
                 withdrawDepositAction.prepare();
                 withdrawDepositAction.execute();
                 toast(message);
 
-            } catch (InsufficientFundsException e){
+            } catch (InsufficientFundsException e) {
                 toast("Insufficient Balance");
-            } catch (InvalidAuthenticationException iae){
+            } catch (InvalidAuthenticationException iae) {
                 toast("Invalid ID");
-            } catch (InvalidInputException iie){
+            } catch (InvalidInputException iie) {
                 toast("Invalid Input");
+            } catch (InvalidAccountException e) {
+                toast("Invalid account");
             }
 
         }
@@ -858,7 +866,7 @@ public class BankUIDemo {
             add(title("User Management"), g(c, 0, 0, 2));
 
             add(btn("Create Accounts", () -> go("admin_user_mgmt_create_account")), g(c, 0, 1, 2));
-            add(btn("Reset Account Passwords", () -> info("Open Reset Passwords")), g(c, 0, 2, 2));
+            add(btn("Reset Account Passwords", () -> go("admin_user_mgmt_update_password")), g(c, 0, 2, 2));
             add(btn("Deactivate Accounts", () -> info("Open Deactivate Accounts")), g(c, 0, 3, 2));
 //            add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 4, 2));
             add(btn("View All Transactions", () -> go("admin_view_transactions")), g(c, 0, 4, 2));
@@ -867,10 +875,10 @@ public class BankUIDemo {
     }
 
     class AdminUpdatePassword extends JPanel {
-        private JTextField emailField;
-        private JPasswordField oldPasswordField;
-        private JPasswordField newPasswordField;
-        private JPasswordField confirmPasswordField;
+        private final UserComboBox userDropDown;
+        private final JPasswordField newPasswordField;
+        private final JPasswordField confirmPasswordField;
+        private ArrayList<User> users = null;
 
         AdminUpdatePassword() {
             super(new GridBagLayout());
@@ -882,14 +890,9 @@ public class BankUIDemo {
             add(title("Update Password"), g(c, 0, 0, 2));
 
             // Email
-            add(new JLabel("Email:"), g(c, 0, 1, 1));
-            emailField = new JTextField(15);
-            add(emailField, g(c, 1, 1, 1));
-
-            // Old Password
-            add(new JLabel("Old Password:"), g(c, 0, 2, 1));
-            oldPasswordField = new JPasswordField(15);
-            add(oldPasswordField, g(c, 1, 2, 1));
+            add(new JLabel("Select Account:"), g(c, 0, 1, 1));
+            userDropDown = new UserComboBox();
+            add(userDropDown, g(c, 1, 1, 1));
 
             // New Password
             add(new JLabel("New Password:"), g(c, 0, 3, 1));
@@ -908,15 +911,108 @@ public class BankUIDemo {
             // Back Button
             add(btn("Back", () -> go("admin")),
                     g(c, 0, 6, 2));
+
+
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    loadAccounts();
+                }
+            });
         }
 
         private void onUpdatePassword() {
-            String email = emailField.getText().trim();
-            String oldPw = new String(oldPasswordField.getPassword());
             String newPw = new String(newPasswordField.getPassword());
             String confirmPw = new String(confirmPasswordField.getPassword());
 
-            // TODO: Add action logic here (AdminUpdatePasswordAction)
+            UpdatePassword action = new UpdatePassword();
+            action.setUser(userDropDown.getSelectedUser());
+            action.setNewPasssword(newPw);
+            action.setConfirmationPassword(confirmPw);
+            try {
+                action.prepare();
+            } catch (InvalidAuthenticationException e) {
+                toast("No permission to update password!");
+                return;
+            } catch (InvalidInputException e) {
+                toast("Password not identical, please input again!");
+                return;
+            }
+            try {
+                action.execute();
+            } catch (InvalidAuthenticationException e) {
+                toast(e.getMessage());
+            } catch (InvalidAccountException e) {
+                toast(e.getMessage());
+            }
+            toast("Password updated!");
+
+
+        }
+
+        private void loadAccounts() {
+            users = DatabaseSingleton.getDatabase().getAllUsers();
+            userDropDown.setUsers(users);
+        }
+
+        static class UserComboBox extends JComboBox<User> {
+            private final DefaultComboBoxModel<User> model;
+
+            public UserComboBox() {
+                super();
+                model = new DefaultComboBoxModel<>();
+                setModel(model);
+
+                setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public java.awt.Component getListCellRendererComponent(
+                            JList<?> list,
+                            Object value,
+                            int index,
+                            boolean isSelected,
+                            boolean cellHasFocus) {
+
+                        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                        if (value instanceof User u) {
+                            setText(getDisplayText(u));
+                        } else {
+                            setText("");
+                        }
+                        return this;
+                    }
+                });
+            }
+
+            /**
+             * Replace all users in the combo box.
+             */
+            public void setUsers(List<User> users) {
+                model.removeAllElements();
+                if (users == null) return;
+                for (User u : users) {
+                    model.addElement(u);
+                }
+                if (model.getSize() > 0) {
+                    setSelectedIndex(0);
+                }
+            }
+
+            /**
+             * Returns the User currently selected, or null.
+             */
+            public User getSelectedUser() {
+                Object sel = getSelectedItem();
+                return (sel instanceof User) ? (User) sel : null;
+            }
+
+            /**
+             * Helper to decide what text gets shown for each User in the dropdown.
+             * Adjust this for your actual User fields.
+             */
+            private String getDisplayText(User u) {
+                return u.getEmail();
+            }
+
         }
     }
 
@@ -1013,11 +1109,7 @@ public class BankUIDemo {
                 default -> throw new IllegalStateException("Unexpected value: " + roleField);
             };
             newUser.setEmail(email);
-            try {
-                newUser.setPassword(password);
-            } catch (InvalidInputException e) {
-                throw new RuntimeException(e);
-            }
+            newUser.setPassword(password);
             action.setUser(newUser);
             try {
                 action.execute();

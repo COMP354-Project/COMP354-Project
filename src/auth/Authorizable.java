@@ -2,13 +2,14 @@ package auth;
 
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
+import auth.exceptions.LackOfClearanceException;
 import bank.Account;
 import core.Action;
 import core.exceptions.InvalidAccountException;
 
 public interface Authorizable {
 
-    enum AUTH_STATUS{
+    enum AUTH_STATUS {
         AUTHORIZED,
         NOT_AUTHORIZED;
     }
@@ -16,12 +17,13 @@ public interface Authorizable {
     /**
      * Authentify the user by matching email and password within database.
      * Then the user has permission to utilize various actions within the permissions of his role.
+     *
      * @param user    User account.
      * @param account A banking account.
      * @throws InvalidAuthenticationException Throws when user enters the wrong identification info (email,password).
      * @see Action
      */
-    void authorize(User user, Account account) throws InvalidAuthenticationException, InvalidAccountException;
+    void authorize(User user, Account account) throws InvalidAuthenticationException, LackOfClearanceException, InvalidAccountException;
 
     /**
      * @return Return "true" is the user has already inputted the information and is authorized to execute an action.

@@ -3,6 +3,7 @@ package core;
 import auth.core.Customer;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
+import auth.exceptions.LackOfClearanceException;
 import core.exceptions.InsufficientFundsException;
 import core.exceptions.InvalidAccountException;
 import core.exceptions.InvalidInputException;
@@ -37,7 +38,6 @@ public class ExecuteTransactionAction extends Action {
         this.branch = branch;
     }
 
-
     //Preparation phase
     @Override
     public void prepare() throws InvalidAuthenticationException, TimeOutException, InvalidInputException {
@@ -48,24 +48,6 @@ public class ExecuteTransactionAction extends Action {
         if (transactionDetails.getSender() == transactionDetails.getReceiver()) { //checks for sending money to the same account (should work for multiple accounts of different types)
             throw new InvalidInputException();
         }
-
-        //Flag check
-        // Authorize the action
-        // If not authorized, this line of code will throw exception
-
-        try {
-            authorize(user, transactionDetails.getSender());
-        } catch (InvalidAccountException e) {
-            // The edge case, where user select an account but the account gets deleted.
-            throw new InvalidInputException();
-        }
-
-
-        // Check if this line needs
-        // TODO: delete if the exception throws correctly #MU
-//        if (authorized != AUTH_STATUS.AUTHORIZED){ //checks for the state of the authorization
-//            throw new IllegalStateException();
-//        }
 
         if (transactionDetails.getAmount() <= 0) {
             throw new InsufficientFundsException();
@@ -79,7 +61,21 @@ public class ExecuteTransactionAction extends Action {
     }
 
     @Override
-    public void execute() {
+    public void execute() throws InvalidAuthenticationException, InvalidAccountException {
+        //Flag check
+        // Authorize the action
+        // If not authorized, this line of code will throw exception
+        if (!isAuthorized()) {
+            try {
+                authorize(user, transactionDetails.getSender());
+            } catch (InvalidAccountException e) {
+                // The edge case, where user select an account but the account gets deleted.
+                throw new InvalidAccountException();
+            } catch (LackOfClearanceException e) {
+                throw new LackOfClearanceException();
+            }
+        }
+
         transactionDetails.getSender().addTransaction(transactionDetails); //uncomment when needed.
         transactionDetails.getReceiver().addTransaction(transactionDetails);
         db.addTransaction(transactionDetails);
@@ -87,7 +83,7 @@ public class ExecuteTransactionAction extends Action {
     }
 
     @Override
-    public void authorize(User user, Account account) throws InvalidAuthenticationException, InvalidAccountException {
+    public void authorize(User user, Account account) throws InvalidAuthenticationException, LackOfClearanceException, InvalidAccountException {
         if (user == null) {
             throw new InvalidAuthenticationException();
         }
@@ -99,7 +95,8 @@ public class ExecuteTransactionAction extends Action {
         if (user instanceof Customer) {
             if (account.getCustomer().equals(user)) {
                 authorized = AUTH_STATUS.AUTHORIZED;
-                return;
+            } else {
+                throw new LackOfClearanceException();
             }
         } else {
             throw new InvalidAuthenticationException();

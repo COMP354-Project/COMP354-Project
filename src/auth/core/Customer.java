@@ -17,13 +17,7 @@ public class Customer extends User {
 
     public Customer(String email, String password, String firstName, String lastName) {
         setEmail(email);
-        try {
-            setPassword(password);
-        } catch (InvalidInputException e) {
-            // This should never happen as password is already validated before creating a Customer
-            System.out.println("Unexpected error: invalid password format.");
-        }
-//        setPassword(password);
+        setPassword(password);
         setFirstName(firstName);
         setLastName(lastName);
     }
@@ -66,7 +60,7 @@ public class Customer extends User {
 
     public String toString() {
         return super.toString() + "\nFirst Name: " + firstName +
-               "\nLast Name: " + lastName;
+                "\nLast Name: " + lastName;
     }
 }
 
