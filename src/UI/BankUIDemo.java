@@ -365,6 +365,8 @@ public class BankUIDemo {
                 toast("System Timeout");
             } catch (InvalidInputException e) {
                 toast("Invalid Input");
+            }catch (Exception e){
+                toast("Other exceptions");
             }
         }
 
