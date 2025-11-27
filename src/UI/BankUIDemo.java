@@ -16,7 +16,6 @@ import auth.core.Admin;
 import auth.core.Customer;
 import auth.core.Teller;
 import auth.core.User;
-import auth.exceptions.DuplicateAccountException;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
 
@@ -102,14 +101,16 @@ public class BankUIDemo {
         // teller
         root.add(new TellerDashboard(), "teller");
         root.add(new TellerManageCustomers(), "teller_manage");
-        root.add(new ViewBranchAccounts(), "teller_view_accounts");
+        root.add(new TellerViewAccounts(), "teller_view_accounts");
+        root.add(new TellerViewTransactions(), "teller_view_transactions");
 
         // admin
         root.add(new AdminDashboard(), "admin");
         root.add(new AdminUserMgmt(), "admin_user_mgmt");
         root.add(new AdminCreateAccount(), "admin_user_mgmt_create_account");
-        root.add(new AdminViewTransactions(), "admin_view_transactions");
+        root.add(new AdminViewTransactions(), "admin_user_mgmt_view_transactions");
         root.add(new AdminUpdatePassword(), "admin_user_mgmt_update_password");
+        root.add(new AdminDeactivateAccount(), "admin_user_mgmt_deactivate_account");
 
         // Fund transfer & Withdraw/Deposit
         root.add(new FundTransferUI(), "fund_transfer");
@@ -352,8 +353,8 @@ public class BankUIDemo {
             }
         }
 
-        //This part currently is redundant
-        //Needs the proper fixes before it can work for many accounts of the same user
+
+        //Needs the proper fixes before it can work for many accounts of the same user (currently 1-1 relation)
         private void fetchSenderAccount() {
             profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
@@ -365,6 +366,8 @@ public class BankUIDemo {
                 toast("System Timeout");
             } catch (InvalidInputException e) {
                 toast("Invalid Input");
+            }catch (Exception e){
+                toast("Other exceptions");
             }
         }
 
@@ -636,16 +639,16 @@ public class BankUIDemo {
             add(title("Manage Customers"), g(c, 0, 0, 2));
 
             add(btn("View Customer Information", () -> go("teller_view_accounts")), g(c, 0, 1, 2));
-            add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 2, 2));
+            add(btn("View All Transactions", () -> go("teller_view_transactions")), g(c, 0, 2, 2));
             add(btn("Back", () -> go("teller")), g(c, 0, 3, 2));
         }
     }
 
-    class ViewBranchAccounts extends JPanel {
+    class TellerViewAccounts extends JPanel {
         private JComboBox<String> accountDropdown;
         private JLabel accountDetailsLabel;
 
-        ViewBranchAccounts() {
+        TellerViewAccounts() {
             super(new GridBagLayout());
             setBorder(pad());
             GridBagConstraints c = gbc();
@@ -729,6 +732,114 @@ public class BankUIDemo {
         }
     }
 
+    class TellerViewTransactions extends JPanel {
+        final String titleText = "Branch Transactions";
+        final BranchTransactionTable tableModel = new BranchTransactionTable();
+        final JTable viewTable = new JTable(tableModel);
+        protected ViewTransactionAction viewTransactionAction;
+
+        TellerViewTransactions() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+
+            // Title
+            JLabel title = new JLabel(this.titleText);
+            title.setFont(title.getFont().deriveFont(Font.BOLD, 20f));
+            add(title, g(c, 0, 0, 2));
+
+            // Table
+            viewTable.setFillsViewportHeight(true);
+            viewTable.setAutoCreateRowSorter(true);
+
+            JScrollPane scroll = new JScrollPane(viewTable);
+            GridBagConstraints tableC = g(c, 0, 1, 2);
+            tableC.weighty  = 1;
+            tableC.fill = GridBagConstraints.BOTH;
+            add(scroll, tableC);
+
+            //add(btn("Back", () -> go("teller_manage")), g(c, 0, 2, 2));
+
+            // Footer Buttons
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton backBtn = new JButton("Back");
+            backBtn.addActionListener(e -> go("teller_manage"));
+            actions.add(backBtn);
+            add(actions, g(c, 0, 2, 2));
+
+            // Fetch trigger
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    loadBranchTransactions();
+                }
+            });
+        }
+        private void loadBranchTransactions() {
+            try {
+                String tellerBranchID = ((Teller)currentUser).getBranchID();
+                Branch tellerBranch = DatabaseSingleton.getDatabase().getBranchByID(tellerBranchID);
+                ArrayList<Account> accounts = DatabaseSingleton.getDatabase()
+                        .getAccountsByBranch(tellerBranchID);
+                List<Transaction> allTransactions = new ArrayList<>();
+
+                for (Account account : accounts) {
+                    viewTransactionAction = new ViewTransactionAction();
+                    viewTransactionAction.setUser(currentUser);
+                    viewTransactionAction.setAccountViewed(account);
+                    viewTransactionAction.execute();
+
+                    // Filter transactions - only add if account is in branch
+                    for (Transaction t : viewTransactionAction.getListOfTransactions()) {
+                        Account transactionAccount = t.getSender();
+                        if (transactionAccount != null && tellerBranch.getAccountIds().contains(transactionAccount.getAccountID())) {
+                            allTransactions.add(t);
+                        }
+                    }
+                }
+
+                tableModel.setTransactions(allTransactions);
+            } catch (InvalidAuthenticationException | InvalidAccountException e) {
+                toast("Error loading accounts: " + e.getMessage());
+            }
+        }
+
+        class BranchTransactionTable extends AbstractTableModel {
+            private final String[] columns = {"Transaction ID", "Sender ID", "Amount", "Time"};
+            private List<Transaction> data = new ArrayList<>();
+
+            public void setTransactions(List<Transaction> data) {
+                this.data = data;
+                fireTableDataChanged();
+            }
+
+            @Override
+            public int getRowCount() {
+                return data.size();
+            }
+
+            @Override
+            public int getColumnCount() {
+                return columns.length;
+            }
+
+            @Override
+            public String getColumnName(int column) {
+                return columns[column];
+            }
+
+            @Override
+            public Object getValueAt(int rowIndex, int columnIndex) {
+                Transaction t = data.get(rowIndex);
+                return switch (columnIndex) {
+                    case 0 -> t.getId();
+                    case 1 -> t.getSender().getAccountID();
+                    case 2 -> t.getAmount();
+                    case 3 -> t.getTimeOfTransaction();
+                    default -> "";
+                };
+            }
+        }
+    }
     // ---------- Admin ----------
 
     // YO YO YO CHECK IT OUT, IT'S THE OMINIPOTENT ADMIN USER
@@ -757,9 +868,8 @@ public class BankUIDemo {
 
             add(btn("Create Accounts", () -> go("admin_user_mgmt_create_account")), g(c, 0, 1, 2));
             add(btn("Reset Account Passwords", () -> go("admin_user_mgmt_update_password")), g(c, 0, 2, 2));
-            add(btn("Deactivate Accounts", () -> info("Open Deactivate Accounts")), g(c, 0, 3, 2));
-//            add(btn("View All Transactions", () -> info("Open All Transactions")), g(c, 0, 4, 2));
-            add(btn("View All Transactions", () -> go("admin_view_transactions")), g(c, 0, 4, 2));
+            add(btn("Deactivate Account", () -> go("admin_user_mgmt_deactivate_account")), g(c, 0, 3, 2));
+            add(btn("View All Transactions", () -> go("admin_user_mgmt_view_transactions")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("admin")), g(c, 0, 5, 2));
         }
     }
@@ -1016,6 +1126,142 @@ public class BankUIDemo {
         private void resetFields() {
             passwordField.setText("");
             emailField.setText("");
+        }
+    }
+
+    class AdminDeactivateAccount extends JPanel {
+        private JTextField emailField;
+        private JLabel emailLabel;
+        private JLabel accountLabel;
+        private final AccountsComboBox accountsDropDown = new AccountsComboBox();
+        protected DeactivateAccountAction deactivateAccountAction;
+        private ArrayList<Account> accounts;
+        private Account selectedAccount;
+        AdminDeactivateAccount() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Deactivate Account"), g(c, 0, 0, 2));
+
+            // UI components for this page:
+            // - A text field for user input (the email of the account to deactivate)
+            // - A dropdown to select accounts associated with that email (customer)
+            // - A "Deactivate" button to perform the action
+            emailField = new JTextField(22);
+            emailLabel = new JLabel("Customer Email: ");
+            add(emailLabel, g(c, 0, 1, 1));
+            add(emailField, g(c, 1, 1, 1));
+            add(btn("Search", () -> {
+                String email = emailField.getText().trim();
+                loadAccounts(email);
+            }), g(c, 0, 2, 2));
+
+            accountLabel = new JLabel("Select Account: ");
+            add(accountLabel, g(c, 0, 3, 1));
+            add(accountsDropDown, g(c, 1, 3, 1));
+
+            add(btn("Deactivate Account", () -> {
+                selectedAccount = accountsDropDown.getSelectedAccount();
+                if (selectedAccount.getAccountStatus() == Account.AccountStatus.INACTIVE){
+                    toast("Account has already been deactivated.");
+                    resetFields();
+                    return;
+                }
+                if (selectedAccount == null) {
+                    toast("No account selected!");
+                    resetFields();
+                    return;
+                }
+                deactivateAccountAction = new DeactivateAccountAction(currentUser, selectedAccount);
+                try {
+                    deactivateAccountAction.execute();
+                    info("Account Deactivated!");
+                } catch (InvalidAuthenticationException e) {
+                    toast("No permission to deactivate account!");
+                } catch (InvalidAccountException e) {
+                    toast("Account deactivation failed!");
+                }
+                resetFields();
+            }), g(c, 0, 4, 2));
+            add(btn("Back", () -> {
+                go("admin_user_mgmt");
+                resetFields();
+            }), g(c, 0, 5, 2));
+        }
+
+        private void loadAccounts(String email) {
+            accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
+            accountsDropDown.setAccounts(accounts);
+            revalidate();
+            repaint();
+        }
+
+        private void resetFields() {
+            emailField.setText("");
+            accountsDropDown.setAccounts(new ArrayList<>());
+        }
+
+        static class AccountsComboBox extends JComboBox<Account> {
+            private final DefaultComboBoxModel<Account> model;
+
+            public AccountsComboBox() {
+                super();
+                model = new DefaultComboBoxModel<>();
+                setModel(model);
+
+                setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public java.awt.Component getListCellRendererComponent(
+                            JList<?> list,
+                            Object value,
+                            int index,
+                            boolean isSelected,
+                            boolean cellHasFocus) {
+
+                        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                        if (value instanceof Account a) {
+                            setText(getDisplayText(a));
+                        } else {
+                            setText("");
+                        }
+                        return this;
+                    }
+                });
+            }
+
+            /**
+             * Replace all accounts in the combo box.
+             */
+            public void setAccounts(List<Account> accounts) {
+                model.removeAllElements();
+                if (accounts == null) return;
+                for (Account a : accounts) {
+                    model.addElement(a);
+                }
+                if (model.getSize() > 0) {
+                    setSelectedIndex(0);
+                }
+            }
+
+            /**
+             * Returns the Account currently selected, or null.
+             */
+            public Account getSelectedAccount() {
+                Object sel = getSelectedItem();
+                return (sel instanceof Account) ? (Account) sel : null;
+            }
+
+            /**
+             * Helper to decide what text gets shown for each Account in the dropdown.
+             * Adjust this for your actual Account fields.
+             */
+            private String getDisplayText(Account a) {
+                return a.getAccountID() + " - " +
+                        a.getCustomer().getFirstName() + " " +
+                        a.getCustomer().getLastName() + " (" +
+                        a.getClass().getSimpleName() + ") - " + a.getAccountStatus();
+            }
         }
     }
 
