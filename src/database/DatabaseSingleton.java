@@ -293,6 +293,15 @@ public class DatabaseSingleton {
     }
 
     /**
+     * Retrieve all users in the database.
+     *
+     * @return An ArrayList of all User objects in the database.
+     */
+    public ArrayList<User> getAllUsers() {
+        return this.userData.getAllUsers();
+    }
+
+    /**
      * Filter transactions for a given account that occurred within the specified date range.
      *
      * @param accountID The ID of the account whose transactions are to be filtered.
@@ -775,6 +784,19 @@ class UserData implements FileProcessor {
         }
         TransactionData.getTransactionData().save();
         this.save(); // Save changes to file
+    }
+
+    /**
+     * Retrieve all users in the database.
+     *
+     * @return An ArrayList of all User objects in the database.
+     */
+    public ArrayList<User> getAllUsers() {
+        if (this.users.isEmpty()) {
+            System.err.println("No users have been added.");
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(this.users.values());
     }
 
     /**
