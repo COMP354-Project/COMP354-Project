@@ -285,6 +285,15 @@ public class DatabaseSingleton {
     }
 
     /**
+     * Retrieve all transactions in the database.
+     *
+     * @return An ArrayList of all Transaction objects in the database.
+     */
+    public ArrayList<Transaction> getTransactions() {
+        return this.transactionData.getAllTransactions();
+    }
+
+    /**
      * Filter transactions for a given account that occurred within the specified date range.
      *
      * @param accountID The ID of the account whose transactions are to be filtered.
@@ -837,7 +846,8 @@ class TransactionData implements FileProcessor {
 
     /**
      * Print all transactions in the database.
-     * */
+     *
+     */
     public void printTransactions() {
         if (this.transactions.isEmpty()) {
             System.out.println("No transactions found in the database.");
@@ -850,10 +860,12 @@ class TransactionData implements FileProcessor {
 
     /**
      * Retrieve a transaction by its ID.
+     *
      * @param transactionID The ID of the transaction to be retrieved.
      * @return The Transaction object with the specified ID.
      * @throws TransactionNotFoundException if the transaction with the specified ID is not found.
-     * */
+     *
+     */
     public Transaction getTransactionById(String transactionID) throws TransactionNotFoundException {
         Transaction res = this.transactions.get(transactionID);
         if (res != null) return res;
@@ -862,8 +874,10 @@ class TransactionData implements FileProcessor {
 
     /**
      * Add a new transaction to the database. This method should be invoked every time an Action related to creating a transaction is performed.
+     *
      * @param transaction The Transaction object to be added.
-     * */
+     *
+     */
     public void addTransaction(Transaction transaction) throws TransactionAlreadyExistedException {
         if (this.transactions.containsKey(transaction.getId())) {
             throw new TransactionAlreadyExistedException("Transaction with ID " + transaction.getId() + " already exists."
@@ -875,10 +889,12 @@ class TransactionData implements FileProcessor {
 
     /**
      * Delete an existing transaction from the database. This method should be invoked every time an Action related to deleting a transaction is performed.
+     *
      * @param transaction The Transaction object to be deleted.
      * @return true if the transaction was successfully deleted, false if the transaction does not exist.
-     * */
-    public boolean deleteTransaction(Transaction transaction){
+     *
+     */
+    public boolean deleteTransaction(Transaction transaction) {
         if (!this.transactions.containsKey(transaction.getId())) {
             return false;
         }
@@ -889,11 +905,13 @@ class TransactionData implements FileProcessor {
 
     /**
      * Retrieve all transactions for a given account ID.
+     *
      * @param accountID The ID of the account whose transactions are to be retrieved.
      * @return An ArrayList of Transaction objects associated with the given account ID.
      * @throws TransactionNotFoundException if no transactions are found for the given account ID.
-     * @throws InvalidAccountIDException if the provided account ID is invalid.
-     * */
+     * @throws InvalidAccountIDException    if the provided account ID is invalid.
+     *
+     */
     public ArrayList<Transaction> getTransactionsByAccountId(String accountID) throws TransactionNotFoundException, InvalidAccountIDException {
         try {
             Account account = AccountData.getAccountData().getAccountById(accountID);
@@ -915,13 +933,15 @@ class TransactionData implements FileProcessor {
 
     /**
      * Filter transactions for a given account that occurred within the specified date range.
+     *
      * @param accountID The ID of the account whose transactions are to be filtered.
-     * @param start The start LocalDateTime of the date range.
-     * @param end The end LocalDateTime of the date range.
+     * @param start     The start LocalDateTime of the date range.
+     * @param end       The end LocalDateTime of the date range.
      * @return An ArrayList of Transaction objects that occurred within the specified date range.
      * @throws TransactionNotFoundException if no transactions are found within the specified date range.
-     * */
-    public ArrayList<Transaction> filterTransactionsByDateRange(String accountID, LocalDateTime start, LocalDateTime end) throws TransactionNotFoundException{
+     *
+     */
+    public ArrayList<Transaction> filterTransactionsByDateRange(String accountID, LocalDateTime start, LocalDateTime end) throws TransactionNotFoundException {
         ArrayList<Transaction> result = new ArrayList<>();
         for (Transaction transaction : this.transactions.values()) {
             if ((transaction.getSender().getAccountID().equals(accountID) ||
@@ -940,12 +960,14 @@ class TransactionData implements FileProcessor {
 
     /**
      * Filter transactions for a given account that occurred after the specified time.
+     *
      * @param accountID The ID of the account whose transactions are to be filtered.
-     * @param time The LocalDateTime after which transactions should be included.
+     * @param time      The LocalDateTime after which transactions should be included.
      * @return An ArrayList of Transaction objects that occurred after the specified time.
      * @throws TransactionNotFoundException if no transactions are found after the specified time.
-     * */
-    public ArrayList<Transaction> filterTransactionsByTime(String accountID, LocalDateTime time) throws TransactionNotFoundException{
+     *
+     */
+    public ArrayList<Transaction> filterTransactionsByTime(String accountID, LocalDateTime time) throws TransactionNotFoundException {
         ArrayList<Transaction> result = new ArrayList<>();
         for (Transaction transaction : this.transactions.values()) {
             if ((transaction.getSender().getAccountID().equals(accountID) ||
@@ -963,9 +985,11 @@ class TransactionData implements FileProcessor {
 
     /**
      * Update an existing transaction in the database. This method should be invoked every time an Action related to updating a transaction is performed.
+     *
      * @param transaction The Transaction object with updated information.
-     * @param status The new status to be set for the transaction.
-     * */
+     * @param status      The new status to be set for the transaction.
+     *
+     */
     public void updateTransactionStatus(Transaction transaction, Transaction.TransactionStatus status) throws TransactionNotFoundException {
         if (!this.transactions.containsKey(transaction.getId())) {
             throw new TransactionNotFoundException("Transaction with ID " + transaction.getId() + " does not exist. " +
@@ -974,6 +998,20 @@ class TransactionData implements FileProcessor {
         transaction.setStatus(status);
         this.transactions.put(transaction.getId(), transaction);
         this.save(); // Save changes to file
+    }
+
+    /**
+     * Retrieve all transactions in the database.
+     *
+     * @return An ArrayList of all Transaction objects in the database.
+     *
+     */
+    public ArrayList<Transaction> getAllTransactions() {
+        if (this.transactions.isEmpty()) {
+            System.err.println("No transactions found in the database.");
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(this.transactions.values());
     }
 }
 
