@@ -87,5 +87,12 @@
     "firstName": "Jia Hao",
     "lastName": "To",
     "type": "Customer"
+  },
+  "atm@bank.com": {
+    "email": "atm@bank.com",
+    "password": "freemoney",
+    "firstName": "ATM",
+    "lastName": "Machine",
+    "type": "Customer"
   }
 }

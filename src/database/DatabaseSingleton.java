@@ -284,6 +284,24 @@ public class DatabaseSingleton {
     }
 
     /**
+     * Retrieve all transactions in the database.
+     *
+     * @return An ArrayList of all Transaction objects in the database.
+     */
+    public ArrayList<Transaction> getTransactions() {
+        return this.transactionData.getAllTransactions();
+    }
+
+    /**
+     * Retrieve all users in the database.
+     *
+     * @return An ArrayList of all User objects in the database.
+     */
+    public ArrayList<User> getAllUsers() {
+        return this.userData.getAllUsers();
+    }
+
+    /**
      * Filter transactions for a given account that occurred within the specified date range.
      *
      * @param accountID The ID of the account whose transactions are to be filtered.
@@ -769,6 +787,19 @@ class UserData implements FileProcessor {
     }
 
     /**
+     * Retrieve all users in the database.
+     *
+     * @return An ArrayList of all User objects in the database.
+     */
+    public ArrayList<User> getAllUsers() {
+        if (this.users.isEmpty()) {
+            System.err.println("No users have been added.");
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(this.users.values());
+    }
+
+    /**
      * Print all users in the database.
      *
      */
@@ -999,6 +1030,20 @@ class TransactionData implements FileProcessor {
         transaction.setStatus(status);
         this.transactions.put(transaction.getId(), transaction);
         this.save(); // Save changes to file
+    }
+
+    /**
+     * Retrieve all transactions in the database.
+     *
+     * @return An ArrayList of all Transaction objects in the database.
+     *
+     */
+    public ArrayList<Transaction> getAllTransactions() {
+        if (this.transactions.isEmpty()) {
+            System.err.println("No transactions found in the database.");
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(this.transactions.values());
     }
 }
 
