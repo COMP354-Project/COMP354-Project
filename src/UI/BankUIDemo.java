@@ -97,6 +97,8 @@ public class BankUIDemo {
         root.add(new CustomerAccountSummary(), "cust_account_summary");
         //customer personal info
         root.add(new CustomerProfile(), "cust_profile");
+        root.add(new CustomerProfileUpdate(), "cust_profile_update");
+        root.add(new CustomerPasswordUpdate(), "cust_password_update");
 
 
         // teller
@@ -607,11 +609,96 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("Personal Profile"), g(c, 0, 0, 2));
 
-            add(btn("Update Personal Information", () -> info("Open Update Info")), g(c, 0, 1, 2));
-            add(btn("Change Password", () -> info("Open Change Password")), g(c, 0, 2, 2));
+            add(btn("Update Personal Information", () -> go("cust_profile_update")), g(c, 0, 1, 2));
+            add(btn("Change Password", () -> go("cust_password_update")), g(c, 0, 2, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 3, 2));
         }
     }
+
+    class CustomerProfileUpdate extends JPanel{
+        CustomerProfileUpdate() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Personal Profile Update"), g(c, 0, 0, 2));
+
+
+            add(btn("Back", () -> go("cust_profile")), g(c, 0, 3, 2));
+        }
+    }
+
+
+    class CustomerPasswordUpdate extends JPanel{
+        private final JPasswordField currentPasswordField;
+        private final JPasswordField newPasswordField;
+        private final JPasswordField confirmPasswordField;
+        private ArrayList<User> users = null;
+
+        CustomerPasswordUpdate() {
+            super(new GridBagLayout());
+            setBorder(pad());
+            GridBagConstraints c = gbc();
+            add(title("Change Password"), g(c, 0, 0, 2));
+
+            add(new JLabel("Current Password:"), g(c, 0, 2, 1));
+            currentPasswordField = new JPasswordField(15);
+            add(currentPasswordField, g(c, 1, 2, 1));
+
+            // New Password
+            add(new JLabel("New Password:"), g(c, 0, 3, 1));
+            newPasswordField = new JPasswordField(15);
+            add(newPasswordField, g(c, 1, 3, 1));
+
+            // Confirm Password
+            add(new JLabel("Confirm Password:"), g(c, 0, 4, 1));
+            confirmPasswordField = new JPasswordField(15);
+            add(confirmPasswordField, g(c, 1, 4, 1));
+
+            // Update Password Button
+            add(btn("Update Password", this::onUpdatePassword),
+                    g(c, 0, 5, 2));
+
+
+            add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
+        }
+
+        private void onUpdatePassword() {
+            String UserInput = new String(currentPasswordField.getPassword());
+            if (UserInput.equals(currentUser.getPassword())){
+                String newPw = new String(newPasswordField.getPassword());
+                String confirmPw = new String(confirmPasswordField.getPassword());
+
+
+                UpdatePassword action = new UpdatePassword();
+                action.setUser(currentUser);
+                action.setNewPasssword(newPw);
+                action.setConfirmationPassword(confirmPw);
+                try {
+                    action.prepare();
+                } catch (InvalidAuthenticationException e) {
+                    toast("No permission to update password!");
+                    return;
+                } catch (InvalidInputException e) {
+                    toast("Password not identical, please input again!");
+                    return;
+                }
+                try {
+                    action.execute();
+                } catch (InvalidAuthenticationException e) {
+                    toast(e.getMessage());
+                } catch (InvalidAccountException e) {
+                    toast(e.getMessage());
+                }
+                toast("Password updated!");
+
+            }
+            else{
+                toast("Invalid Current Password");
+            }
+        }
+
+    }
+
 
     // ---------- Teller ----------
     class TellerDashboard extends JPanel {
