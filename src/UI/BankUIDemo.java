@@ -68,9 +68,11 @@ public class BankUIDemo {
     protected User currentUser;
     private LoginPage loginPage;
     private ProfileAction profile;
+
+    //Unused currently (but meant for the fund transfer with multiple account under the user
     private Account currentAccount;
 
-    //Atm/GAB variables
+    //For the ATM
     private static Account ATM;
 
     public static void main(String[] args) {
