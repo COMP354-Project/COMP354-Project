@@ -92,17 +92,18 @@ public class DatabaseSingleton {
 
     /**
      * Retrieve account(s) by their email. Since a user can have multiple accounts, this method returns a list of accounts.
+     *
      * @param email The email of the account to be retrieved.
      * @return The ArrayList of Account objects with the specified email, or null if not found.
-     * */
+     *
+     */
     public ArrayList<Account> getAccountsByEmail(String email) {
         // Implementation to get account by username
         ArrayList<Account> res = null;
         try {
             res = this.accountData.getAccountsByEmail(email);
             System.out.println(res.size() + " accounts with email " + email + " retrieved successfully.");
-        }
-        catch (InvalidEmailException e) {
+        } catch (InvalidEmailException e) {
             System.out.println(e.getMessage());
         }
         return res;
@@ -205,15 +206,13 @@ public class DatabaseSingleton {
 
     /**
      * Add a new user to the database. This method should be invoked every time an Action related to creating a user is performed.
+     *
      * @param user The User object to be added.
-     * */
-    public void addUser(User user) {
-        try {
-            this.userData.addUser(user);
-            System.out.println("User added to database successfully.");
-        } catch (UserAlreadyExistedException e) {
-            System.out.println(e.getMessage());
-        }
+     *
+     */
+    public void addUser(User user) throws UserAlreadyExistedException {
+        this.userData.addUser(user);
+        System.out.println("User added to database successfully.");
     }
 
     /**
@@ -349,8 +348,10 @@ public class DatabaseSingleton {
     /**
      * Update an existing user in the database. This method should be invoked every time an Action related to updating a user information is performed.
      * IMPORTANT: This method does NOT update the email of the user. To update email, please use updateUserEmail method.
+     *
      * @param user The User object with updated information.
-     * */
+     *
+     */
     public void updateUserInfo(User user) {
         try {
             this.userData.updateUserInfo(user);
@@ -363,9 +364,11 @@ public class DatabaseSingleton {
     /**
      * Update the email of an existing user in the database. This method should be invoked every time an Action related to updating a user's email is performed.
      * IMPORTANT: This method updates the email of the user across all related accounts and transactions. Use updateUserInfo method to update other user information.
+     *
      * @param oldEmail The current email of the user.
      * @param newEmail The new email to be set for the user.
-     * */
+     *
+     */
     public void updateUserEmail(String oldEmail, String newEmail) {
         try {
             this.userData.updateUserEmail(oldEmail, newEmail);
@@ -405,14 +408,16 @@ public class DatabaseSingleton {
 
     /**
      * Print all users in the database.
-     * */
+     *
+     */
     public void printUsers() {
         this.userData.printUsers();
     }
 
     /**
      * Print all branches in the database.
-     * */
+     *
+     */
     public void printBranches() {
         this.branchData.printBranches();
     }
@@ -426,7 +431,8 @@ class AccountData implements FileProcessor {
     private static AccountData ad;
     private static final String PATH = "src/database/bank_data_files/account.json";
     HashMap<String, Account> accounts;
-    private static final Type a_type = new TypeToken<HashMap<String, Account>>() {}.getType();
+    private static final Type a_type = new TypeToken<HashMap<String, Account>>() {
+    }.getType();
 
     private AccountData() {
         this.load();
@@ -611,7 +617,8 @@ class UserData implements FileProcessor {
     private static UserData rd;
     private static final String PATH = "src/database/bank_data_files/user.json";
     HashMap<String, User> users;
-    private static final Type u_type = new TypeToken<HashMap<String, User>>() {}.getType();
+    private static final Type u_type = new TypeToken<HashMap<String, User>>() {
+    }.getType();
 
     private UserData() {
         this.load();
@@ -632,8 +639,7 @@ class UserData implements FileProcessor {
             fr = new FileReader(PATH);
             this.users = getGson().fromJson(fr, u_type);
             fr.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("Error reading from file: " + e.getMessage());
         }
 
@@ -651,8 +657,7 @@ class UserData implements FileProcessor {
             fw = new FileWriter(PATH);
             getGson().toJson(this.users, u_type, fw);
             fw.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());
         }
     }
@@ -699,9 +704,11 @@ class UserData implements FileProcessor {
     /**
      * Update the email of an existing user in the database. This method should be invoked every time an Action related to updating a user's email is performed.
      * IMPORTANT: This method updates the email of the user across all related accounts and transactions. Use updateUserInfo method to update other user information.
+     *
      * @param oldEmail The current email of the user.
      * @param newEmail The new email to be set for the user.
-     * */
+     *
+     */
     public void updateUserEmail(String oldEmail, String newEmail) throws UserNotFoundException, UserAlreadyExistedException {
         if (!this.users.containsKey(oldEmail)) {
             throw new UserNotFoundException("User with email " + oldEmail + " does not exist. " +
@@ -739,8 +746,10 @@ class UserData implements FileProcessor {
     /**
      * Update an existing user in the database. This method should be invoked every time an Action related to updating a user information is performed.
      * IMPORTANT: This method does NOT update the email of the user. To update email, please use updateUserEmail method.
+     *
      * @param user The User object with updated information.
-     * */
+     *
+     */
     public void updateUserInfo(User user) throws UserNotFoundException {
         if (!this.users.containsKey(user.getEmail())) {
             throw new UserNotFoundException("User with email " + user.getEmail() + " does not exist. " +
@@ -770,7 +779,8 @@ class UserData implements FileProcessor {
 
     /**
      * Print all users in the database.
-     * */
+     *
+     */
     public void printUsers() {
         if (this.users.isEmpty()) {
             System.out.println("No users found in the database.");
@@ -1017,8 +1027,9 @@ class TransactionData implements FileProcessor {
 
 /**
  * BranchData class implementing FileProcessor interface
- * */
-class BranchData implements FileProcessor{
+ *
+ */
+class BranchData implements FileProcessor {
     private static BranchData bd;
     private static final String PATH = "src/database/bank_data_files/branch.json";
     private HashMap<String, Branch> branches;
@@ -1075,10 +1086,12 @@ class BranchData implements FileProcessor{
 
     /**
      * Retrieve a branch by its ID.
+     *
      * @param branchID The ID of the branch to be retrieved.
      * @return The Branch object with the specified ID.
      * @throws BranchNotFoundException if the branch with the specified ID is not found.
-     * */
+     *
+     */
     public Branch getBranchByID(String branchID) throws BranchNotFoundException {
         Branch res = this.branches.get(branchID);
         if (res != null) return res;
@@ -1087,7 +1100,8 @@ class BranchData implements FileProcessor{
 
     /**
      * Print all branches in the database.
-     * */
+     *
+     */
     public void printBranches() {
         if (this.branches.isEmpty()) {
             System.out.println("No branches found in the database.");
@@ -1100,8 +1114,10 @@ class BranchData implements FileProcessor{
 
     /**
      * Add a new branch to the database. This method should be invoked every time an Action related to creating a branch is performed.
+     *
      * @param branch The Branch object to be added.
-     * */
+     *
+     */
     public void addBranch(Branch branch) throws BranchAlreadyExistedException {
         if (this.branches.containsKey(branch.getId())) {
             throw new BranchAlreadyExistedException("Branch with ID " + branch.getId() + " already exists."
@@ -1113,8 +1129,10 @@ class BranchData implements FileProcessor{
 
     /**
      * Update an existing branch in the database. This method should be invoked every time an Action related to updating a branch is performed.
+     *
      * @param branch The Branch object with updated information.
-     * */
+     *
+     */
     public void updateBranch(Branch branch) throws BranchNotFoundException {
         if (!this.branches.containsKey(branch.getId())) {
             throw new BranchNotFoundException("Branch with ID " + branch.getId() + " does not exist. " +

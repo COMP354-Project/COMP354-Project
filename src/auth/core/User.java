@@ -8,6 +8,13 @@ public abstract class User {
     protected String email;
     protected String password;
 
+    public User(String email, String password) {
+    }
+
+    public User() {
+
+    }
+
     public void setPassword(String password) throws InvalidInputException {
         // TODO Password format verification (bellow nmb of characters, not-allowed symbols, etc...)
         if (false) {
