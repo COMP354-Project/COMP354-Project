@@ -1,11 +1,4 @@
 {
-  "mutian@gmail.com": {
-    "email": "mutian@gmail.com",
-    "password": "Mutian123!",
-    "firstName": "Mu Tian",
-    "lastName": "Wang",
-    "type": "Customer"
-  },
   "minh@gmail.com": {
     "email": "minh@gmail.com",
     "password": "Minh123!",
@@ -17,24 +10,6 @@
     "email": "admin@gmail.com",
     "password": "adminPass",
     "type": "Admin"
-  },
-  "teller1@gmail.com": {
-    "email": "teller1@gmail.com",
-    "password": "tellerPass",
-    "branchID": "6879aad4-4df2-4e32-b500-2d4fc6721189",
-    "type": "Teller"
-  },
-  "teller2@gmail.com": {
-    "email": "teller2@gmail.com",
-    "password": "tellerPass",
-    "branchID": "e8da72ca-8182-491a-aaf1-40c3faffd22e",
-    "type": "Teller"
-  },
-  "teller3@gmail.com": {
-    "email": "teller3@gmail.com",
-    "password": "tellerPass",
-    "branchID": "f2868d14-c831-43be-960a-44a6bb7828f4",
-    "type": "Teller"
   },
   "jjj@gmail.com": {
     "email": "jjj@gmail.com",
@@ -50,12 +25,47 @@
     "lastName": "Joe",
     "type": "Customer"
   },
+  "mutian@gmail.com": {
+    "email": "mutian@gmail.com",
+    "password": "Mutian123!",
+    "firstName": "Mu Tian",
+    "lastName": "Wang",
+    "type": "Customer"
+  },
+  "teller2@gmail.com": {
+    "email": "teller2@gmail.com",
+    "password": "tellerPass",
+    "branchID": "e8da72ca-8182-491a-aaf1-40c3faffd22e",
+    "type": "Teller"
+  },
+  "teller1@gmail.com": {
+    "email": "teller1@gmail.com",
+    "password": "tellerPass",
+    "branchID": "6879aad4-4df2-4e32-b500-2d4fc6721189",
+    "type": "Teller"
+  },
+  "mutian.wang@hotmail.com": {
+    "email": "mutian.wang@hotmail.com",
+    "password": "password",
+    "type": "Admin"
+  },
+  "teller3@gmail.com": {
+    "email": "teller3@gmail.com",
+    "password": "tellerPass",
+    "branchID": "f2868d14-c831-43be-960a-44a6bb7828f4",
+    "type": "Teller"
+  },
   "abc@gmail.com": {
     "email": "abc@gmail.com",
     "password": "password",
     "firstName": "Joseph",
     "lastName": "Joestar",
     "type": "Customer"
+  },
+  "katyusha.gup@hotmail.com": {
+    "email": "katyusha.gup@hotmail.com",
+    "password": "blayt",
+    "type": "Admin"
   },
   "ghi@gmail.com": {
     "email": "ghi@gmail.com",
