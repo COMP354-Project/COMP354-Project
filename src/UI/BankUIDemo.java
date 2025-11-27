@@ -7,17 +7,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
-import auth.core.Customer;
 import auth.core.Teller;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
-import com.google.gson.Gson;
 
 import core.ExecuteTransactionAction;
 import core.LoginAction;
@@ -292,7 +289,6 @@ public class BankUIDemo {
         FundTransferUI() {
             super(new GridBagLayout());
             setBorder(pad());
-            GridBagConstraints c = gbc();
 
             addComponentListener(new ComponentAdapter() {
                 public void componentShown(ComponentEvent e) {
