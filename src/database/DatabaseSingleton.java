@@ -194,11 +194,11 @@ public class DatabaseSingleton {
                 try {
                     Account account = accountData.getAccountById(accountID);
                     branchAccounts.add(account);
-                } catch (Exception e) {
+                } catch (InvalidAccountIDException e) {
                     System.err.println("Error fetching account " + accountID + ": " + e.getMessage());
                 }
             }
-        } catch (Exception e) {
+        } catch (BranchNotFoundException e) {
             System.err.println("Error fetching accounts by branch: " + e.getMessage());
         }
         return branchAccounts;
