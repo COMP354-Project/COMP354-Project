@@ -992,6 +992,7 @@ public class BankUIDemo {
             String type = Objects.requireNonNull(roleField.getSelectedItem()).toString();
 
             CreateUserAction action = new CreateUserAction();
+            action.setUser(currentUser);
             User newUser = switch (type) {
                 case "Admin" -> new Admin();
                 case "Customer" -> new Customer();
@@ -1000,7 +1001,7 @@ public class BankUIDemo {
             };
             newUser.setEmail(email);
             newUser.setPassword(password);
-            action.setUser(newUser);
+            action.setNewUser(newUser);
             try {
                 action.execute();
                 toast(CreateUserAction.MESSAGE);

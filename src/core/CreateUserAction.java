@@ -20,6 +20,7 @@ import database.exceptions.UserAlreadyExistedException;
 public class CreateUserAction extends Action {
     private final DatabaseSingleton db = DatabaseSingleton.getDatabase();
     // Inputs
+    private User newUser;
     private User user;
     // Outputs
     public final static String MESSAGE = "Account created successfully!";
@@ -30,6 +31,14 @@ public class CreateUserAction extends Action {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public User getNewUser() {
+        return newUser;
+    }
+
+    public void setNewUser(User newUser) {
+        this.newUser = newUser;
     }
 
     @Override
@@ -48,7 +57,7 @@ public class CreateUserAction extends Action {
     public void execute() throws InvalidAuthenticationException, InvalidAccountException {
         authorize(user, null);
         try {
-            db.addUser(user);
+            db.addUser(newUser);
         } catch (UserAlreadyExistedException e) {
             throw new InvalidAccountException();
         }
