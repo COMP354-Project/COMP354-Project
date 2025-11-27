@@ -28,7 +28,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T22:30:50.246891500",
@@ -82,7 +82,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T22:32:20.553477400",
@@ -116,10 +116,10 @@
       "type": "Chequing"
     },
     "receiver": {
-      "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
-      "customer": "abc@gmail.com",
-      "accountStatus": "ACTIVE",
-      "type": "Chequing"
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T21:14:15.471542400",
     "amount": 10.0,
@@ -136,7 +136,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T22:34:23.493413",
@@ -206,10 +206,10 @@
       "type": "Chequing"
     },
     "receiver": {
-      "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
-      "customer": "atm@bank.com",
-      "accountStatus": "ACTIVE",
-      "type": "Chequing"
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Saving"
     },
     "timeOfTransaction": "2025-11-27T13:14:21.810506400",
     "amount": 2.0E7,
@@ -224,10 +224,10 @@
       "type": "Chequing"
     },
     "receiver": {
-      "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
-      "customer": "atm@bank.com",
-      "accountStatus": "ACTIVE",
-      "type": "Chequing"
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Saving"
     },
     "timeOfTransaction": "2025-11-27T13:14:16.438587200",
     "amount": 2.0E7,
@@ -406,7 +406,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T17:42:06.139118",
@@ -458,13 +458,31 @@
       "type": "Chequing"
     },
     "receiver": {
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Saving"
+    },
+    "timeOfTransaction": "2025-11-26T17:44:33.257235300",
+    "amount": 123.0,
+    "status": "ACTIVE"
+  },
+  "9c77e541-ea73-4a42-926e-9fe837d68121": {
+    "id": "9c77e541-ea73-4a42-926e-9fe837d68121",
+    "sender": {
       "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
       "customer": "abc@gmail.com",
       "accountStatus": "ACTIVE",
       "type": "Chequing"
     },
-    "timeOfTransaction": "2025-11-27T13:13:57.096507600",
-    "amount": 1.0E7,
+    "receiver": {
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Saving"
+    },
+    "timeOfTransaction": "2025-11-26T19:42:50.001076600",
+    "amount": 123.0,
     "status": "ACTIVE"
   },
   "d7c4d571-17f1-4f54-97fe-764afbe2ee44": {
@@ -530,10 +548,10 @@
       "type": "Chequing"
     },
     "receiver": {
-      "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
-      "customer": "abc@gmail.com",
-      "accountStatus": "ACTIVE",
-      "type": "Chequing"
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Saving"
     },
     "timeOfTransaction": "2025-11-27T13:13:23.006528500",
     "amount": 160000.0,
@@ -676,7 +694,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T17:44:35.678122800",
@@ -710,10 +728,10 @@
       "type": "Chequing"
     },
     "receiver": {
-      "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
-      "customer": "abc@gmail.com",
-      "accountStatus": "ACTIVE",
-      "type": "Chequing"
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T21:13:19.958553600",
     "amount": 10.0,
@@ -820,7 +838,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T19:40:55.475447300",
@@ -1000,28 +1018,10 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T17:44:33.257235300",
-    "amount": 123.0,
-    "status": "ACTIVE"
-  },
-  "9c77e541-ea73-4a42-926e-9fe837d68121": {
-    "id": "9c77e541-ea73-4a42-926e-9fe837d68121",
-    "sender": {
-      "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
-      "customer": "abc@gmail.com",
-      "accountStatus": "ACTIVE",
-      "type": "Chequing"
-    },
-    "receiver": {
-      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
-      "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
-      "type": "Saving"
-    },
-    "timeOfTransaction": "2025-11-26T19:42:50.001076600",
     "amount": 123.0,
     "status": "ACTIVE"
   },
@@ -1034,10 +1034,10 @@
       "type": "Chequing"
     },
     "receiver": {
-      "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
-      "customer": "abc@gmail.com",
-      "accountStatus": "ACTIVE",
-      "type": "Chequing"
+      "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+      "customer": "jjj@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T21:12:46.691993200",
     "amount": 10.0,
@@ -1126,7 +1126,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T17:44:35.194253700",
@@ -1162,7 +1162,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T17:44:31.510548200",
@@ -1414,7 +1414,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T19:40:42.827745500",
@@ -1594,7 +1594,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T19:41:17.110784500",
@@ -1630,7 +1630,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T19:40:51.718743200",
@@ -1666,7 +1666,7 @@
     "receiver": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "timeOfTransaction": "2025-11-26T22:32:10.069261700",
@@ -1678,7 +1678,7 @@
     "sender": {
       "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
       "customer": "jjj@gmail.com",
-      "accountStatus": "ACTIVE",
+      "accountStatus": "INACTIVE",
       "type": "Saving"
     },
     "receiver": {
