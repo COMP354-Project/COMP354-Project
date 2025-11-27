@@ -163,15 +163,6 @@ public class BankUIDemo {
             currentUser = loginAction.getAuthenticatedUser();
 
             //Loads the data to the profile action
-            ProfileAction profileAction = new ProfileAction();
-            profileAction.setCurrentUser(currentUser);
-            try {
-                profileAction.execute(); // fetches userAccount
-            } catch (InvalidAuthenticationException | InvalidAccountException e) {
-                toast("Could not load account info");
-            }
-
-
         }
     }
 
@@ -206,7 +197,6 @@ public class BankUIDemo {
             add(btn("Fund Transfer", () -> go("fund_transfer")), g(c, 0, 3, 2));
             add(btn("Deposit / Withdraw", () -> go("withdraw_deposit")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
-
         }
     }
 
@@ -277,6 +267,7 @@ public class BankUIDemo {
 
             row(this, c, 1, "Recipient: ", recipientAccount);
             row(this, c, 2, "Amount: ", amountInput);
+
             /**
             try{
                 double amount = Double.parseDouble(amountInput.getText());
