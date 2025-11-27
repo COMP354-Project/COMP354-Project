@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
+import auth.core.Customer;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import bank.*;
@@ -61,6 +62,7 @@ public class BankUIDemo {
     private final JPanel root = new JPanel(cards);
     private String currentRole;
     protected User currentUser;
+    private LoginPage loginPage;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BankUIDemo().start());
@@ -70,7 +72,9 @@ public class BankUIDemo {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // pages
-        root.add(new LoginPage(), "login");
+        // Storing LoginPage instance for loginPage.reset() calls
+        loginPage = new LoginPage();
+        root.add(loginPage, "login");
 
         // customer
         root.add(new CustomerDashboard(), "customer");
@@ -164,6 +168,11 @@ public class BankUIDemo {
 
             //Loads the data to the profile action
         }
+
+        void reset() {
+            tfUser.setText("");
+            pfPass.setText("");
+        }
     }
 
     // ---------- Customer ----------
@@ -176,7 +185,12 @@ public class BankUIDemo {
 
             JButton account = btn("Account Information", () -> go("cust_account"));
             JButton profile = btn("Personal Profile", () -> go("cust_profile"));
-            JButton logout = btn("Logout", () -> go("login"));
+            JButton logout = btn("Logout", () -> {
+                currentUser = null;
+                loginPage.reset();
+                go("login");
+
+            });
 
             add(account, g(c, 0, 1, 2));
             add(profile, g(c, 0, 2, 2));
@@ -197,6 +211,7 @@ public class BankUIDemo {
             add(btn("Fund Transfer", () -> go("fund_transfer")), g(c, 0, 3, 2));
             add(btn("Deposit / Withdraw", () -> go("withdraw_deposit")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("customer")), g(c, 0, 5, 2));
+
         }
     }
 
@@ -220,6 +235,7 @@ public class BankUIDemo {
         }
 
         private void displaySummary() {
+            removeAll();
             profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
             try {
@@ -267,7 +283,6 @@ public class BankUIDemo {
 
             row(this, c, 1, "Recipient: ", recipientAccount);
             row(this, c, 2, "Amount: ", amountInput);
-
             /**
             try{
                 double amount = Double.parseDouble(amountInput.getText());
@@ -441,7 +456,11 @@ public class BankUIDemo {
             add(title("Teller Dashboard"), g(c, 0, 0, 2));
 
             add(btn("Manage Customers", () -> go("teller_manage")), g(c, 0, 1, 2));
-            add(btn("Logout", () -> go("login")), g(c, 0, 2, 2));
+            add(btn("Logout", () -> {
+                currentUser = null;
+                loginPage.reset();
+                go("login");
+            }), g(c, 0, 2, 2));
         }
     }
 
@@ -467,7 +486,11 @@ public class BankUIDemo {
             add(title("Admin Dashboard"), g(c, 0, 0, 2));
 
             add(btn("User Management", () -> go("admin_user_mgmt")), g(c, 0, 1, 2));
-            add(btn("Logout", () -> go("login")), g(c, 0, 2, 2));
+            add(btn("Logout", () -> {
+                currentUser = null;
+                loginPage.reset();
+                go("login");
+            }), g(c, 0, 2, 2));
         }
     }
 
