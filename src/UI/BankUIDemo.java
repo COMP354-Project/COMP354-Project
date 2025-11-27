@@ -491,6 +491,8 @@ public class BankUIDemo {
                 toast("Invalid ID");
             } catch (InvalidInputException iie) {
                 toast("Invalid Input");
+            } catch (InvalidAccountException e) {
+                toast("Invalid account");
             }
 
         }
