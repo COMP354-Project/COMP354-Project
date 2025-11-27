@@ -22,6 +22,7 @@ import core.LoginAction;
 import core.ProfileAction;
 import core.ViewTransactionAction;
 import core.exceptions.InvalidAccountException;
+import core.exceptions.InvalidInputException;
 import database.DatabaseSingleton;
 
 // ---------- Models / Store (users + roles from JSON) ----------
@@ -61,6 +62,7 @@ public class BankUIDemo {
     private final JPanel root = new JPanel(cards);
     private String currentRole;
     protected User currentUser;
+    private ProfileAction profile;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BankUIDemo().start());
@@ -92,8 +94,8 @@ public class BankUIDemo {
         root.add(new AdminUserMgmt(), "admin_user_mgmt");
 
         // Fund transfer & Withdraw/Deposit
-        root.add(new FundTransfer(), "fund_transfer");
-        root.add(new WithdrawDeposit(), "withdraw_deposit");
+        root.add(new FundTransferUI(), "fund_transfer");
+        root.add(new WithdrawDepositUI(), "withdraw_deposit");
 
         cards.show(root, "login");
         frame.setContentPane(root);
@@ -162,14 +164,14 @@ public class BankUIDemo {
             }
             currentUser = loginAction.getAuthenticatedUser();
 
-            //Loads the data to the profile action
-            ProfileAction profileAction = new ProfileAction();
-            profileAction.setCurrentUser(currentUser);
-            try {
-                profileAction.execute(); // fetches userAccount
-            } catch (InvalidAuthenticationException | InvalidAccountException e) {
-                toast("Could not load account info");
-            }
+//            //Loads the data to the profile action
+//            ProfileAction profileAction = new ProfileAction();
+//            profileAction.setCurrentUser(currentUser);
+//            try {
+//                profileAction.execute(); // fetches userAccount
+//            } catch (InvalidAuthenticationException | InvalidAccountException e) {
+//                toast("Could not load account info");
+//            }
 
 
         }
@@ -215,7 +217,7 @@ public class BankUIDemo {
      *
      */
     class CustomerAccountSummary extends JPanel {
-        private ProfileAction profile;
+        //private ProfileAction profile;
 
         CustomerAccountSummary() {
             super(new GridBagLayout());
@@ -230,8 +232,10 @@ public class BankUIDemo {
         }
 
         private void displaySummary() {
+            removeAll();
             profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
+
             try {
                 profile.execute();
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
@@ -262,64 +266,165 @@ public class BankUIDemo {
 
     }
 
-    class FundTransfer extends JPanel {
-        JTextField recipientAccount = new JTextField(22);
+    class FundTransferUI extends JPanel {
+        private Account currentAccount;
+        JComboBox<String> senderAccountSelector = new JComboBox<>();
+
+        JTextField recipientEmail = new JTextField(22);
+        JComboBox<String> recipientAccountSelector = new JComboBox<>();
+
         JTextField amountInput = new JTextField(22);
 
-        FundTransfer() {
+        FundTransferUI() {
             super(new GridBagLayout());
             setBorder(pad());
             GridBagConstraints c = gbc();
+
+            addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent e) {
+                    TransferUI();
+                    revalidate();
+                    repaint();
+                }
+            });
+        }
+
+        private void TransferUI(){
+            GridBagConstraints c = gbc();
+            resetForm();
+
             add(title("Fund Transfer"), g(c, 0, 0, 2));
+            senderAccountSelector.setEnabled(true);
+            row(this, c, 1, "Sender Account:", senderAccountSelector);
 
-            c.gridy = 0;
-            c.gridwidth = 2;
 
-            row(this, c, 1, "Recipient: ", recipientAccount);
-            row(this, c, 2, "Amount: ", amountInput);
-            /**
+            row(this, c, 3, "Recipient: ", recipientEmail);
+            JButton searchBtn = btn("Search", () -> {
+                fetchSenderAccount();
+                findRecipient();
+            });
+
+            add(searchBtn, g(c, 0, 4, 2) );
+
+            // Account chooser (initially disabled)
+            recipientAccountSelector.setEnabled(false);
+            row(this, c, 5, "Recipient Account:", recipientAccountSelector);
+            row(this, c, 6, "Amount: ", amountInput);
+
+
+            JButton confirmBtn = btn("Confirm", this::conductTransfer);
+            add(confirmBtn, g(c, 0, 7, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 8, 2));
+        }
+
+        private void resetForm(){
+            senderAccountSelector.removeAllItems();
+            recipientEmail.setText("");
+            recipientAccountSelector.removeAllItems();
+            recipientAccountSelector.setEnabled(false);
+            amountInput.setText("");
+
+            ArrayList<Account> myAccounts = DatabaseSingleton.getDatabase().getAccountsByEmail(currentUser.getEmail());
+            for (Account acc : myAccounts){
+                senderAccountSelector.addItem(String.valueOf(acc.getAccountID()));
+            }
+        }
+
+        //This part currently is redundant
+        //Needs the proper fixes before it can work for many accounts of the same user
+        private void fetchSenderAccount(){
+            profile = new ProfileAction();
+            profile.setCurrentUser(currentUser);
+
+            try {
+                profile.execute();
+                currentAccount = profile.getUserAccount();
+            } catch (InvalidAuthenticationException | InvalidAccountException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void findRecipient(){
+            try {
+                String email = recipientEmail.getText().trim();
+                User recipient = DatabaseSingleton.getDatabase().getUserByEmail(email);
+
+                if (recipient == null){
+                    toast("Email not found");
+                    recipientAccountSelector.setEnabled(false);
+                    recipientAccountSelector.removeAllItems();
+                    return;
+                }
+
+                ArrayList<Account> accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
+
+                recipientAccountSelector.removeAllItems();
+                for(Account acc: accounts){
+                    if (acc instanceof Chequing){
+                        recipientAccountSelector.addItem("Chequing: " + acc.getAccountID());
+                    }
+                    if (acc instanceof Saving){
+                        recipientAccountSelector.addItem("Saving: " + acc.getAccountID());
+                    }
+                    else{
+                        recipientAccountSelector.addItem("Credit Card: " + acc.getAccountID());
+                    }
+
+                }
+                recipientAccountSelector.setEnabled(true);
+
+            }catch (Exception e){
+                toast("Invalid destination account");
+            }
+        }
+
+        private boolean conductTransfer(){
             try{
+
                 double amount = Double.parseDouble(amountInput.getText());
-                Account destinationAcc = DatabaseSingleton.getDatabase().getAccountByID(recipientAccount.getText());
-                Transaction transaction = new Transaction(currentAccount, destinationAcc, LocalDateTime.now(), amount);
+
+                String selected = (String) recipientAccountSelector.getSelectedItem();
+                String parts[] = selected.split(":");
+
+                Account destinationAcc = DatabaseSingleton.getDatabase().getAccountByID(parts[1].trim());
+
+                Transaction transaction = new Transaction(profile.getUserAccount(), destinationAcc, LocalDateTime.now(), amount);
 
                 ExecuteTransactionAction sendAction = new ExecuteTransactionAction();
                 sendAction.setUser(currentUser);
                 sendAction.setTransactionDetails(transaction);
+                sendAction.prepare();
                 sendAction.execute();
 
-            } catch (Exception e) {
-                toast("Invalid amount");
+                toast("Transaction Sent");
+                return true; //signals the button
+
+            }catch (InvalidInputException ie){
+                toast("Invalid recipient");
+                return false;
             }
-             */
-
-
-            add(btn("Confirm", () -> info("Transaction sent")), g(c, 0, 4, 2));
-            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
+            catch (Exception e) {
+                toast("Invalid amount");
+                return false; //signals the button
+            }
         }
     }
 
-    class WithdrawDeposit extends JPanel {
+    class WithdrawDepositUI extends JPanel {
         String[] choices = {"Withdraw", "Deposit"};
         JComboBox<String> box = new JComboBox<>(choices);
         JTextField amountInput = new JTextField(22);
 
 
-        WithdrawDeposit() {
+        WithdrawDepositUI() {
             super(new GridBagLayout());
             setBorder(pad());
             GridBagConstraints c = gbc();
             add(title("Withdraw/Deposit"), g(c, 0, 0, 2));
             add(box, g(c, 0, 1, 2));
             row(this, c, 2, "Amount: ", amountInput);
-            /**
-            try{
-                double amount = Double.parseDouble(amountInput.getText());
 
-            } catch (Exception e) {
-                toast("Invalid amount");
-            }
-             */
+            //Just need to adapt this part using the fundTransfer
 
             add(btn("Confirm", () ->info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
