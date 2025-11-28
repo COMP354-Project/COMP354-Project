@@ -91,24 +91,17 @@ import database.DatabaseSingleton;
  * @author
  */
 // ---------- App ----------
-
-/**
- * Demo object
- */
+/** Demo object */
 public class BankUIDemo {
     private final JFrame frame = new JFrame("Bank");
     private final CardLayout cards = new CardLayout();
     private final JPanel root = new JPanel(cards);
     private String currentRole;
-    /**
-     * User object
-     */
+    /** User object*/
     protected User currentUser;
     private LoginPage loginPage;
 
-    /**
-     * For the ATM simulation
-     */
+    /** For the ATM simulation */
     private static Account ATM;
 
     /**
@@ -119,7 +112,6 @@ public class BankUIDemo {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BankUIDemo().start());
     }
-
     /**
      * Initializes and starts the banking GUI application.
      * <p>
@@ -178,7 +170,6 @@ public class BankUIDemo {
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
     }
-
     /**
      * Switches the currently visible panel to the specified page.
      *
@@ -189,7 +180,6 @@ public class BankUIDemo {
     }
 
     // ---------- Login ----------
-
     /**
      * Inner class representing the login page panel.
      * <p>
@@ -199,17 +189,11 @@ public class BankUIDemo {
      * </p>
      */
     class LoginPage extends JPanel {
-        /**
-         * Text field for user email or ID
-         */
+        /** Text field for user email or ID */
         JTextField tfUser = new JTextField(22);
-        /**
-         * Password field for user password
-         */
+        /** Password field for user password */
         JPasswordField pfPass = new JPasswordField(22);
-        /**
-         * Login action instance for executing authentication
-         */
+        /** Login action instance for executing authentication */
         LoginAction loginAction;
 
         /**
@@ -250,7 +234,6 @@ public class BankUIDemo {
             c.gridwidth = 2;
             add(actions, c);
         }
-
         /**
          * Performs the login operation using the entered credentials.
          * <p>
@@ -275,7 +258,6 @@ public class BankUIDemo {
 
             //Loads the data to the profile action
         }
-
         /**
          * Resets the login fields to empty strings.
          */
@@ -286,7 +268,6 @@ public class BankUIDemo {
     }
 
     // ---------- Customer ----------
-
     /**
      * Customer Dashboard panel.
      * <p>
@@ -346,7 +327,6 @@ public class BankUIDemo {
 
         }
     }
-
     /**
      * Customer Account Summary panel.
      * <p>
@@ -418,10 +398,10 @@ public class BankUIDemo {
                         add(new JLabel("Credit Usage: $" + ((Card) selectedAccount).getCreditUsage()), g(c, 0, 7, 2));
                     } else if (selectedAccount instanceof Saving) { //Saving
                         add(new JLabel("Account Type: Saving"), g(c, 0, 5, 2));
-                        add(new JLabel(String.format("Balance: $%.2f", selectedAccount.getBalance())), g(c, 0, 6, 2));
+                        add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
                     } else {//Chequing
                         add(new JLabel("Account Type: Chequing"), g(c, 0, 5, 2));
-                        add(new JLabel(String.format("Balance: $%.2f", selectedAccount.getBalance())), g(c, 0, 6, 2));
+                        add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
                     }
                 }
 
@@ -430,10 +410,7 @@ public class BankUIDemo {
                 repaint();
             });
         }
-
-        /**
-         * Clears displayed account summary labels except dropdown and buttons.
-         */
+        /** Clears displayed account summary labels except dropdown and buttons. */
         private void clearSummaryLabels() {
             // Remove everything except dropdown and buttons
             for (Component comp : getComponents()) {
@@ -443,9 +420,7 @@ public class BankUIDemo {
             }
         }
 
-        /**
-         * Loads accounts for the current user via ProfileAction.
-         */
+        /** Loads accounts for the current user via ProfileAction. */
         private void loadAccounts() {
             ProfileAction profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
@@ -522,7 +497,6 @@ public class BankUIDemo {
         }
 
     }
-
     /**
      * Fund Transfer UI panel.
      * <p>
@@ -640,9 +614,7 @@ public class BankUIDemo {
             }
         }
 
-        /**
-         * Resets all form fields.
-         */
+        /** Resets all form fields. */
         private void resetForm() {
             senderAccountSelector.removeAllItems();
             recipientEmail.setText("");
@@ -652,9 +624,7 @@ public class BankUIDemo {
         }
 
 
-        /**
-         * Fetches accounts for the current user (sender accounts).
-         */
+        /** Fetches accounts for the current user (sender accounts). */
         private void fetchSenderAccount() {
             ProfileAction profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
@@ -670,10 +640,7 @@ public class BankUIDemo {
                 toast("Other exceptions");
             }
         }
-
-        /**
-         * Finds recipient accounts using the entered email.
-         */
+        /** Finds recipient accounts using the entered email. */
         private boolean findRecipient() {
             ProfileAction action = new ProfileAction();
             try {
@@ -711,10 +678,7 @@ public class BankUIDemo {
 
             return true;
         }
-
-        /**
-         * Conducts the fund transfer after validation.
-         */
+        /** Conducts the fund transfer after validation. */
         private boolean conductTransfer() {
             try {
                 double amount = Double.parseDouble(amountInput.getText());
@@ -725,7 +689,7 @@ public class BankUIDemo {
                 sendAction.prepare();
                 sendAction.execute();
             } catch (InvalidInputException ie) {
-                toast("Invalid recipient or amount");
+                toast("Invalid recipient");
                 return false;
             } catch (Exception e) {
                 toast("Invalid amount");
@@ -736,7 +700,6 @@ public class BankUIDemo {
             return true; //signals the button
         }
     }
-
     /**
      * JPanel UI for performing withdrawals and deposits for a Customer.
      *
@@ -752,17 +715,11 @@ public class BankUIDemo {
      */
     class WithdrawDepositUI extends JPanel {
         String[] choices = {"Withdraw", "Deposit"};
-        /**
-         * Combo box for choosing either "Withdraw" or "Deposit".
-         */
+        /** Combo box for choosing either "Withdraw" or "Deposit". */
         JComboBox<String> box = new JComboBox<>(choices);
-        /**
-         * Input field for entering the transaction amount.
-         */
+        /** Input field for entering the transaction amount. */
         JTextField amountInput = new JTextField(22);
-        /**
-         * Combo box for selecting which account to transact from/to.
-         */
+        /** Combo box for selecting which account to transact from/to. */
         AccountComboBox accountBox = new AccountComboBox();
 
         /**
@@ -787,8 +744,9 @@ public class BankUIDemo {
                     ProfileAction profile = new ProfileAction();
                     profile.setCurrentUser(currentUser);
                     try {
+                        profile.prepare();
                         profile.execute();
-                    } catch (InvalidAuthenticationException | InvalidAccountException ie) {
+                    } catch (InvalidAuthenticationException | InvalidAccountException | InvalidInputException ie) {
                         throw new RuntimeException(ie);
                     }
                     accountBox.setAccounts(profile.getUserAccount());
@@ -804,7 +762,6 @@ public class BankUIDemo {
             }), g(c, 0, 4, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
         }
-
         /**
          * Custom combo box for displaying accounts with type and balance.
          */
@@ -947,21 +904,14 @@ public class BankUIDemo {
      */
     class TransactionHistory extends JPanel {
         final String titleText = "Transaction History";
-        /**
-         * Table model containing transaction data.
-         */
+        /** Table model containing transaction data. */
         final TransactionTable tableModel = new TransactionTable();
-        /**
-         * JTable displaying the transaction data.
-         */
+        /** JTable displaying the transaction data. */
         final JTable viewTable = new JTable(tableModel);
-        /**
-         * Action used to fetch transactions from the database.
-         */
+        /** Action used to fetch transactions from the database. */
         protected ViewTransactionAction viewTransactionAction;
 
         // Initialize the panel to see the transaction history of an account
-
         /**
          * Initializes the transaction history panel with a table and back button.
          * Automatically refreshes data when the panel is shown.
@@ -1001,7 +951,6 @@ public class BankUIDemo {
                 }
             });
         }
-
         /**
          * Fetches the latest transaction data for the current user and updates the table model.
          */
@@ -1018,17 +967,13 @@ public class BankUIDemo {
             }
             tableModel.setTransactions(viewTransactionAction.getListOfTransactions());
         }
-
         /**
          * Table model for displaying transactions in a JTable.
          */
         class TransactionTable extends AbstractTableModel {
             private final String[] columns = {"Transaction ID", "Amount", "Time"};
             private List<Transaction> data = new ArrayList<>();
-
-            /**
-             * Sets the transactions to display and refreshes the table.
-             */
+            /** Sets the transactions to display and refreshes the table. */
             public void setTransactions(List<Transaction> data) {
                 this.data = data;
                 fireTableDataChanged(); // tells JTable to repaint
@@ -1061,7 +1006,6 @@ public class BankUIDemo {
             }
         }
     }
-
     /**
      * Panel displaying a customer's personal profile options.
      *
@@ -1079,7 +1023,6 @@ public class BankUIDemo {
             add(btn("Back", () -> go("customer")), g(c, 0, 3, 2));
         }
     }
-
     /**
      * Panel for updating a customer's personal information.
      *
@@ -1090,7 +1033,6 @@ public class BankUIDemo {
         private final JPasswordField currentPasswordField;
         private final JTextField newFirstNameField;
         private final JTextField newLastNameField;
-
         /**
          * Initializes the profile update panel with fields and buttons.
          */
@@ -1105,11 +1047,11 @@ public class BankUIDemo {
             currentPasswordField = new JPasswordField(15);
             add(currentPasswordField, g(c, 1, 2, 1));
 
-            add(new JLabel("Current First Name:"), g(c, 0, 3, 1));
+            add(new JLabel("New First Name:"), g(c, 0, 3, 1));
             newFirstNameField = new JTextField(15);
             add(newFirstNameField, g(c, 1, 3, 1));
 
-            add(new JLabel("Current Last Name:"), g(c, 0, 4, 1));
+            add(new JLabel("New Last Name:"), g(c, 0, 4, 1));
             newLastNameField = new JTextField(15);
             add(newLastNameField, g(c, 1, 4, 1));
 
@@ -1119,7 +1061,6 @@ public class BankUIDemo {
 
             add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
         }
-
         /**
          * Handles updating the customer's personal information.
          *
@@ -1200,7 +1141,6 @@ public class BankUIDemo {
 
             add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
         }
-
         /**
          * Handles the password update process.
          *
@@ -1222,21 +1162,20 @@ public class BankUIDemo {
                 action.setConfirmationPassword(confirmPw);
                 try {
                     action.prepare();
+                    action.execute();
+                    toast("Password updated!");
+
                 } catch (InvalidAuthenticationException e) {
                     toast("No permission to update password!");
                     return;
                 } catch (InvalidInputException e) {
                     toast("Password not identical, please input again!");
                     return;
-                }
-                try {
-                    action.execute();
-                } catch (InvalidAuthenticationException e) {
-                    toast(e.getMessage());
+                }catch (IllegalArgumentException iae){
+                    toast("Password Field Cannot be empty");
                 } catch (InvalidAccountException e) {
-                    toast(e.getMessage());
+                    throw new RuntimeException(e);
                 }
-                toast("Password updated!");
 
             } else {
                 toast("Invalid Current Password");
@@ -1247,7 +1186,6 @@ public class BankUIDemo {
 
 
     // ---------- Teller ----------
-
     /**
      * Dashboard panel for Teller users.
      *
@@ -1296,7 +1234,6 @@ public class BankUIDemo {
     class TellerViewAccounts extends JPanel {
         private JComboBox<String> accountDropdown;
         private JLabel accountDetailsLabel;
-
         /**
          * Initializes the account view panel with dropdown, details label, and buttons.
          * Automatically loads branch accounts when the panel is shown.
@@ -1331,18 +1268,12 @@ public class BankUIDemo {
                 }
             });
         }
-
-        /**
-         * Clears the fields to prevent leaking data between sessions.
-         */
+        /** Clears the fields to prevent leaking data between sessions. */
         private void clearFields() {
             accountDropdown.removeAllItems();
             accountDetailsLabel.setText("Select an account to view details");
         }
-
-        /**
-         * Loads all accounts for the teller's branch into the dropdown.
-         */
+        /** Loads all accounts for the teller's branch into the dropdown. */
         private void loadAccountsInBranch() {
             accountDropdown.removeAllItems();
             try {
@@ -1366,10 +1297,7 @@ public class BankUIDemo {
                 toast("Error loading accounts: " + e.getMessage());
             }
         }
-
-        /**
-         * Displays detailed information about the selected account.
-         */
+        /** Displays detailed information about the selected account. */
         private void displayAccountDetails() {
             // Display selected account info
             if (accountDropdown.getSelectedItem() == null) {
@@ -1393,7 +1321,6 @@ public class BankUIDemo {
             }
         }
     }
-
     /**
      * Panel for viewing all transactions in a teller's branch.
      *
@@ -1405,7 +1332,6 @@ public class BankUIDemo {
         final BranchTransactionTable tableModel = new BranchTransactionTable();
         final JTable viewTable = new JTable(tableModel);
         protected ViewTransactionAction viewTransactionAction;
-
         /**
          * Initializes the branch transaction panel with a table and back button.
          * Automatically refreshes data when the panel is shown.
@@ -1446,10 +1372,7 @@ public class BankUIDemo {
                 }
             });
         }
-
-        /**
-         * Loads all transactions for the teller's branch.
-         */
+        /** Loads all transactions for the teller's branch. */
         private void loadBranchTransactions() {
             try {
                 String tellerBranchID = ((Teller) currentUser).getBranchID();
@@ -1478,7 +1401,6 @@ public class BankUIDemo {
                 toast("Error loading accounts: " + e.getMessage());
             }
         }
-
         /**
          * Table model for displaying transactions in a branch JTable.
          */
@@ -1521,7 +1443,6 @@ public class BankUIDemo {
     }
     // ---------- Admin ----------
     // YO YO YO CHECK IT OUT, IT'S THE OMINIPOTENT ADMIN USER
-
     /**
      * Admin dashboard panel.
      *
@@ -1542,7 +1463,6 @@ public class BankUIDemo {
             }), g(c, 0, 2, 2));
         }
     }
-
     /**
      * Panel for admin user management operations.
      *
@@ -1563,7 +1483,6 @@ public class BankUIDemo {
             add(btn("Back", () -> go("admin")), g(c, 0, 5, 2));
         }
     }
-
     /**
      * Panel for updating passwords of any user.
      *
@@ -1575,7 +1494,6 @@ public class BankUIDemo {
         private final JPasswordField newPasswordField;
         private final JPasswordField confirmPasswordField;
         private ArrayList<User> users = null;
-
         /**
          * Initializes the password update panel with user selection and password fields.
          */
@@ -1608,7 +1526,7 @@ public class BankUIDemo {
                     g(c, 0, 5, 2));
 
             // Back Button
-            add(btn("Back", () -> go("admin")),
+            add(btn("Back", () -> go("admin_user_mgmt")),
                     g(c, 0, 6, 2));
 
 
@@ -1618,7 +1536,6 @@ public class BankUIDemo {
                 }
             });
         }
-
         /**
          * Handles updating the selected user's password.
          *
@@ -1633,35 +1550,24 @@ public class BankUIDemo {
             action.setUser(userDropDown.getSelectedUser());
             action.setNewPasssword(newPw);
             action.setConfirmationPassword(confirmPw);
+
             try {
                 action.prepare();
-            } catch (InvalidAuthenticationException e) {
-                toast("No permission to update password!");
-                return;
-            } catch (InvalidInputException e) {
-                toast("Password not identical, please input again!");
-                return;
-            }
-            try {
                 action.execute();
             } catch (InvalidAuthenticationException e) {
                 toast(e.getMessage());
-            } catch (InvalidAccountException e) {
+            } catch (InvalidAccountException | InvalidInputException e) {
                 toast(e.getMessage());
             }
             toast("Password updated!");
 
 
         }
-
-        /**
-         * Loads all users from the database and populates the dropdown.
-         */
+        /** Loads all users from the database and populates the dropdown. */
         private void loadAccounts() {
             users = DatabaseSingleton.getDatabase().getAllUsers();
             userDropDown.setUsers(users);
         }
-
         /**
          * Dropdown to select a User.
          *
@@ -1843,7 +1749,7 @@ public class BankUIDemo {
                     g(c, 0, 9, 1));
 
             // --- Back Button ---
-            add(btn("Back", () -> go("admin")),
+            add(btn("Back", () -> go("admin_user_mgmt")),
                     g(c, 1, 9, 1));
 
         }
@@ -1910,10 +1816,7 @@ public class BankUIDemo {
 
 
         }
-
-        /**
-         * Resets form fields to default/empty values.
-         */
+        /** Resets form fields to default/empty values. */
         private void resetFields() {
             passwordField.setText("");
             emailField.setText("");
@@ -1988,20 +1891,14 @@ public class BankUIDemo {
                 resetFields();
             }), g(c, 0, 5, 2));
         }
-
-        /**
-         * Loads accounts associated with a given email into the dropdown.
-         */
+        /** Loads accounts associated with a given email into the dropdown. */
         private void loadAccounts(String email) {
             accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
             accountsDropDown.setAccounts(accounts);
             revalidate();
             repaint();
         }
-
-        /**
-         * Clears input fields and resets the combo box.
-         */
+        /** Clears input fields and resets the combo box. */
         private void resetFields() {
             emailField.setText("");
             accountsDropDown.setAccounts(new ArrayList<>());
@@ -2113,10 +2010,7 @@ public class BankUIDemo {
                 }
             });
         }
-
-        /**
-         * Fetches transactions from the database and updates the table.
-         */
+        /** Fetches transactions from the database and updates the table. */
         public void updateData() {
             // Setup data
             viewTransactionAction = new ViewTransactionAction();
@@ -2137,10 +2031,7 @@ public class BankUIDemo {
         class TransactionTable extends AbstractTableModel {
             private final String[] columns = {"Transaction ID", "Amount", "Time"};
             private List<Transaction> data = new ArrayList<>();
-
-            /**
-             * Sets the transactions and refreshes the table.
-             */
+            /** Sets the transactions and refreshes the table. */
             public void setTransactions(List<Transaction> data) {
                 this.data = data;
                 fireTableDataChanged(); // tells JTable to repaint
