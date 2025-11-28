@@ -79,6 +79,9 @@ public class UpdatePassword extends Action {
         if (!newPasssword.equals(confirmationPassword)) {
             throw new InvalidInputException();
         }
+        if(newPasssword.isEmpty()){
+            throw new IllegalArgumentException();
+        }
     }
     /**
      * Executes the password update in the database.
