@@ -115,7 +115,7 @@ public class BankUIDemo {
 
         cards.show(root, "login");
         frame.setContentPane(root);
-        frame.setPreferredSize(new Dimension(390, 250)); // bigger window
+        frame.setPreferredSize(new Dimension(500, 400)); // bigger window
 
         frame.pack();
         frame.setLocationByPlatform(true);
@@ -253,22 +253,24 @@ public class BankUIDemo {
             accountDropDown = new CustomerAccountSummary.AccountComboBox();
             add(accountDropDown, g(c, 0, 2, 1));
 
+            //this part seems redundant, it is still able to show the details without it
+//            if (selectedAccount != null) {
+//                add(new JLabel("Customer: " + selectedAccount.getCustomer().getFirstName() + " " + selectedAccount.getCustomer().getLastName()), g(c, 0, 3, 2));
+//                add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
+//
+//                if (selectedAccount instanceof Card) { //Credit Card
+//                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 5, 2));
+//                    add(new JLabel("Credit Limit: $" + ((Card) selectedAccount).getCreditLimit()), g(c, 0, 6, 2));
+//                    add(new JLabel("Credit Usage: $" + ((Card) selectedAccount).getCreditUsage()), g(c, 0, 7, 2));
+//                } else if (selectedAccount instanceof Saving) { //Saving
+//                    add(new JLabel("Account Type: Saving"), g(c, 0, 5, 2));
+//                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
+//                } else {//Chequing
+//                    add(new JLabel("Account Type: Chequing"), g(c, 0, 5, 2));
+//                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
+//                }
+//            }
 
-            if (selectedAccount != null) {
-                add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
-
-                if (selectedAccount instanceof Card) { //Credit Card
-                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 5, 2));
-                    add(new JLabel("Credit Limit: $" + ((Card) selectedAccount).getCreditLimit()), g(c, 0, 6, 2));
-                    add(new JLabel("Credit Usage: $" + ((Card) selectedAccount).getCreditUsage()), g(c, 0, 7, 2));
-                } else if (selectedAccount instanceof Saving) { //Saving
-                    add(new JLabel("Account Type: Saving"), g(c, 0, 5, 2));
-                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
-                } else {//Chequing
-                    add(new JLabel("Account Type: Chequing"), g(c, 0, 5, 2));
-                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
-                }
-            }
 
             add(btn("Back", () -> go("cust_account")), g(c, 0, 7, 2));
 
@@ -284,6 +286,7 @@ public class BankUIDemo {
             accountDropDown.addActionListener(e -> {
                 selectedAccount = accountDropDown.getSelectAccount();
                 if (selectedAccount != null) {
+                    add(new JLabel("Customer: " + selectedAccount.getCustomer().getFirstName() + " " + selectedAccount.getCustomer().getLastName()), g(c, 0, 3, 2));
                     add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
 
                     if (selectedAccount instanceof Card) { //Credit Card
