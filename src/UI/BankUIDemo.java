@@ -309,6 +309,7 @@ public class BankUIDemo {
                 repaint();
             });
         }
+
         private void clearSummaryLabels() {
             // Remove everything except dropdown and buttons
             for (Component comp : getComponents()) {
@@ -866,10 +867,11 @@ public class BankUIDemo {
         }
     }
 
-    class CustomerProfileUpdate extends JPanel{
+    class CustomerProfileUpdate extends JPanel {
         private final JPasswordField currentPasswordField;
         private final JTextField newFirstNameField;
         private final JTextField newLastNameField;
+
         CustomerProfileUpdate() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -894,6 +896,7 @@ public class BankUIDemo {
 
             add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
         }
+
         private void onUpdateInfo() {
             //Verifies Password
             String UserInput = new String(currentPasswordField.getPassword());
@@ -917,8 +920,7 @@ public class BankUIDemo {
                 } catch (InvalidAccountException e) {
                     throw new RuntimeException(e);
                 }
-            }
-            else{
+            } else {
                 toast("Invalid Current Password");
             }
         }
@@ -1404,10 +1406,12 @@ public class BankUIDemo {
         private JTextField lastNameField;
         private JTextField passwordField;
         private JTextField emailField;
+        private JComboBox<String> branchNames;
         private JComboBox<String> roleField;
         private JLabel firstNameLabel;
         private JLabel lastNameLabel;
         private JLabel accountTypeLabel;
+        private JLabel branchLabel;
         private JComboBox<String> accountTypeField;
 
         AdminCreateAccount() {
@@ -1449,12 +1453,15 @@ public class BankUIDemo {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     String selected = (String) e.getItem();
                     boolean isCustomer = selected.equals(Customer.class.getSimpleName());
+                    boolean isTeller = selected.equals(Teller.class.getSimpleName());
                     accountTypeLabel.setVisible(isCustomer);
                     accountTypeField.setVisible(isCustomer);
                     firstNameLabel.setVisible(isCustomer);
                     firstNameField.setVisible(isCustomer);
                     lastNameLabel.setVisible(isCustomer);
                     lastNameField.setVisible(isCustomer);
+                    branchLabel.setVisible(isTeller);
+                    branchNames.setVisible(isTeller);
                     revalidate();
                     repaint();
                 }
@@ -1469,28 +1476,40 @@ public class BankUIDemo {
                     "Card"
             });
             accountTypeLabel.setVisible(false);
-            accountTypeField.setVisible(true);
+            accountTypeField.setVisible(false);
             add(accountTypeLabel, g(c, 0, 4, 1));
             add(accountTypeField, g(c, 1, 4, 1));
+
+            // --- Branch Names (only for Teller) ---
+            branchNames = new JComboBox<>();
+            ArrayList<String> branches = DatabaseSingleton.getDatabase().getAllBranchNames();
+            for (String branch : branches) {
+                branchNames.addItem(branch);
+            }
+            branchLabel = new JLabel("Branch:");
+            branchLabel.setVisible(false);
+            branchNames.setVisible(false);
+            add(branchLabel, g(c, 0, 5, 1));
+            add(branchNames, g(c, 1, 5, 1));
 
             // --- First & Last name (for Customer) ---
             firstNameLabel = new JLabel("First Name:");
             lastNameLabel = new JLabel("Last Name:");
             firstNameField = new JTextField(15);
             lastNameField = new JTextField(15);
-            add(firstNameLabel, g(c, 0, 5, 1));
-            add(firstNameField, g(c, 1, 5, 1));
-            add(lastNameLabel, g(c, 0, 6, 1));
-            add(lastNameField, g(c, 1, 6, 1));
+            add(firstNameLabel, g(c, 0, 6, 1));
+            add(firstNameField, g(c, 1, 6, 1));
+            add(lastNameLabel, g(c, 0, 7, 1));
+            add(lastNameField, g(c, 1, 7, 1));
 
 
             // --- Create Button ---
             add(btn("Create Account", this::onCreateAccount),
-                    g(c, 0, 7, 2));
+                    g(c, 0, 8, 1));
 
             // --- Back Button ---
             add(btn("Back", () -> go("admin")),
-                    g(c, 0, 8, 2));
+                    g(c, 1, 8, 1));
 
         }
 
@@ -1515,6 +1534,11 @@ public class BankUIDemo {
             if (newUser instanceof Customer) {
                 ((Customer) newUser).setFirstName(firstName);
                 ((Customer) newUser).setLastName(lastName);
+            }
+            if (newUser instanceof Teller) {
+                String selectedBranchName = Objects.requireNonNull(branchNames.getSelectedItem()).toString();
+                Branch branch = DatabaseSingleton.getDatabase().getBranchByName(selectedBranchName);
+                ((Teller) newUser).setBranchID(branch.getId());
             }
             action.setNewUser(newUser);
             try {
