@@ -14,7 +14,9 @@ public class UpdatePassword extends Action {
     private User user;
     private String newPasssword;
     private String confirmationPassword;
+    private String currentPassword;
     private DatabaseSingleton db = DatabaseSingleton.getDatabase();
+    private boolean adminFlag;
 
 
     /**
@@ -26,6 +28,13 @@ public class UpdatePassword extends Action {
         return newPasssword;
     }
 
+    public void setCurrentPassword(String currentPassword){
+        this.currentPassword = currentPassword;
+        this.adminFlag = false;
+    }
+    public void setAdminFlag(){
+        this.adminFlag = true;
+    }
     /**
      * Sets the new password to be used.
      *
@@ -76,11 +85,17 @@ public class UpdatePassword extends Action {
      */
     @Override
     public void prepare() throws InvalidAuthenticationException, InvalidInputException {
-        if (!newPasssword.equals(confirmationPassword)) {
-            throw new InvalidInputException();
+        if(!adminFlag){
+            if(currentPassword == user.getPassword()){
+                throw new InvalidAuthenticationException();
+            }
         }
+
         if(newPasssword.isEmpty()){
             throw new IllegalArgumentException();
+        }
+        if (!newPasssword.equals(confirmationPassword)) {
+            throw new InvalidInputException();
         }
     }
     /**

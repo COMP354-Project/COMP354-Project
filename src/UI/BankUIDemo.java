@@ -1043,6 +1043,7 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("Personal Profile Update"), g(c, 0, 0, 2));
 
+
             add(new JLabel("Current Password:"), g(c, 0, 2, 1));
             currentPasswordField = new JPasswordField(15);
             add(currentPasswordField, g(c, 1, 2, 1));
@@ -1055,11 +1056,23 @@ public class BankUIDemo {
             newLastNameField = new JTextField(15);
             add(newLastNameField, g(c, 1, 4, 1));
 
+            addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentShown(ComponentEvent e) {
+                    resetFields(); // clear all text fields, selections, etc.
+                }
+            });
+
             add(btn("Update Info", this::onUpdateInfo),
                     g(c, 0, 5, 2));
 
 
             add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
+        }
+        private void resetFields() {
+            currentPasswordField.setText("");
+            newFirstNameField.setText("");
+            newLastNameField.setText("");
         }
         /**
          * Handles updating the customer's personal information.
@@ -1119,7 +1132,6 @@ public class BankUIDemo {
             setBorder(pad());
             GridBagConstraints c = gbc();
             add(title("Change Password"), g(c, 0, 0, 2));
-
             add(new JLabel("Current Password:"), g(c, 0, 2, 1));
             currentPasswordField = new JPasswordField(15);
             add(currentPasswordField, g(c, 1, 2, 1));
@@ -1134,12 +1146,25 @@ public class BankUIDemo {
             confirmPasswordField = new JPasswordField(15);
             add(confirmPasswordField, g(c, 1, 4, 1));
 
+            addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentShown(ComponentEvent e) {
+                    resetFields(); // clear all text fields, selections, etc.
+                }
+            });
+
+
             // Update Password Button
             add(btn("Update Password", this::onUpdatePassword),
                     g(c, 0, 5, 2));
 
 
             add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
+        }
+        private void resetFields() {
+            currentPasswordField.setText("");
+            newPasswordField.setText("");
+            confirmPasswordField.setText("");
         }
         /**
          * Handles the password update process.
@@ -1157,6 +1182,8 @@ public class BankUIDemo {
 
 
                 UpdatePassword action = new UpdatePassword();
+
+                action.setCurrentPassword(UserInput);
                 action.setUser(currentUser);
                 action.setNewPasssword(newPw);
                 action.setConfirmationPassword(confirmPw);
@@ -1166,15 +1193,16 @@ public class BankUIDemo {
                     toast("Password updated!");
 
                 } catch (InvalidAuthenticationException e) {
-                    toast("No permission to update password!");
+                    toast("Password cannot be the same as old one.");
                     return;
-                } catch (InvalidInputException e) {
-                    toast("Password not identical, please input again!");
-                    return;
-                }catch (IllegalArgumentException iae){
+                }
+                catch (IllegalArgumentException iae) {
                     toast("Password Field Cannot be empty");
+                }catch (InvalidInputException e) {
+                    toast("Password identical, please input again!");
+                    return;
                 } catch (InvalidAccountException e) {
-                    throw new RuntimeException(e);
+                    toast("Invalid Account");
                 }
 
             } else {
@@ -1533,8 +1561,15 @@ public class BankUIDemo {
             addComponentListener(new ComponentAdapter() {
                 public void componentShown(ComponentEvent e) {
                     loadAccounts();
+                    resetFields();
                 }
             });
+
+        }
+        private void resetFields() {
+
+            newPasswordField.setText("");
+            confirmPasswordField.setText("");
         }
         /**
          * Handles updating the selected user's password.
@@ -1546,20 +1581,26 @@ public class BankUIDemo {
             String newPw = new String(newPasswordField.getPassword());
             String confirmPw = new String(confirmPasswordField.getPassword());
 
+
             UpdatePassword action = new UpdatePassword();
             action.setUser(userDropDown.getSelectedUser());
+
+            action.setAdminFlag();
             action.setNewPasssword(newPw);
             action.setConfirmationPassword(confirmPw);
 
             try {
                 action.prepare();
                 action.execute();
+                toast("Password updated!");
             } catch (InvalidAuthenticationException e) {
                 toast(e.getMessage());
-            } catch (InvalidAccountException | InvalidInputException e) {
+            } catch (InvalidAccountException e){
+                toast(e.getMessage());
+            } catch (InvalidInputException e){
                 toast(e.getMessage());
             }
-            toast("Password updated!");
+
 
 
         }
@@ -2182,5 +2223,6 @@ public class BankUIDemo {
     private static void info(String m) {
         JOptionPane.showMessageDialog(null, m, "Info", JOptionPane.INFORMATION_MESSAGE);
     }
+
 }
 
