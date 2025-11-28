@@ -6,6 +6,10 @@ import bank.Account;
 import core.exceptions.InvalidAccountException;
 import core.exceptions.InvalidInputException;
 import database.DatabaseSingleton;
+import database.exceptions.EmptyPasswordField;
+
+import java.util.InvalidPropertiesFormatException;
+
 /**
  * An action to update a user's password in the system.
  * Ensures that the new password and confirmation password match before updating.
@@ -93,6 +97,9 @@ public class UpdatePassword extends Action {
 
         if(newPasssword.isEmpty()){
             throw new IllegalArgumentException();
+        }
+        if(confirmationPassword.isEmpty()){
+            throw new EmptyPasswordField();
         }
         if (!newPasssword.equals(confirmationPassword)) {
             throw new InvalidInputException();

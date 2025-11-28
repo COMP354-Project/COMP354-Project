@@ -28,6 +28,7 @@ import core.exceptions.InsufficientFundsException;
 import core.exceptions.InvalidAccountException;
 import core.exceptions.InvalidInputException;
 import database.DatabaseSingleton;
+import database.exceptions.EmptyPasswordField;
 
 // ---------- Models / Store (users + roles from JSON) ----------
 //class User {
@@ -1197,7 +1198,9 @@ public class BankUIDemo {
                     return;
                 }
                 catch (IllegalArgumentException iae) {
-                    toast("Password Field Cannot be empty");
+                    toast("Password Field Cannot Be Empty");
+                }catch (EmptyPasswordField e) {
+                    toast("Confirmation Password Cannot Be Empty");
                 }catch (InvalidInputException e) {
                     toast("Password identical, please input again!");
                     return;
@@ -1595,6 +1598,8 @@ public class BankUIDemo {
                 toast("Password updated!");
             } catch (InvalidAuthenticationException e) {
                 toast(e.getMessage());
+            }catch (EmptyPasswordField e) {
+                toast("Confirmation Password Cannot Be Empty");
             } catch (InvalidAccountException e){
                 toast(e.getMessage());
             } catch (InvalidInputException e){
