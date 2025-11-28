@@ -646,24 +646,31 @@ public class BankUIDemo {
             add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
         }
         private void onUpdateInfo() {
-            String newFirst = newFirstNameField.getText().trim();
-            String newLast = newLastNameField.getText().trim();
+            //Verifies Password
+            String UserInput = new String(currentPasswordField.getPassword());
+            if (UserInput.equals(currentUser.getPassword())) {
+                String newFirst = newFirstNameField.getText().trim();
+                String newLast = newLastNameField.getText().trim();
 
-            UpdateProfileAction action = new UpdateProfileAction();
-            action.setCustomer((Customer) currentUser);
-            action.setFirstName(newFirst);
-            action.setLastName(newLast);
+                UpdateProfileAction action = new UpdateProfileAction();
+                action.setCustomer((Customer) currentUser);
+                action.setFirstName(newFirst);
+                action.setLastName(newLast);
 
-            try {
-                action.prepare();
-                action.execute();
-                toast("Profile updated!");
-            } catch (InvalidInputException e) {
-                toast("Invalid input: " + e.getMessage());
-            } catch (InvalidAuthenticationException e) {
-                toast("You are not authorized to update this profile.");
-            } catch (InvalidAccountException e) {
-                throw new RuntimeException(e);
+                try {
+                    action.prepare();
+                    action.execute();
+                    toast("Profile updated!");
+                } catch (InvalidInputException e) {
+                    toast("Invalid input: " + e.getMessage());
+                } catch (InvalidAuthenticationException e) {
+                    toast("You are not authorized to update this profile.");
+                } catch (InvalidAccountException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else{
+                toast("Invalid Current Password");
             }
         }
     }
