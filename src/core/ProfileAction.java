@@ -9,11 +9,12 @@ import core.exceptions.InvalidInputException;
 import database.DatabaseSingleton;
 
 import javax.management.InvalidAttributeValueException;
+import java.util.ArrayList;
 
 public class ProfileAction extends Action {
 
     private User currentUser;
-    private Account userAccount;
+    private ArrayList<Account> userAccount;
 
     private boolean tellerFlag;
 
@@ -28,11 +29,11 @@ public class ProfileAction extends Action {
 
     @Override
     public void execute() throws InvalidAuthenticationException, InvalidAccountException {
-        Account account = DatabaseSingleton.getDatabase().getAccountByUser(currentUser);
-        if (account == null){
-            throw new InvalidAccountException();
+        if (currentUser == null){
+            throw new InvalidAuthenticationException();
         }
-        this.userAccount = account;
+        this.userAccount = DatabaseSingleton.getDatabase().getAccountsByEmail(currentUser.getEmail());
+
     }
 
     @Override
@@ -46,7 +47,7 @@ public class ProfileAction extends Action {
     public User getCurrentUser(){
         return this.currentUser;
     }
-    public Account getUserAccount(){
+    public ArrayList<Account> getUserAccount(){
         return this.userAccount;
     }
 

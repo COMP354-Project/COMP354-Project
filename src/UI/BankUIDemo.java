@@ -3,7 +3,6 @@ package UI;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
-import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
@@ -67,10 +66,6 @@ public class BankUIDemo {
     private String currentRole;
     protected User currentUser;
     private LoginPage loginPage;
-    private ProfileAction profile;
-
-    //Unused currently (but meant for the fund transfer with multiple account under the user
-    private Account currentAccount;
 
     //For the ATM
     private static Account ATM;
@@ -227,8 +222,7 @@ public class BankUIDemo {
             setBorder(pad());
             GridBagConstraints c = gbc();
             add(title("Account Information"), g(c, 0, 0, 2));
-
-            add(btn("Transaction History", () -> go("cust_account_transactions")));
+            add(btn("Transaction History", () -> go("cust_account_transactions")), g(c, 0, 1, 2));
             add(btn("Account Summary", () -> go("cust_account_summary")), g(c, 0, 2, 2));
             add(btn("Fund Transfer", () -> go("fund_transfer")), g(c, 0, 3, 2));
             add(btn("Deposit / Withdraw", () -> go("withdraw_deposit")), g(c, 0, 4, 2));
@@ -242,23 +236,77 @@ public class BankUIDemo {
      *
      */
     class CustomerAccountSummary extends JPanel {
-        //private ProfileAction profile;
+        private final AccountComboBox accountDropDown;
+        private ArrayList<Account> accounts;
+        private Account selectedAccount;
+
 
         CustomerAccountSummary() {
             super(new GridBagLayout());
             setBorder(pad());
+            GridBagConstraints c = gbc();
+
+
+            add(title("Account Summary"), g(c, 0, 0, 2));
+
+            add(new JLabel("Select Account:"), g(c, 0, 1, 1));
+            accountDropDown = new CustomerAccountSummary.AccountComboBox();
+            add(accountDropDown, g(c, 0, 2, 1));
+
+
+            if (selectedAccount != null) {
+                add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
+
+                if (selectedAccount instanceof Card) { //Credit Card
+                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 5, 2));
+                    add(new JLabel("Credit Limit: $" + ((Card) selectedAccount).getCreditLimit()), g(c, 0, 6, 2));
+                    add(new JLabel("Credit Usage: $" + ((Card) selectedAccount).getCreditUsage()), g(c, 0, 7, 2));
+                } else if (selectedAccount instanceof Saving) { //Saving
+                    add(new JLabel("Account Type: Saving"), g(c, 0, 5, 2));
+                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
+                } else {//Chequing
+                    add(new JLabel("Account Type: Chequing"), g(c, 0, 5, 2));
+                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
+                }
+            }
+
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 7, 2));
+
             addComponentListener(new ComponentAdapter() {
                 public void componentShown(ComponentEvent e) {
-                    displaySummary();   // ← RUN UPDATE HERE
+                    loadAccounts();
                     revalidate();
                     repaint();
                 }
             });
+
+            // This is when an new account is selected to view summary
+            accountDropDown.addActionListener(e -> {
+                selectedAccount = accountDropDown.getSelectAccount();
+                if (selectedAccount != null) {
+                    add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
+
+                    if (selectedAccount instanceof Card) { //Credit Card
+                        add(new JLabel("Account Type: Credit Card"), g(c, 0, 5, 2));
+                        add(new JLabel("Credit Limit: $" + ((Card) selectedAccount).getCreditLimit()), g(c, 0, 6, 2));
+                        add(new JLabel("Credit Usage: $" + ((Card) selectedAccount).getCreditUsage()), g(c, 0, 7, 2));
+                    } else if (selectedAccount instanceof Saving) { //Saving
+                        add(new JLabel("Account Type: Saving"), g(c, 0, 5, 2));
+                        add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
+                    } else {//Chequing
+                        add(new JLabel("Account Type: Chequing"), g(c, 0, 5, 2));
+                        add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
+                    }
+                }
+
+
+                revalidate();
+                repaint();
+            });
         }
 
-        private void displaySummary() {
-            removeAll();
-            profile = new ProfileAction();
+        private void loadAccounts() {
+            ProfileAction profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
 
             try {
@@ -266,58 +314,92 @@ public class BankUIDemo {
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
                 throw new RuntimeException(e);
             }
+            accounts = profile.getUserAccount();
+            accountDropDown.setAccounts(accounts);
+        }
 
-            GridBagConstraints c = gbc();
-            add(title("Account Summary"), g(c, 0, 0, 2));
-            add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
-            if (profile.getUserAccount() != null) {
-                add(new JLabel("Customer: " + profile.getUserAccount().getFullName()), g(c, 0, 1, 2));
-                add(new JLabel("Account Number: " + profile.getUserAccount().getAccountID()), g(c, 0, 2, 2));
+        static class AccountComboBox extends JComboBox<Account> {
+            private final DefaultComboBoxModel<Account> model;
 
-                if (profile.getUserAccount() instanceof Card) { //Credit Card
-                    Card cc = (Card) profile.getUserAccount();
-                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 3, 2));
-                    add(new JLabel("Credit Limit: $" + cc.getCreditLimit()), g(c, 0, 4, 2));
-                    add(new JLabel("Credit Usage: $" + cc.getCreditUsage()), g(c, 0, 5, 2));
-                } else if (profile.getUserAccount() instanceof Saving) { //Saving
-                    add(new JLabel("Account Type: Saving"), g(c, 0, 3, 2));
-                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 4, 2));
-                } else {//Chequing
-                    add(new JLabel("Account Type: Chequing"), g(c, 0, 3, 2));
-                    add(new JLabel("Balance: $" + profile.getUserAccount().getBalance()), g(c, 0, 4, 2));
-                }
-            } else {
-                add(new JLabel("No account found"), g(c, 0, 1, 2));
+            public AccountComboBox() {
+                super();
+                model = new DefaultComboBoxModel<>();
+                setModel(model);
+
+                setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public java.awt.Component getListCellRendererComponent(
+                            JList<?> list,
+                            Object value,
+                            int index,
+                            boolean isSelected,
+                            boolean cellHasFocus) {
+
+                        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                        if (value instanceof Account account) {
+                            setText(getDisplayText(account));
+                        } else {
+                            setText("");
+                        }
+
+                        return this;
+                    }
+                });
             }
+
+            /**
+             * Replace all users in the combo box.
+             */
+            public void setAccounts(List<Account> accounts) {
+                model.removeAllElements();
+                if (accounts == null) return;
+                for (Account a : accounts) {
+                    model.addElement(a);
+                }
+                if (model.getSize() > 0) {
+                    setSelectedIndex(0);
+                }
+            }
+
+            /**
+             * Returns the User currently selected, or null.
+             */
+            public Account getSelectAccount() {
+                Object sel = getSelectedItem();
+                return (sel instanceof Account) ? (Account) sel : null;
+            }
+
+            private String getDisplayText(Account account) {
+                return account.getClass().getSimpleName().toUpperCase() + ": $" + account.getBalance();
+            }
+
         }
 
     }
 
     class FundTransferUI extends JPanel {
-        //private Account currentAccount;
-        JComboBox<String> senderAccountSelector = new JComboBox<>();
+        // ComboBox for selection of sender and receiver for the transaction
+        AccountComboBox senderAccountSelector = new AccountComboBox();
+        AccountComboBox recipientAccountSelector = new AccountComboBox();
 
+        // Search box for searching the account
         JTextField recipientEmail = new JTextField(22);
-        JComboBox<String> recipientAccountSelector = new JComboBox<>();
 
         JTextField amountInput = new JTextField(22);
 
         FundTransferUI() {
             super(new GridBagLayout());
             setBorder(pad());
+            GridBagConstraints c = gbc();
 
             addComponentListener(new ComponentAdapter() {
                 public void componentShown(ComponentEvent e) {
-                    TransferUI();
+                    fetchSenderAccount();
                     revalidate();
                     repaint();
                 }
             });
-        }
-
-        private void TransferUI() {
-            GridBagConstraints c = gbc();
-            resetForm();
 
             add(title("Fund Transfer"), g(c, 0, 0, 2));
             senderAccountSelector.setEnabled(true);
@@ -325,8 +407,10 @@ public class BankUIDemo {
 
             row(this, c, 3, "Recipient: ", recipientEmail);
             JButton searchBtn = btn("Search", () -> {
-                fetchSenderAccount();
-                findRecipient();
+                if (findRecipient()) {
+                    revalidate();
+                    repaint();
+                }
             });
 
             add(searchBtn, g(c, 0, 4, 2));
@@ -340,88 +424,143 @@ public class BankUIDemo {
             JButton confirmBtn = btn("Confirm", this::conductTransfer);
             add(confirmBtn, g(c, 0, 7, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 8, 2));
+
+
         }
 
+        static class AccountComboBox extends JComboBox<Account> {
+            private final DefaultComboBoxModel<Account> model;
+
+            public AccountComboBox() {
+                super();
+                model = new DefaultComboBoxModel<>();
+                setModel(model);
+
+                setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public java.awt.Component getListCellRendererComponent(
+                            JList<?> list,
+                            Object value,
+                            int index,
+                            boolean isSelected,
+                            boolean cellHasFocus) {
+
+                        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                        if (value instanceof Account account) {
+                            setText(getDisplayText(account));
+                        } else {
+                            setText("");
+                        }
+
+                        return this;
+                    }
+                });
+            }
+
+            /**
+             * Replace all users in the combo box.
+             */
+            public void setAccounts(List<Account> accounts) {
+                model.removeAllElements();
+                if (accounts == null) return;
+                for (Account a : accounts) {
+                    model.addElement(a);
+                }
+                if (model.getSize() > 0) {
+                    setSelectedIndex(0);
+                }
+            }
+
+            /**
+             * Returns the User currently selected, or null.
+             */
+            public Account getSelectAccount() {
+                Object sel = getSelectedItem();
+                return (sel instanceof Account) ? (Account) sel : null;
+            }
+
+            private String getDisplayText(Account account) {
+                return account.getClass().getSimpleName().toUpperCase() + ": $" + account.getBalance();
+            }
+        }
+
+        /**
+         *
+         */
         private void resetForm() {
             senderAccountSelector.removeAllItems();
             recipientEmail.setText("");
             recipientAccountSelector.removeAllItems();
             recipientAccountSelector.setEnabled(false);
             amountInput.setText("");
-
-            ArrayList<Account> myAccounts = DatabaseSingleton.getDatabase().getAccountsByEmail(currentUser.getEmail());
-            for (Account acc : myAccounts) {
-                senderAccountSelector.addItem(String.valueOf(acc.getAccountID()));
-            }
         }
 
 
         //Needs the proper fixes before it can work for many accounts of the same user (currently 1-1 relation)
         private void fetchSenderAccount() {
-            profile = new ProfileAction();
+            ProfileAction profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
             try {
                 profile.prepare();
                 profile.execute();
-                currentAccount = profile.getUserAccount();
+                senderAccountSelector.setAccounts(profile.getUserAccount());
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
                 toast("System Timeout");
             } catch (InvalidInputException e) {
                 toast("Invalid Input");
-            }catch (Exception e){
+            } catch (Exception e) {
                 toast("Other exceptions");
             }
         }
 
-        private void findRecipient() {
+        private boolean findRecipient() {
+            ProfileAction action = new ProfileAction();
             try {
                 String email = recipientEmail.getText().trim();
                 User recipient = DatabaseSingleton.getDatabase().getUserByEmail(email);
 
+                action.setCurrentUser(recipient);
+                action.execute();
                 if (recipient == null) {
                     toast("Email not found");
                     recipientAccountSelector.setEnabled(false);
                     recipientAccountSelector.removeAllItems();
-                    return;
+                    return false;
                 }
-
-                ArrayList<Account> accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
-                recipientAccountSelector.removeAllItems();
-                for (Account acc : accounts) {
-                    if (acc instanceof Chequing) {
-                        recipientAccountSelector.addItem("Chequing: " + acc.getAccountID());
-                    }
-                    if (acc instanceof Saving) {
-                        recipientAccountSelector.addItem("Saving: " + acc.getAccountID());
-                    } else {
-                        recipientAccountSelector.addItem("Credit Card: " + acc.getAccountID());
-                    }
-                }
-                recipientAccountSelector.setEnabled(true);
-
-            } catch (Exception e) {
-                toast("Invalid destination account");
+            } catch (InvalidAuthenticationException e) {
+                throw new RuntimeException(e);
+            } catch (InvalidAccountException e) {
+                throw new RuntimeException(e);
             }
+            recipientAccountSelector.setAccounts(action.getUserAccount());
+
+//                ArrayList<Account> accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
+//                recipientAccountSelector.removeAllItems();
+//                for (Account acc : accounts) {
+//                    if (acc instanceof Chequing) {
+//                        recipientAccountSelector.addItem("Chequing: " + acc.getAccountID());
+//                    }
+//                    if (acc instanceof Saving) {
+//                        recipientAccountSelector.addItem("Saving: " + acc.getAccountID());
+//                    } else {
+//                        recipientAccountSelector.addItem("Credit Card: " + acc.getAccountID());
+//                    }
+//                }
+            recipientAccountSelector.setEnabled(true);
+
+            return true;
         }
 
         private boolean conductTransfer() {
             try {
-
                 double amount = Double.parseDouble(amountInput.getText());
-                String selected = (String) recipientAccountSelector.getSelectedItem();
-                String parts[] = selected.split(":");
-
-                Account destinationAcc = DatabaseSingleton.getDatabase().getAccountByID(parts[1].trim());
-                Transaction transaction = new Transaction(profile.getUserAccount(), destinationAcc, LocalDateTime.now(), amount);
+                Transaction transaction = new Transaction(senderAccountSelector.getSelectAccount(), recipientAccountSelector.getSelectAccount(), LocalDateTime.now(), amount);
                 ExecuteTransactionAction sendAction = new ExecuteTransactionAction();
                 sendAction.setUser(currentUser);
                 sendAction.setTransactionDetails(transaction);
                 sendAction.prepare();
                 sendAction.execute();
-
-                toast("Transaction Sent");
-                return true; //signals the button
-
             } catch (InvalidInputException ie) {
                 toast("Invalid recipient");
                 return false;
@@ -429,6 +568,9 @@ public class BankUIDemo {
                 toast("Invalid amount");
                 return false; //signals the button
             }
+            toast("Transaction Sent");
+            resetForm(); // Reset the form after a transaction is successfully executed.
+            return true; //signals the button
         }
     }
 
@@ -437,6 +579,7 @@ public class BankUIDemo {
         JComboBox<String> box = new JComboBox<>(choices);
         JTextField amountInput = new JTextField(22);
 
+        AccountComboBox accountBox = new WithdrawDepositUI.AccountComboBox();
 
         WithdrawDepositUI() {
             super(new GridBagLayout());
@@ -444,50 +587,139 @@ public class BankUIDemo {
             GridBagConstraints c = gbc();
             add(title("Withdraw/Deposit"), g(c, 0, 0, 2));
             add(box, g(c, 0, 1, 2));
-            row(this, c, 2, "Amount: ", amountInput);
+
+            add(new JLabel("Select Account:"), g(c, 0, 1, 1));
+
+            add(accountBox, g(c, 0, 2, 1));
+            row(this, c, 3, "Amount: ", amountInput);
 
             addComponentListener(new ComponentAdapter() {
                 public void componentShown(ComponentEvent e) {
+                    ProfileAction profile = new ProfileAction();
+                    profile.setCurrentUser(currentUser);
                     try {
-                        profile = new ProfileAction();
-                        profile.setCurrentUser(currentUser);
                         profile.execute();
-                        currentAccount = profile.getUserAccount();
                     } catch (InvalidAuthenticationException | InvalidAccountException ie) {
                         throw new RuntimeException(ie);
                     }
+                    accountBox.setAccounts(profile.getUserAccount());
                     revalidate();
                     repaint();
                 }
             });
             ATM = DatabaseSingleton.getDatabase().getAccountByID("8df41236-c149-4421-83e8-07a4e4618498");
-
-            add(btn("Confirm", () -> info("Confirm Withdraw/Deposit")), g(c, 0, 4, 2));
+            add(btn("Confirm", () -> {
+                this.WithdrawDeposit();
+                revalidate();
+                repaint();
+            }), g(c, 0, 4, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
         }
 
+        class AccountComboBox extends JComboBox<Account> {
+            private final DefaultComboBoxModel<Account> model;
+
+            public AccountComboBox() {
+                super();
+                model = new DefaultComboBoxModel<>();
+                setModel(model);
+
+                setRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public java.awt.Component getListCellRendererComponent(
+                            JList<?> list,
+                            Object value,
+                            int index,
+                            boolean isSelected,
+                            boolean cellHasFocus) {
+
+                        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                        if (value instanceof Account account) {
+                            setText(getDisplayText(account));
+                        } else {
+                            setText("");
+                        }
+
+                        return this;
+                    }
+                });
+            }
+
+            /**
+             * Replace all users in the combo box.
+             */
+            public void setAccounts(List<Account> accounts) {
+                model.removeAllElements();
+                if (accounts == null) return;
+                for (Account a : accounts) {
+                    model.addElement(a);
+                }
+                if (model.getSize() > 0) {
+                    setSelectedIndex(0);
+                }
+            }
+
+            /**
+             * Returns the User currently selected, or null.
+             */
+            public Account getSelectAccount() {
+                Object sel = getSelectedItem();
+                return (sel instanceof Account) ? (Account) sel : null;
+            }
+
+            private String getDisplayText(Account account) {
+                return account.getClass().getSimpleName().toUpperCase() + ": $" + account.getBalance();
+            }
+        }
+
+
         private void WithdrawDeposit() {
             String selected = (String) box.getSelectedItem();
-            double amount = Double.parseDouble(amountInput.getText());
+            double amount = 0;
+            try {
+                amount = Double.parseDouble(amountInput.getText());
+            } catch (NumberFormatException e) {
+                toast("Invalid amount!");
+                return;
+            }
             ExecuteTransactionAction withdrawDepositAction = new ExecuteTransactionAction();
             Transaction transaction;
             String message;
 
             if (Objects.equals(selected, "Deposit")) {
-                transaction = new Transaction(ATM, profile.getUserAccount(), LocalDateTime.now(), amount);
+                transaction = new Transaction(ATM, accountBox.getSelectAccount(), LocalDateTime.now(), amount);
                 withdrawDepositAction.setUser(currentUser);
                 message = "Money Deposited";
             } else {
-                transaction = new Transaction(profile.getUserAccount(), ATM, LocalDateTime.now(), amount);
+                transaction = new Transaction(accountBox.getSelectAccount(), ATM, LocalDateTime.now(), amount);
                 withdrawDepositAction.setUser(currentUser);
                 message = "Money Withdrew";
             }
-            try {
-                withdrawDepositAction.setTransactionDetails(transaction);
-                withdrawDepositAction.prepare();
-                withdrawDepositAction.execute();
-                toast(message);
+            withdrawDepositAction.setTransactionDetails(transaction);
 
+            try {
+                withdrawDepositAction.prepare();
+            } catch (InvalidAuthenticationException e) {
+                toast(e.getMessage());
+                return;
+            } catch (InvalidInputException e) {
+                toast(e.getMessage());
+                return;
+            }
+
+            try {
+                withdrawDepositAction.execute();
+            } catch (InvalidAuthenticationException e) {
+                toast(e.getMessage());
+            } catch (InvalidAccountException e) {
+                toast(e.getMessage());
+            } catch (InsufficientFundsException e) {
+                toast(e.getMessage());
+            }
+
+            /*
+                     toast(message);
             } catch (InsufficientFundsException e) {
                 toast("Insufficient Balance");
             } catch (InvalidAuthenticationException iae) {
@@ -497,6 +729,10 @@ public class BankUIDemo {
             } catch (InvalidAccountException e) {
                 toast("Invalid account");
             }
+
+
+
+             */
 
         }
     }
@@ -620,7 +856,6 @@ public class BankUIDemo {
         private final JPasswordField currentPasswordField;
         private final JTextField newFirstNameField;
         private final JTextField newLastNameField;
-
         CustomerProfileUpdate() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -676,7 +911,7 @@ public class BankUIDemo {
     }
 
 
-    class CustomerPasswordUpdate extends JPanel{
+    class CustomerPasswordUpdate extends JPanel {
         private final JPasswordField currentPasswordField;
         private final JPasswordField newPasswordField;
         private final JPasswordField confirmPasswordField;
@@ -711,7 +946,7 @@ public class BankUIDemo {
 
         private void onUpdatePassword() {
             String UserInput = new String(currentPasswordField.getPassword());
-            if (UserInput.equals(currentUser.getPassword())){
+            if (UserInput.equals(currentUser.getPassword())) {
                 String newPw = new String(newPasswordField.getPassword());
                 String confirmPw = new String(confirmPasswordField.getPassword());
 
@@ -738,8 +973,7 @@ public class BankUIDemo {
                 }
                 toast("Password updated!");
 
-            }
-            else{
+            } else {
                 toast("Invalid Current Password");
             }
         }
@@ -887,7 +1121,7 @@ public class BankUIDemo {
 
             JScrollPane scroll = new JScrollPane(viewTable);
             GridBagConstraints tableC = g(c, 0, 1, 2);
-            tableC.weighty  = 1;
+            tableC.weighty = 1;
             tableC.fill = GridBagConstraints.BOTH;
             add(scroll, tableC);
 
@@ -907,9 +1141,10 @@ public class BankUIDemo {
                 }
             });
         }
+
         private void loadBranchTransactions() {
             try {
-                String tellerBranchID = ((Teller)currentUser).getBranchID();
+                String tellerBranchID = ((Teller) currentUser).getBranchID();
                 Branch tellerBranch = DatabaseSingleton.getDatabase().getBranchByID(tellerBranchID);
                 ArrayList<Account> accounts = DatabaseSingleton.getDatabase()
                         .getAccountsByBranch(tellerBranchID);
@@ -1270,6 +1505,7 @@ public class BankUIDemo {
         protected DeactivateAccountAction deactivateAccountAction;
         private ArrayList<Account> accounts;
         private Account selectedAccount;
+
         AdminDeactivateAccount() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -1295,7 +1531,7 @@ public class BankUIDemo {
 
             add(btn("Deactivate Account", () -> {
                 selectedAccount = accountsDropDown.getSelectedAccount();
-                if (selectedAccount.getAccountStatus() == Account.AccountStatus.INACTIVE){
+                if (selectedAccount.getAccountStatus() == Account.AccountStatus.INACTIVE) {
                     toast("Account has already been deactivated.");
                     resetFields();
                     return;

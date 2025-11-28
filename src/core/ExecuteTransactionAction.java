@@ -23,6 +23,7 @@ public class ExecuteTransactionAction extends Action {
 
     public ExecuteTransactionAction() {
         this.db = DatabaseSingleton.getDatabase();
+        this.authorized = AUTH_STATUS.NOT_AUTHORIZED;
     }
 
     //Setup phase
@@ -40,7 +41,7 @@ public class ExecuteTransactionAction extends Action {
 
     //Preparation phase
     @Override
-    public void prepare() throws InvalidAuthenticationException, TimeOutException, InvalidInputException {
+    public void prepare() throws InvalidAuthenticationException, TimeOutException, InvalidInputException, InsufficientFundsException {
         //Validate inputted data
         if (user == null || transactionDetails.getSender() == null || transactionDetails == null | transactionDetails.getReceiver() == null) {
             throw new InvalidInputException();
@@ -48,20 +49,19 @@ public class ExecuteTransactionAction extends Action {
         if (transactionDetails.getSender() == transactionDetails.getReceiver()) { //checks for sending money to the same account (should work for multiple accounts of different types)
             throw new InvalidInputException();
         }
-
         if (transactionDetails.getAmount() <= 0) {
-            throw new InsufficientFundsException();
+            throw new InvalidInputException();
         }
+    }
+
+    @Override
+    public void execute() throws InvalidAuthenticationException, InvalidAccountException {
         if (transactionDetails.getSender().getBalance() < 0) {
             throw new InsufficientFundsException();
         }
         if (transactionDetails.getSender().getBalance() < transactionDetails.getAmount()) {
             throw new InsufficientFundsException();
         }
-    }
-
-    @Override
-    public void execute() throws InvalidAuthenticationException, InvalidAccountException {
         //Flag check
         // Authorize the action
         // If not authorized, this line of code will throw exception
@@ -91,9 +91,13 @@ public class ExecuteTransactionAction extends Action {
             throw new InvalidAccountException();
         }
 
+
         // Case: if user is a customer
         if (user instanceof Customer) {
             if (account.getCustomer().equals(user)) {
+                authorized = AUTH_STATUS.AUTHORIZED;
+            } else if (transactionDetails.getSender().getAccountID().equals("8df41236-c149-4421-83e8-07a4e4618498")) {
+                // Hard-coded, letting all transactions with ATM as sender, be authorized.
                 authorized = AUTH_STATUS.AUTHORIZED;
             } else {
                 throw new LackOfClearanceException();
