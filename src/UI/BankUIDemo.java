@@ -286,6 +286,7 @@ public class BankUIDemo {
             // This is when an new account is selected to view summary
             accountDropDown.addActionListener(e -> {
                 selectedAccount = accountDropDown.getSelectAccount();
+                clearSummaryLabels();
                 if (selectedAccount != null) {
                     add(new JLabel("Customer: " + selectedAccount.getCustomer().getFirstName() + " " + selectedAccount.getCustomer().getLastName()), g(c, 0, 3, 2));
                     add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
@@ -308,6 +309,15 @@ public class BankUIDemo {
                 repaint();
             });
         }
+        private void clearSummaryLabels() {
+            // Remove everything except dropdown and buttons
+            for (Component comp : getComponents()) {
+                if (comp != accountDropDown && !(comp instanceof JButton) && !(comp instanceof JLabel && ((JLabel) comp).getText().equals("Select Account:"))) {
+                    remove(comp);
+                }
+            }
+        }
+
 
         private void loadAccounts() {
             ProfileAction profile = new ProfileAction();
