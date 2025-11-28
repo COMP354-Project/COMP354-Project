@@ -206,6 +206,25 @@ public class DatabaseSingleton {
     }
 
     /**
+     * Retrieve all branch names in the database.
+     *
+     * @return An ArrayList of all branch names.
+     */
+    public ArrayList<String> getAllBranchNames() {
+        return this.branchData.getAllBranchNames();
+    }
+
+    /**
+     * Retrieve a branch by its name.
+     *
+     * @param branchName The name of the branch to be retrieved.
+     * @return The Branch object with the specified name.
+     */
+    public Branch getBranchByName(String branchName) {
+        return this.branchData.getBranchByName(branchName);
+    }
+
+    /**
      * Add a new user to the database. This method should be invoked every time an Action related to creating a user is performed.
      *
      * @param user The User object to be added.
@@ -1175,6 +1194,37 @@ class BranchData implements FileProcessor {
         }
         this.branches.put(branch.getId(), branch);
         this.save(); // Save changes to file
+    }
+
+    /**
+     * Retrieve all branch names in the database.
+     *
+     * @return An ArrayList of all branch names in the database.
+     *
+     */
+    public ArrayList<String> getAllBranchNames() {
+        ArrayList<String> branchNames = new ArrayList<>();
+        for (Branch branch : this.branches.values()) {
+            branchNames.add(branch.getName());
+        }
+        return branchNames;
+    }
+
+    /**
+     * Retrieve a branch by its name.
+     *
+     * @param branchName The name of the branch to be retrieved.
+     * @return The Branch object with the specified name.
+     * @throws BranchNotFoundException if the branch with the specified name is not found.
+     *
+     */
+    public Branch getBranchByName(String branchName) throws BranchNotFoundException {
+        for (Branch branch : this.branches.values()) {
+            if (branch.getName().equals(branchName)) {
+                return branch;
+            }
+        }
+        throw new BranchNotFoundException("Branch with name " + branchName + " not found.");
     }
 
     /**
