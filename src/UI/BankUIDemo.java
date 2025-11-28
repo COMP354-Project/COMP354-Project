@@ -116,7 +116,7 @@ public class BankUIDemo {
 
         cards.show(root, "login");
         frame.setContentPane(root);
-        frame.setPreferredSize(new Dimension(390, 250)); // bigger window
+        frame.setPreferredSize(new Dimension(500, 400)); // bigger window
 
         frame.pack();
         frame.setLocationByPlatform(true);
@@ -254,22 +254,24 @@ public class BankUIDemo {
             accountDropDown = new AccountComboBox();
             add(accountDropDown, g(c, 0, 2, 1));
 
+            //this part seems redundant, it is still able to show the details without it
+//            if (selectedAccount != null) {
+//                add(new JLabel("Customer: " + selectedAccount.getCustomer().getFirstName() + " " + selectedAccount.getCustomer().getLastName()), g(c, 0, 3, 2));
+//                add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
+//
+//                if (selectedAccount instanceof Card) { //Credit Card
+//                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 5, 2));
+//                    add(new JLabel("Credit Limit: $" + ((Card) selectedAccount).getCreditLimit()), g(c, 0, 6, 2));
+//                    add(new JLabel("Credit Usage: $" + ((Card) selectedAccount).getCreditUsage()), g(c, 0, 7, 2));
+//                } else if (selectedAccount instanceof Saving) { //Saving
+//                    add(new JLabel("Account Type: Saving"), g(c, 0, 5, 2));
+//                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
+//                } else {//Chequing
+//                    add(new JLabel("Account Type: Chequing"), g(c, 0, 5, 2));
+//                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
+//                }
+//            }
 
-            if (selectedAccount != null) {
-                add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
-
-                if (selectedAccount instanceof Card) { //Credit Card
-                    add(new JLabel("Account Type: Credit Card"), g(c, 0, 5, 2));
-                    add(new JLabel("Credit Limit: $" + ((Card) selectedAccount).getCreditLimit()), g(c, 0, 6, 2));
-                    add(new JLabel("Credit Usage: $" + ((Card) selectedAccount).getCreditUsage()), g(c, 0, 7, 2));
-                } else if (selectedAccount instanceof Saving) { //Saving
-                    add(new JLabel("Account Type: Saving"), g(c, 0, 5, 2));
-                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
-                } else {//Chequing
-                    add(new JLabel("Account Type: Chequing"), g(c, 0, 5, 2));
-                    add(new JLabel("Balance: $" + selectedAccount.getBalance()), g(c, 0, 6, 2));
-                }
-            }
 
             add(btn("Back", () -> go("cust_account")), g(c, 0, 7, 2));
 
@@ -285,6 +287,7 @@ public class BankUIDemo {
             accountDropDown.addActionListener(e -> {
                 selectedAccount = accountDropDown.getSelectAccount();
                 if (selectedAccount != null) {
+                    add(new JLabel("Customer: " + selectedAccount.getCustomer().getFirstName() + " " + selectedAccount.getCustomer().getLastName()), g(c, 0, 3, 2));
                     add(new JLabel("Account Number: " + selectedAccount.getAccountID()), g(c, 0, 4, 2));
 
                     if (selectedAccount instanceof Card) { //Credit Card
@@ -725,6 +728,8 @@ public class BankUIDemo {
                 toast("Insufficient Balance");
             } catch (InvalidAuthenticationException iae) {
                 toast("Invalid ID");
+            } catch (InvalidInputException iie) {
+                toast("Invalid Input");
             } catch (InvalidAccountException e) {
                 toast("Invalid account");
             }
@@ -851,15 +856,61 @@ public class BankUIDemo {
         }
     }
 
-    class CustomerProfileUpdate extends JPanel {
+    class CustomerProfileUpdate extends JPanel{
+        private final JPasswordField currentPasswordField;
+        private final JTextField newFirstNameField;
+        private final JTextField newLastNameField;
         CustomerProfileUpdate() {
             super(new GridBagLayout());
             setBorder(pad());
             GridBagConstraints c = gbc();
             add(title("Personal Profile Update"), g(c, 0, 0, 2));
 
+            add(new JLabel("Current Password:"), g(c, 0, 2, 1));
+            currentPasswordField = new JPasswordField(15);
+            add(currentPasswordField, g(c, 1, 2, 1));
 
-            add(btn("Back", () -> go("cust_profile")), g(c, 0, 3, 2));
+            add(new JLabel("Current First Name:"), g(c, 0, 3, 1));
+            newFirstNameField = new JTextField(15);
+            add(newFirstNameField, g(c, 1, 3, 1));
+
+            add(new JLabel("Current Last Name:"), g(c, 0, 4, 1));
+            newLastNameField = new JTextField(15);
+            add(newLastNameField, g(c, 1, 4, 1));
+
+            add(btn("Update Info", this::onUpdateInfo),
+                    g(c, 0, 5, 2));
+
+
+            add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
+        }
+        private void onUpdateInfo() {
+            //Verifies Password
+            String UserInput = new String(currentPasswordField.getPassword());
+            if (UserInput.equals(currentUser.getPassword())) {
+                String newFirst = newFirstNameField.getText().trim();
+                String newLast = newLastNameField.getText().trim();
+
+                UpdateProfileAction action = new UpdateProfileAction();
+                action.setCustomer((Customer) currentUser);
+                action.setFirstName(newFirst);
+                action.setLastName(newLast);
+
+                try {
+                    action.prepare();
+                    action.execute();
+                    toast("Profile updated!");
+                } catch (InvalidInputException e) {
+                    toast("Invalid input: " + e.getMessage());
+                } catch (InvalidAuthenticationException e) {
+                    toast("You are not authorized to update this profile.");
+                } catch (InvalidAccountException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else{
+                toast("Invalid Current Password");
+            }
         }
     }
 
@@ -868,7 +919,6 @@ public class BankUIDemo {
         private final JPasswordField currentPasswordField;
         private final JPasswordField newPasswordField;
         private final JPasswordField confirmPasswordField;
-        private ArrayList<User> users = null;
 
         CustomerPasswordUpdate() {
             super(new GridBagLayout());
