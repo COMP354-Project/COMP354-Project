@@ -10,7 +10,13 @@ import database.DatabaseSingleton;
  * An action is an operation of the banking system (similar to an use case)
  */
 public abstract class Action implements Authorizable {
-
+    /**
+     * Indicates the authorization status of the current action.
+     * <p>
+     * This value is set during {@code prepare()} to determine whether the user
+     * has sufficient permissions to execute the requested action.
+     * </p>
+     */
     protected AUTH_STATUS authorized;
 
     /***
@@ -25,6 +31,11 @@ public abstract class Action implements Authorizable {
      */
     abstract public void execute() throws InvalidAuthenticationException, InvalidAccountException;
 
+    /**
+     * Returns whether the action is authorized to be executed.
+     *
+     * @return true if the action is authorized; false otherwise
+     */
     @Override
     public boolean isAuthorized() {
         return (authorized.equals(AUTH_STATUS.AUTHORIZED));

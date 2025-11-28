@@ -30,7 +30,7 @@ import database.exceptions.*;
  *     <li><em>BranchData</em>: Manages branch data, including loading from and saving to JSON files.</li>
  * </ul>
  *
- * @author Cong Minh Le (40264100)
+ * @author Cong Minh Le
  */
 public class DatabaseSingleton {
     private static DatabaseSingleton db;
@@ -60,7 +60,15 @@ public class DatabaseSingleton {
             }
         }
     }
-
+    /**
+     * Returns the singleton instance of the database.
+     * <p>
+     * If the database has not yet been initialized, this method creates a new
+     * {@link DatabaseSingleton} instance. Otherwise, it returns the existing one.
+     * </p>
+     *
+     * @return the singleton {@link DatabaseSingleton} instance
+     */
     public static DatabaseSingleton getDatabase() {
         // If database isn't instantiated, initialise it and return it
         // Else, return the initialised database

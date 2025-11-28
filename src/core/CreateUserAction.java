@@ -18,29 +18,59 @@ import database.exceptions.UserAlreadyExistedException;
  * the user is added to the database if they do not already exist.</p>
  */
 public class CreateUserAction extends Action {
+    /** Reference to the database singleton. */
     private final DatabaseSingleton db = DatabaseSingleton.getDatabase();
     // Inputs
+    /** The new user to be created. */
     private User newUser;
+    /** The user performing this action. */
     private User user;
     // Outputs
+    /** Success message for account creation. */
     public final static String MESSAGE = "Account created successfully!";
 
+    /**
+     * Returns the user performing this action.
+     *
+     * @return the {@link User} performing this action
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * Sets the user performing this action.
+     *
+     * @param user the {@link User} performing the action
+     */
     public void setUser(User user) {
         this.user = user;
     }
 
+    /**
+     * Returns the new user to be created.
+     *
+     * @return the {@link User} being added
+     */
     public User getNewUser() {
         return newUser;
     }
 
+    /**
+     * Sets the new user to be created.
+     *
+     * @param newUser the {@link User} to add to the system
+     */
     public void setNewUser(User newUser) {
         this.newUser = newUser;
     }
 
+    /**
+     * Prepares the action by validating inputs.
+     *
+     * @throws InvalidAuthenticationException if the user is not authenticated
+     * @throws InvalidInputException if the new user data is invalid
+     */
     @Override
     public void prepare() throws InvalidAuthenticationException, InvalidInputException {
 

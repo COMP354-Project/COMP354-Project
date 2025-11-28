@@ -13,33 +13,66 @@ import bank.Branch;
 import bank.Transaction;
 import database.DatabaseSingleton;
 
+/**
+ * Action to execute a monetary transaction between two accounts.
+ * <p>
+ * Only authorized users can perform transactions. Customers can only send
+ * from their own accounts. Transactions are validated for sufficient funds,
+ * valid accounts, and non-zero positive amounts.
+ */
 public class ExecuteTransactionAction extends Action {
-    // Initialize database
+    /** Database instance. */
     DatabaseSingleton db;
-    //Data needed to prepare
+    /** The user initiating the transaction. */
     private User user;
+    /** The details of the transaction to be executed. */
     private Transaction transactionDetails;
+    /** The branch associated with the transaction (currently unused). */
     private Branch branch; //use to check for fraud? not used for anything for now
 
+    /**
+     * Constructs a new transaction action and initializes the database reference.
+     */
     public ExecuteTransactionAction() {
         this.db = DatabaseSingleton.getDatabase();
         this.authorized = AUTH_STATUS.NOT_AUTHORIZED;
     }
 
-    //Setup phase
+    /**
+     * Sets the user performing the transaction.
+     *
+     * @param user the user initiating the transaction
+     */
     public void setUser(User user) {
         this.user = user;
     }
 
+    /**
+     * Sets the transaction details.
+     *
+     * @param transaction the transaction to execute
+     */
     public void setTransactionDetails(Transaction transaction) {
         this.transactionDetails = transaction;
     }
 
+    /**
+     * Sets the branch associated with the transaction.
+     *
+     * @param branch the branch
+     */
     public void setBranch(Branch branch) {
         this.branch = branch;
     }
 
-    //Preparation phase
+    /**
+     * Validates the transaction before execution.
+     *
+     * @throws InvalidAuthenticationException if the user is null
+     * @throws InvalidInputException if sender, receiver, or amount is invalid
+     * @throws TimeOutException currently unused, placeholder for timeout logic
+     * @throws InsufficientFundsException if sender's balance is negative
+     */
     @Override
     public void prepare() throws InvalidAuthenticationException, TimeOutException, InvalidInputException, InsufficientFundsException {
         //Validate inputted data
@@ -54,6 +87,12 @@ public class ExecuteTransactionAction extends Action {
         }
     }
 
+    /**
+     * Executes the transaction after validation and authorization.
+     *
+     * @throws InvalidAuthenticationException if the user is not authorized
+     * @throws InvalidAccountException if either account no longer exists
+     */
     @Override
     public void execute() throws InvalidAuthenticationException, InvalidAccountException {
         if (transactionDetails.getSender().getBalance() < 0) {
@@ -82,6 +121,15 @@ public class ExecuteTransactionAction extends Action {
         System.out.println("[" + transactionDetails.getSender().getFullName() + " has sent $" + transactionDetails.getAmount() + " to " + transactionDetails.getReceiver().getFullName() + "] \n");
     }
 
+    /**
+     * Authorizes the user to perform the transaction.
+     *
+     * @param user the user performing the transaction
+     * @param account the sender account
+     * @throws InvalidAuthenticationException if the user is not a Customer
+     * @throws LackOfClearanceException if the user is a Customer but does not own the sender account
+     * @throws InvalidAccountException if the account is null
+     */
     @Override
     public void authorize(User user, Account account) throws InvalidAuthenticationException, LackOfClearanceException, InvalidAccountException {
         if (user == null) {

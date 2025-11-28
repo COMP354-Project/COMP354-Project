@@ -99,15 +99,27 @@ public class LoginAction extends Action {
     public void authorize(User user, Account account) throws InvalidAuthenticationException {
     }
 
-
+    /**
+     * Sets the password for this user.
+     *
+     * @param password the new password to set
+     */
     public void setPassword(String password) {
         this.password = password;
     }
-
+    /**
+     * Sets the email for this user.
+     *
+     * @param email the new email to set
+     */
     public void setEmail(String email) {
         this.email = email;
     }
-
+    /**
+     * Returns the currently authenticated user associated with this instance.
+     *
+     * @return the authenticated user, or null if no user is authenticated
+     */
     public User getAuthenticatedUser() {
         return authentifiedUser;
     }

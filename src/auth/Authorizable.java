@@ -6,11 +6,18 @@ import auth.exceptions.LackOfClearanceException;
 import bank.Account;
 import core.Action;
 import core.exceptions.InvalidAccountException;
-
+/**
+ * Represents an entity that can be authorized to perform actions
+ * within the system, such as accessing or modifying accounts.
+ */
 public interface Authorizable {
-
+    /**
+     * Status indicating whether the action is authorized.
+     */
     enum AUTH_STATUS {
+        /** Action is permitted. */
         AUTHORIZED,
+        /** Action is not permitted. */
         NOT_AUTHORIZED;
     }
 

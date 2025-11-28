@@ -59,22 +59,70 @@ import database.DatabaseSingleton;
 //    }
 //}
 
+/**
+ * BankUIDemo is a simple Swing-based demo application for the banking system.
+ * <p>
+ * It uses a {@link CardLayout} to switch between different UI pages such as login,
+ * account overview, and transaction pages. It also maintains information about
+ * the currently authenticated user and their role.
+ * </p>
+ * <p>
+ * Additionally, it includes a static {@link Account} reference for simulating ATM operations.
+ * </p>
+ *
+ * <p><b>Fields:</b></p>
+ * <ul>
+ *     <li>{@link #frame} - The main JFrame window for the application.</li>
+ *     <li>{@link #cards} - CardLayout for switching between different UI panels.</li>
+ *     <li>{@link #root} - The root JPanel that contains all pages.</li>
+ *     <li>{@link #currentRole} - Stores the role of the currently authenticated user (e.g., Admin, Customer).</li>
+ *     <li>{@link #currentUser} - Reference to the currently authenticated {@link User}.</li>
+ *     <li>{@link #loginPage} - Reference to the login page panel.</li>
+ *     <li>{@link #ATM} - Static reference to an ATM account for demo purposes.</li>
+ * </ul>
+ *
+ * <p><b>Methods:</b></p>
+ * <ul>
+ *     <li>{@link #main(String[])} - Entry point of the application. Launches the GUI in the Event Dispatch Thread.</li>
+ * </ul>
+ *
+ * <p>This class is designed for demonstration and testing purposes of the banking system's UI.</p>
+ *
+ * @author
+ */
 // ---------- App ----------
+/** Demo object */
 public class BankUIDemo {
     private final JFrame frame = new JFrame("Bank");
     private final CardLayout cards = new CardLayout();
     private final JPanel root = new JPanel(cards);
     private String currentRole;
+    /** User object*/
     protected User currentUser;
     private LoginPage loginPage;
 
-    //For the ATM
+    /** For the ATM simulation */
     private static Account ATM;
 
+    /**
+     * Application entry point. Launches the Swing UI in the Event Dispatch Thread.
+     *
+     * @param args command-line arguments (ignored)
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BankUIDemo().start());
     }
-
+    /**
+     * Initializes and starts the banking GUI application.
+     * <p>
+     * This method sets up the main {@link JFrame}, configures all application pages
+     * using a {@link CardLayout}, and displays the login page by default.
+     * </p>
+     * <p>
+     * The pages include dashboards and forms for Customers, Tellers, and Admins,
+     * as well as fund transfer and deposit/withdrawal UIs.
+     * </p>
+     */
     private void start() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -122,17 +170,35 @@ public class BankUIDemo {
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
     }
-
+    /**
+     * Switches the currently visible panel to the specified page.
+     *
+     * @param page The string key of the page to display.
+     */
     private void go(String page) {
         cards.show(root, page);
     }
 
     // ---------- Login ----------
+    /**
+     * Inner class representing the login page panel.
+     * <p>
+     * Provides fields for user credentials and handles the login action.
+     * Upon successful authentication, it navigates to the appropriate dashboard
+     * depending on the user's role (Customer, Teller, or Admin).
+     * </p>
+     */
     class LoginPage extends JPanel {
+        /** Text field for user email or ID */
         JTextField tfUser = new JTextField(22);
+        /** Password field for user password */
         JPasswordField pfPass = new JPasswordField(22);
+        /** Login action instance for executing authentication */
         LoginAction loginAction;
 
+        /**
+         * Constructs the login page UI with labels, input fields, and sign-in button.
+         */
         LoginPage() {
             super(new GridBagLayout());
             setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
@@ -168,7 +234,13 @@ public class BankUIDemo {
             c.gridwidth = 2;
             add(actions, c);
         }
-
+        /**
+         * Performs the login operation using the entered credentials.
+         * <p>
+         * Executes a {@link LoginAction} and sets {@link BankUIDemo#currentUser} if successful.
+         * If authentication fails, displays an error toast.
+         * </p>
+         */
         void doLogin() {
             String email = tfUser.getText().trim();
             String password = new String(pfPass.getPassword());
@@ -186,7 +258,9 @@ public class BankUIDemo {
 
             //Loads the data to the profile action
         }
-
+        /**
+         * Resets the login fields to empty strings.
+         */
         void reset() {
             tfUser.setText("");
             pfPass.setText("");
@@ -194,7 +268,19 @@ public class BankUIDemo {
     }
 
     // ---------- Customer ----------
+    /**
+     * Customer Dashboard panel.
+     * <p>
+     * Displays navigation buttons for the customer to access:
+     * - Account information
+     * - Personal profile
+     * - Logout
+     * </p>
+     */
     class CustomerDashboard extends JPanel {
+        /**
+         * Constructs the customer dashboard with buttons for navigation.
+         */
         CustomerDashboard() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -216,7 +302,17 @@ public class BankUIDemo {
         }
     }
 
-
+    /**
+     * Customer Account Information panel.
+     * <p>
+     * Provides buttons to navigate to:
+     * - Transaction History
+     * - Account Summary
+     * - Fund Transfer
+     * - Deposit/Withdraw
+     * - Back to dashboard
+     * </p>
+     */
     class CustomerAccountInfo extends JPanel {
         CustomerAccountInfo() {
             super(new GridBagLayout());
@@ -231,16 +327,21 @@ public class BankUIDemo {
 
         }
     }
-
-    /***
-     * Account Summary
-     *
+    /**
+     * Customer Account Summary panel.
+     * <p>
+     * Allows a customer to select one of their accounts from a dropdown
+     * and view details including:
+     * - Customer name
+     * - Account number
+     * - Account type (Chequing, Saving, Card)
+     * - Balance or credit usage/limit
+     * </p>
      */
     class CustomerAccountSummary extends JPanel {
         private final AccountComboBox accountDropDown;
         private ArrayList<Account> accounts;
         private Account selectedAccount;
-
 
         CustomerAccountSummary() {
             super(new GridBagLayout());
@@ -309,6 +410,7 @@ public class BankUIDemo {
                 repaint();
             });
         }
+        /** Clears displayed account summary labels except dropdown and buttons. */
         private void clearSummaryLabels() {
             // Remove everything except dropdown and buttons
             for (Component comp : getComponents()) {
@@ -318,7 +420,7 @@ public class BankUIDemo {
             }
         }
 
-
+        /** Loads accounts for the current user via ProfileAction. */
         private void loadAccounts() {
             ProfileAction profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
@@ -332,6 +434,10 @@ public class BankUIDemo {
             accountDropDown.setAccounts(accounts);
         }
 
+        /**
+         * Dropdown component for selecting an account.
+         * Displays account type and balance.
+         */
         static class AccountComboBox extends JComboBox<Account> {
             private final DefaultComboBoxModel<Account> model;
 
@@ -391,7 +497,16 @@ public class BankUIDemo {
         }
 
     }
-
+    /**
+     * Fund Transfer UI panel.
+     * <p>
+     * Allows a customer to:
+     * - Select sender and recipient accounts
+     * - Enter recipient email
+     * - Specify transfer amount
+     * - Conduct the transfer with validation
+     * </p>
+     */
     class FundTransferUI extends JPanel {
         // ComboBox for selection of sender and receiver for the transaction
         AccountComboBox senderAccountSelector = new AccountComboBox();
@@ -499,9 +614,7 @@ public class BankUIDemo {
             }
         }
 
-        /**
-         *
-         */
+        /** Resets all form fields. */
         private void resetForm() {
             senderAccountSelector.removeAllItems();
             recipientEmail.setText("");
@@ -511,7 +624,7 @@ public class BankUIDemo {
         }
 
 
-        //Needs the proper fixes before it can work for many accounts of the same user (currently 1-1 relation)
+        /** Fetches accounts for the current user (sender accounts). */
         private void fetchSenderAccount() {
             ProfileAction profile = new ProfileAction();
             profile.setCurrentUser(currentUser);
@@ -527,7 +640,7 @@ public class BankUIDemo {
                 toast("Other exceptions");
             }
         }
-
+        /** Finds recipient accounts using the entered email. */
         private boolean findRecipient() {
             ProfileAction action = new ProfileAction();
             try {
@@ -565,7 +678,7 @@ public class BankUIDemo {
 
             return true;
         }
-
+        /** Conducts the fund transfer after validation. */
         private boolean conductTransfer() {
             try {
                 double amount = Double.parseDouble(amountInput.getText());
@@ -587,14 +700,33 @@ public class BankUIDemo {
             return true; //signals the button
         }
     }
-
+    /**
+     * JPanel UI for performing withdrawals and deposits for a Customer.
+     *
+     * <p>The panel allows the user to select one of their accounts, choose between
+     * "Withdraw" or "Deposit", enter an amount, and execute the transaction.
+     * All deposits are transferred from/to the ATM account.</p>
+     *
+     * <p>The panel automatically loads the current user's accounts when displayed.</p>
+     *
+     * @see Account
+     * @see ExecuteTransactionAction
+     * @see Transaction
+     */
     class WithdrawDepositUI extends JPanel {
         String[] choices = {"Withdraw", "Deposit"};
+        /** Combo box for choosing either "Withdraw" or "Deposit". */
         JComboBox<String> box = new JComboBox<>(choices);
+        /** Input field for entering the transaction amount. */
         JTextField amountInput = new JTextField(22);
-
+        /** Combo box for selecting which account to transact from/to. */
         AccountComboBox accountBox = new AccountComboBox();
 
+        /**
+         * Constructs the Withdraw/Deposit panel.
+         * Sets up layout, input fields, and buttons.
+         * Automatically loads accounts when the panel is displayed.
+         */
         WithdrawDepositUI() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -629,7 +761,9 @@ public class BankUIDemo {
             }), g(c, 0, 4, 2));
             add(btn("Back", () -> go("cust_account")), g(c, 0, 5, 2));
         }
-
+        /**
+         * Custom combo box for displaying accounts with type and balance.
+         */
         class AccountComboBox extends JComboBox<Account> {
             private final DefaultComboBoxModel<Account> model;
 
@@ -687,7 +821,15 @@ public class BankUIDemo {
             }
         }
 
-
+        /**
+         * Performs a withdrawal or deposit for the current user.
+         *
+         * <p>The user selects an account and enters an amount. If "Deposit" is selected,
+         * money is transferred from the ATM account to the user account. If "Withdraw"
+         * is selected, money is transferred from the user account to the ATM account.</p>
+         *
+         * <p>Exceptions are caught and displayed to the user using {@link #toast(String)}.</p>
+         */
         private void WithdrawDeposit() {
             String selected = (String) box.getSelectedItem();
             double amount = 0;
@@ -761,11 +903,18 @@ public class BankUIDemo {
      */
     class TransactionHistory extends JPanel {
         final String titleText = "Transaction History";
+        /** Table model containing transaction data. */
         final TransactionTable tableModel = new TransactionTable();
+        /** JTable displaying the transaction data. */
         final JTable viewTable = new JTable(tableModel);
+        /** Action used to fetch transactions from the database. */
         protected ViewTransactionAction viewTransactionAction;
 
         // Initialize the panel to see the transaction history of an account
+        /**
+         * Initializes the transaction history panel with a table and back button.
+         * Automatically refreshes data when the panel is shown.
+         */
         TransactionHistory() {
             super(new GridBagLayout());
             setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
@@ -801,7 +950,9 @@ public class BankUIDemo {
                 }
             });
         }
-
+        /**
+         * Fetches the latest transaction data for the current user and updates the table model.
+         */
         public void updateData() {
             // Setup data
             viewTransactionAction = new ViewTransactionAction();
@@ -815,11 +966,13 @@ public class BankUIDemo {
             }
             tableModel.setTransactions(viewTransactionAction.getListOfTransactions());
         }
-
+        /**
+         * Table model for displaying transactions in a JTable.
+         */
         class TransactionTable extends AbstractTableModel {
             private final String[] columns = {"Transaction ID", "Amount", "Time"};
             private List<Transaction> data = new ArrayList<>();
-
+            /** Sets the transactions to display and refreshes the table. */
             public void setTransactions(List<Transaction> data) {
                 this.data = data;
                 fireTableDataChanged(); // tells JTable to repaint
@@ -852,7 +1005,11 @@ public class BankUIDemo {
             }
         }
     }
-
+    /**
+     * Panel displaying a customer's personal profile options.
+     *
+     * <p>Provides buttons to update personal information or change password.</p>
+     */
     class CustomerProfile extends JPanel {
         CustomerProfile() {
             super(new GridBagLayout());
@@ -865,11 +1022,19 @@ public class BankUIDemo {
             add(btn("Back", () -> go("customer")), g(c, 0, 3, 2));
         }
     }
-
+    /**
+     * Panel for updating a customer's personal information.
+     *
+     * <p>Verifies the current password before allowing the user to update first
+     * and last names. Updates are performed via {@link UpdateProfileAction}.</p>
+     */
     class CustomerProfileUpdate extends JPanel{
         private final JPasswordField currentPasswordField;
         private final JTextField newFirstNameField;
         private final JTextField newLastNameField;
+        /**
+         * Initializes the profile update panel with fields and buttons.
+         */
         CustomerProfileUpdate() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -894,6 +1059,13 @@ public class BankUIDemo {
 
             add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
         }
+        /**
+         * Handles updating the customer's personal information.
+         *
+         * <p>Validates current password and updates the profile through
+         * {@link UpdateProfileAction}. Displays toast messages for success
+         * or error conditions.</p>
+         */
         private void onUpdateInfo() {
             //Verifies Password
             String UserInput = new String(currentPasswordField.getPassword());
@@ -924,12 +1096,23 @@ public class BankUIDemo {
         }
     }
 
-
+    /**
+     * Panel for changing the current user's password.
+     *
+     * <p>Requires the user to input the current password, new password, and confirm
+     * the new password. Password update is handled through {@link UpdatePassword}.</p>
+     *
+     * <p>Displays toast messages for invalid input, authentication failures, or
+     * successful updates.</p>
+     */
     class CustomerPasswordUpdate extends JPanel {
         private final JPasswordField currentPasswordField;
         private final JPasswordField newPasswordField;
         private final JPasswordField confirmPasswordField;
 
+        /**
+         * Initializes the password update panel with input fields and buttons.
+         */
         CustomerPasswordUpdate() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -957,7 +1140,14 @@ public class BankUIDemo {
 
             add(btn("Back", () -> go("cust_profile")), g(c, 0, 6, 2));
         }
-
+        /**
+         * Handles the password update process.
+         *
+         * <p>Validates the current password, checks that the new and confirm passwords
+         * match, and executes the update via {@link UpdatePassword}.</p>
+         *
+         * <p>Displays toast messages for success or failure.</p>
+         */
         private void onUpdatePassword() {
             String UserInput = new String(currentPasswordField.getPassword());
             if (UserInput.equals(currentUser.getPassword())) {
@@ -996,6 +1186,11 @@ public class BankUIDemo {
 
 
     // ---------- Teller ----------
+    /**
+     * Dashboard panel for Teller users.
+     *
+     * <p>Provides navigation to manage customers or logout.</p>
+     */
     class TellerDashboard extends JPanel {
         TellerDashboard() {
             super(new GridBagLayout());
@@ -1012,6 +1207,11 @@ public class BankUIDemo {
         }
     }
 
+    /**
+     * Panel for managing customers from the teller's perspective.
+     *
+     * <p>Provides buttons to view customer information or transactions.</p>
+     */
     class TellerManageCustomers extends JPanel {
         TellerManageCustomers() {
             super(new GridBagLayout());
@@ -1025,10 +1225,19 @@ public class BankUIDemo {
         }
     }
 
+    /**
+     * Panel for viewing customer accounts in a teller's branch.
+     *
+     * <p>Displays account information in a JComboBox and allows viewing details
+     * of selected accounts.</p>
+     */
     class TellerViewAccounts extends JPanel {
         private JComboBox<String> accountDropdown;
         private JLabel accountDetailsLabel;
-
+        /**
+         * Initializes the account view panel with dropdown, details label, and buttons.
+         * Automatically loads branch accounts when the panel is shown.
+         */
         TellerViewAccounts() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -1059,12 +1268,12 @@ public class BankUIDemo {
                 }
             });
         }
-
+        /** Clears the fields to prevent leaking data between sessions. */
         private void clearFields() {
             accountDropdown.removeAllItems();
             accountDetailsLabel.setText("Select an account to view details");
         }
-
+        /** Loads all accounts for the teller's branch into the dropdown. */
         private void loadAccountsInBranch() {
             accountDropdown.removeAllItems();
             try {
@@ -1088,7 +1297,7 @@ public class BankUIDemo {
                 toast("Error loading accounts: " + e.getMessage());
             }
         }
-
+        /** Displays detailed information about the selected account. */
         private void displayAccountDetails() {
             // Display selected account info
             if (accountDropdown.getSelectedItem() == null) {
@@ -1112,13 +1321,21 @@ public class BankUIDemo {
             }
         }
     }
-
+    /**
+     * Panel for viewing all transactions in a teller's branch.
+     *
+     * <p>Automatically fetches transactions for all accounts in the branch
+     * and displays them in a JTable using {@link BranchTransactionTable}.</p>
+     */
     class TellerViewTransactions extends JPanel {
         final String titleText = "Branch Transactions";
         final BranchTransactionTable tableModel = new BranchTransactionTable();
         final JTable viewTable = new JTable(tableModel);
         protected ViewTransactionAction viewTransactionAction;
-
+        /**
+         * Initializes the branch transaction panel with a table and back button.
+         * Automatically refreshes data when the panel is shown.
+         */
         TellerViewTransactions() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -1155,7 +1372,7 @@ public class BankUIDemo {
                 }
             });
         }
-
+        /** Loads all transactions for the teller's branch. */
         private void loadBranchTransactions() {
             try {
                 String tellerBranchID = ((Teller) currentUser).getBranchID();
@@ -1184,7 +1401,9 @@ public class BankUIDemo {
                 toast("Error loading accounts: " + e.getMessage());
             }
         }
-
+        /**
+         * Table model for displaying transactions in a branch JTable.
+         */
         class BranchTransactionTable extends AbstractTableModel {
             private final String[] columns = {"Transaction ID", "Sender ID", "Amount", "Time"};
             private List<Transaction> data = new ArrayList<>();
@@ -1223,8 +1442,12 @@ public class BankUIDemo {
         }
     }
     // ---------- Admin ----------
-
     // YO YO YO CHECK IT OUT, IT'S THE OMINIPOTENT ADMIN USER
+    /**
+     * Admin dashboard panel.
+     *
+     * <p>Provides navigation to user management and logout.</p>
+     */
     class AdminDashboard extends JPanel {
         AdminDashboard() {
             super(new GridBagLayout());
@@ -1240,7 +1463,12 @@ public class BankUIDemo {
             }), g(c, 0, 2, 2));
         }
     }
-
+    /**
+     * Panel for admin user management operations.
+     *
+     * <p>Provides buttons for creating accounts, resetting passwords, deactivating
+     * accounts, and viewing all transactions.</p>
+     */
     class AdminUserMgmt extends JPanel {
         AdminUserMgmt() {
             super(new GridBagLayout());
@@ -1255,13 +1483,20 @@ public class BankUIDemo {
             add(btn("Back", () -> go("admin")), g(c, 0, 5, 2));
         }
     }
-
+    /**
+     * Panel for updating passwords of any user.
+     *
+     * <p>Uses {@link UpdatePassword} to perform the update. Shows toast messages
+     * for success or errors. Populates a dropdown of users using {@link UserComboBox}.</p>
+     */
     class AdminUpdatePassword extends JPanel {
         private final UserComboBox userDropDown;
         private final JPasswordField newPasswordField;
         private final JPasswordField confirmPasswordField;
         private ArrayList<User> users = null;
-
+        /**
+         * Initializes the password update panel with user selection and password fields.
+         */
         AdminUpdatePassword() {
             super(new GridBagLayout());
             setBorder(pad());
@@ -1301,7 +1536,12 @@ public class BankUIDemo {
                 }
             });
         }
-
+        /**
+         * Handles updating the selected user's password.
+         *
+         * <p>Validates that the new and confirm passwords match, and executes the
+         * {@link UpdatePassword} action.</p>
+         */
         private void onUpdatePassword() {
             String newPw = new String(newPasswordField.getPassword());
             String confirmPw = new String(confirmPasswordField.getPassword());
@@ -1330,12 +1570,17 @@ public class BankUIDemo {
 
 
         }
-
+        /** Loads all users from the database and populates the dropdown. */
         private void loadAccounts() {
             users = DatabaseSingleton.getDatabase().getAllUsers();
             userDropDown.setUsers(users);
         }
-
+        /**
+         * Dropdown to select a User.
+         *
+         * <p>Displays the email of the user in the list. Provides helper methods
+         * to set and retrieve the selected user.</p>
+         */
         static class UserComboBox extends JComboBox<User> {
             private final DefaultComboBoxModel<User> model;
 
@@ -1398,7 +1643,12 @@ public class BankUIDemo {
         }
     }
 
-
+    /**
+     * Panel for creating new users and optionally customer accounts.
+     *
+     * <p>Handles account type, role selection, and conditional fields for customer
+     * first/last names. Uses {@link CreateUserAction} and {@link CreateAccountAction}.</p>
+     */
     class AdminCreateAccount extends JPanel {
         private JTextField firstNameField;
         private JTextField lastNameField;
@@ -1493,7 +1743,7 @@ public class BankUIDemo {
                     g(c, 0, 8, 2));
 
         }
-
+        /** Handles creation of the user and associated account if applicable. */
         private void onCreateAccount() {
             String firstName = firstNameField.getText().trim();
             String lastName = lastNameField.getText().trim();
@@ -1545,13 +1795,18 @@ public class BankUIDemo {
 
 
         }
-
+        /** Resets form fields to default/empty values. */
         private void resetFields() {
             passwordField.setText("");
             emailField.setText("");
         }
     }
-
+    /**
+     * Panel for deactivating a user's account.
+     *
+     * <p>Allows searching by email, selecting a specific account, and executing
+     * {@link DeactivateAccountAction}.</p>
+     */
     class AdminDeactivateAccount extends JPanel {
         private JTextField emailField;
         private JLabel emailLabel;
@@ -1612,19 +1867,23 @@ public class BankUIDemo {
                 resetFields();
             }), g(c, 0, 5, 2));
         }
-
+        /** Loads accounts associated with a given email into the dropdown. */
         private void loadAccounts(String email) {
             accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
             accountsDropDown.setAccounts(accounts);
             revalidate();
             repaint();
         }
-
+        /** Clears input fields and resets the combo box. */
         private void resetFields() {
             emailField.setText("");
             accountsDropDown.setAccounts(new ArrayList<>());
         }
-
+        /**
+         * ComboBox for displaying accounts.
+         *
+         * <p>Displays account info and status, allows selection for deactivation.</p>
+         */
         static class AccountsComboBox extends JComboBox<Account> {
             private final DefaultComboBoxModel<Account> model;
 
@@ -1688,7 +1947,12 @@ public class BankUIDemo {
             }
         }
     }
-
+    /**
+     * Panel for viewing all transactions in the system.
+     *
+     * <p>Fetches all transactions via {@link ViewTransactionAction} and displays
+     * them in a table using {@link TransactionTable}.</p>
+     */
     class AdminViewTransactions extends JPanel {
         // The transactions to be displayed
         final TransactionTable tableModel = new TransactionTable();
@@ -1720,7 +1984,7 @@ public class BankUIDemo {
                 }
             });
         }
-
+        /** Fetches transactions from the database and updates the table. */
         public void updateData() {
             // Setup data
             viewTransactionAction = new ViewTransactionAction();
@@ -1734,31 +1998,54 @@ public class BankUIDemo {
             }
             tableModel.setTransactions(viewTransactionAction.getListOfTransactions());
         }
-
+        /**
+         * Table model for displaying transactions in a JTable.
+         */
         class TransactionTable extends AbstractTableModel {
             private final String[] columns = {"Transaction ID", "Amount", "Time"};
             private List<Transaction> data = new ArrayList<>();
-
+            /** Sets the transactions and refreshes the table. */
             public void setTransactions(List<Transaction> data) {
                 this.data = data;
                 fireTableDataChanged(); // tells JTable to repaint
             }
-
+            /**
+             * Returns the number of rows in the table.
+             * Used by JTable for rendering row count.
+             *
+             * @return number of rows in the data model
+             */
             @Override
             public int getRowCount() {
                 return data.size();
             }
-
+            /**
+             * Returns the number of columns in the table.
+             * Used by JTable for rendering column count.
+             *
+             * @return number of columns in the data model
+             */
             @Override
             public int getColumnCount() {
                 return columns.length;
             }
-
+            /**
+             * Returns the name of a specific column.
+             *
+             * @param column index of the column
+             * @return column name
+             */
             @Override
             public String getColumnName(int column) {
                 return columns[column];
             }
-
+            /**
+             * Returns the value at a specific row and column.
+             *
+             * @param rowIndex    index of the row
+             * @param columnIndex index of the column
+             * @return object to be displayed in the cell
+             */
             @Override
             public Object getValueAt(int rowIndex, int columnIndex) {
                 Transaction t = data.get(rowIndex);
@@ -1773,6 +2060,11 @@ public class BankUIDemo {
     }
 
     // ---------- UI helpers ----------
+    /**
+     * Provides a default GridBagConstraints instance with standard insets, anchor, and fill.
+     *
+     * @return GridBagConstraints base instance
+     */
     private static GridBagConstraints gbc() {
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(6, 6, 6, 6);
@@ -1781,7 +2073,15 @@ public class BankUIDemo {
         c.weightx = 1;
         return c;
     }
-
+    /**
+     * Clones a GridBagConstraints instance and sets gridx, gridy, and gridwidth.
+     *
+     * @param c base constraints
+     * @param x grid x-coordinate
+     * @param y grid y-coordinate
+     * @param w grid width
+     * @return cloned and modified GridBagConstraints
+     */
     private static GridBagConstraints g(GridBagConstraints c, int x, int y, int w) {
         GridBagConstraints n = (GridBagConstraints) c.clone();
         n.gridx = x;
@@ -1789,7 +2089,13 @@ public class BankUIDemo {
         n.gridwidth = w;
         return n;
     }
-
+    /**
+     * Creates a JButton from a title string and a Runnable callback.
+     *
+     * @param t button text
+     * @param r callback executed on click
+     * @return configured JButton
+     */
     private static JButton btn(String t, Runnable r) {
         return new JButton(new AbstractAction(t) {
             @Override
@@ -1798,17 +2104,34 @@ public class BankUIDemo {
             }
         });
     }
-
+    /**
+     * Creates a JLabel styled as a section title (bold, 20pt font).
+     *
+     * @param t text to display
+     * @return styled JLabel
+     */
     private static JLabel title(String t) {
         JLabel l = new JLabel(t);
         l.setFont(l.getFont().deriveFont(Font.BOLD, 20f));
         return l;
     }
-
+    /**
+     * Returns a standard empty border for panels.
+     *
+     * @return empty Border with 16px padding
+     */
     private static Border pad() {
         return BorderFactory.createEmptyBorder(16, 16, 16, 16);
     }
-
+    /**
+     * Adds a label and field pair to a panel using GridBagLayout.
+     *
+     * @param p     panel to add components to
+     * @param base  base GridBagConstraints
+     * @param r     row index
+     * @param lab   text for JLabel
+     * @param field JComponent to place next to the label
+     */
     private static void row(JPanel p, GridBagConstraints base, int r, String lab, JComponent field) {
         // label
         GridBagConstraints c = (GridBagConstraints) base.clone();
@@ -1828,11 +2151,19 @@ public class BankUIDemo {
         c.insets = new Insets(12, 96, 12, 12);
         p.add(field, c);
     }
-
+    /**
+     * Shows a warning message dialog to the user.
+     *
+     * @param m message text
+     */
     private static void toast(String m) {
         JOptionPane.showMessageDialog(null, m, "Notice", JOptionPane.WARNING_MESSAGE);
     }
-
+    /**
+     * Shows an information message dialog to the user.
+     *
+     * @param m message text
+     */
     private static void info(String m) {
         JOptionPane.showMessageDialog(null, m, "Info", JOptionPane.INFORMATION_MESSAGE);
     }
