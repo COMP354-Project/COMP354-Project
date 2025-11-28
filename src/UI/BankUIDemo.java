@@ -744,8 +744,9 @@ public class BankUIDemo {
                     ProfileAction profile = new ProfileAction();
                     profile.setCurrentUser(currentUser);
                     try {
+                        profile.prepare();
                         profile.execute();
-                    } catch (InvalidAuthenticationException | InvalidAccountException ie) {
+                    } catch (InvalidAuthenticationException | InvalidAccountException | InvalidInputException ie) {
                         throw new RuntimeException(ie);
                     }
                     accountBox.setAccounts(profile.getUserAccount());
@@ -1046,11 +1047,11 @@ public class BankUIDemo {
             currentPasswordField = new JPasswordField(15);
             add(currentPasswordField, g(c, 1, 2, 1));
 
-            add(new JLabel("Current First Name:"), g(c, 0, 3, 1));
+            add(new JLabel("New First Name:"), g(c, 0, 3, 1));
             newFirstNameField = new JTextField(15);
             add(newFirstNameField, g(c, 1, 3, 1));
 
-            add(new JLabel("Current Last Name:"), g(c, 0, 4, 1));
+            add(new JLabel("New Last Name:"), g(c, 0, 4, 1));
             newLastNameField = new JTextField(15);
             add(newLastNameField, g(c, 1, 4, 1));
 
@@ -1161,21 +1162,20 @@ public class BankUIDemo {
                 action.setConfirmationPassword(confirmPw);
                 try {
                     action.prepare();
+                    action.execute();
+                    toast("Password updated!");
+
                 } catch (InvalidAuthenticationException e) {
                     toast("No permission to update password!");
                     return;
                 } catch (InvalidInputException e) {
                     toast("Password not identical, please input again!");
                     return;
-                }
-                try {
-                    action.execute();
-                } catch (InvalidAuthenticationException e) {
-                    toast(e.getMessage());
+                }catch (IllegalArgumentException iae){
+                    toast("Password Field Cannot be empty");
                 } catch (InvalidAccountException e) {
-                    toast(e.getMessage());
+                    throw new RuntimeException(e);
                 }
-                toast("Password updated!");
 
             } else {
                 toast("Invalid Current Password");
@@ -1526,7 +1526,7 @@ public class BankUIDemo {
                     g(c, 0, 5, 2));
 
             // Back Button
-            add(btn("Back", () -> go("admin")),
+            add(btn("Back", () -> go("admin_user_mgmt")),
                     g(c, 0, 6, 2));
 
 
@@ -1550,20 +1550,13 @@ public class BankUIDemo {
             action.setUser(userDropDown.getSelectedUser());
             action.setNewPasssword(newPw);
             action.setConfirmationPassword(confirmPw);
+
             try {
                 action.prepare();
-            } catch (InvalidAuthenticationException e) {
-                toast("No permission to update password!");
-                return;
-            } catch (InvalidInputException e) {
-                toast("Password not identical, please input again!");
-                return;
-            }
-            try {
                 action.execute();
             } catch (InvalidAuthenticationException e) {
                 toast(e.getMessage());
-            } catch (InvalidAccountException e) {
+            } catch (InvalidAccountException | InvalidInputException e) {
                 toast(e.getMessage());
             }
             toast("Password updated!");
@@ -1756,7 +1749,7 @@ public class BankUIDemo {
                     g(c, 0, 8, 1));
 
             // --- Back Button ---
-            add(btn("Back", () -> go("admin")),
+            add(btn("Back", () -> go("admin_user_mgmt")),
                     g(c, 1, 8, 1));
 
         }
