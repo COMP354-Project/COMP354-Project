@@ -60,6 +60,7 @@ public class DatabaseSingleton {
             }
         }
     }
+
     /**
      * Returns the singleton instance of the database.
      * <p>
@@ -282,6 +283,15 @@ public class DatabaseSingleton {
             System.out.println("Transaction added to database successfully.");
         } catch (TransactionAlreadyExistedException e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    public void addAccountToBranch(String accountID, String branchID) {
+        try {
+            this.branchData.addAccountToBranch(accountID, branchID);
+            System.out.println("Account " + accountID + " added to branch " + branchID + " successfully.");
+        } catch (BranchNotFoundException e) {
+            System.err.println(e.getMessage());
         }
     }
 
@@ -1233,6 +1243,20 @@ class BranchData implements FileProcessor {
             }
         }
         throw new BranchNotFoundException("Branch with name " + branchName + " not found.");
+    }
+
+    public void addAccountToBranch(String accountID, String branchID) throws BranchNotFoundException {
+        Branch branch;
+        try {
+            branch = this.getBranchByID(branchID);
+        } catch (BranchNotFoundException e) {
+            throw new BranchNotFoundException("Branch with ID " + branchID + " not found.");
+        }
+        ArrayList<String> accountIds = branch.getAccountIds();
+        if (!accountIds.contains(accountID)) {
+            accountIds.add(accountID);
+            this.updateBranch(branch);
+        }
     }
 
     /**

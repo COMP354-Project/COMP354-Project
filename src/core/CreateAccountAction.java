@@ -5,10 +5,7 @@ import auth.core.Customer;
 import auth.core.User;
 import auth.exceptions.InvalidAuthenticationException;
 import auth.exceptions.LackOfClearanceException;
-import bank.Account;
-import bank.Card;
-import bank.Chequing;
-import bank.Saving;
+import bank.*;
 import core.exceptions.InvalidAccountException;
 import core.exceptions.InvalidInputException;
 import database.DatabaseSingleton;
@@ -26,8 +23,11 @@ public class CreateAccountAction extends Action {
     private User user;
     private User associatedUser;
     private String accountType;
+    private String customerAccountBranch; // Only used for Customer class
     // Outputs
-    /** Console message confirmation*/
+    /**
+     * Console message confirmation
+     */
     public final static String MESSAGE = "Account created successfully!";
 
     /**
@@ -46,6 +46,16 @@ public class CreateAccountAction extends Action {
      */
     public void setAccountType(String accountType) {
         this.accountType = accountType;
+    }
+
+
+    /**
+     * Returns the branch associated with the customer's account.
+     *
+     * @return the customer account branch
+     */
+    public void setCustomerAccountBranch(String customerAccountBranch) {
+        this.customerAccountBranch = customerAccountBranch;
     }
 
     /**
@@ -88,7 +98,7 @@ public class CreateAccountAction extends Action {
      * Prepares the action by performing any necessary data validation.
      *
      * @throws InvalidAuthenticationException if the user is not authenticated
-     * @throws InvalidInputException if the input data is invalid
+     * @throws InvalidInputException          if the input data is invalid
      */
     @Override
     public void prepare() throws InvalidAuthenticationException, InvalidInputException {
@@ -99,7 +109,7 @@ public class CreateAccountAction extends Action {
      * Executes the action by creating the specified account for the associated user.
      *
      * @throws InvalidAuthenticationException if the user is not authenticated
-     * @throws InvalidAccountException if the associated user or account creation fails
+     * @throws InvalidAccountException        if the associated user or account creation fails
      */
     @Override
     public void execute() throws InvalidAuthenticationException, InvalidAccountException {
@@ -112,19 +122,21 @@ public class CreateAccountAction extends Action {
                 account = new Saving((Customer) associatedUser);
             }
             if (accountType.equals("Card")) {
-                account = new Card((Customer) associatedUser,2000);
+                account = new Card((Customer) associatedUser, 2000);
             }
+            db.addAccountToBranch(account.getAccountID(), db.getBranchByName(customerAccountBranch).getId());
             db.addAccount(account);
         }
     }
+
     /**
      * Authorizes the action to ensure the user has clearance to create accounts.
      *
-     * @param user the user attempting the action
+     * @param user    the user attempting the action
      * @param account not used in this action but required by interface
      * @throws InvalidAuthenticationException if the user is not an Admin
-     * @throws LackOfClearanceException never thrown here but part of signature
-     * @throws InvalidAccountException never thrown here but part of signature
+     * @throws LackOfClearanceException       never thrown here but part of signature
+     * @throws InvalidAccountException        never thrown here but part of signature
      */
     @Override
     public void authorize(User user, Account account) throws InvalidAuthenticationException, LackOfClearanceException, InvalidAccountException {
