@@ -25,11 +25,6 @@
     "password": "adminPass",
     "type": "Admin"
   },
-  "anotherteller@gmail.com": {
-    "email": "anotherteller@gmail.com",
-    "password": "tellerPass",
-    "type": "Teller"
-  },
   "jjj@gmail.com": {
     "email": "jjj@gmail.com",
     "password": "password",
@@ -64,6 +59,12 @@
   },
   "teller1@gmail.com": {
     "email": "teller1@gmail.com",
+    "password": "tellerPass",
+    "branchID": "6879aad4-4df2-4e32-b500-2d4fc6721189",
+    "type": "Teller"
+  },
+  "another.teller@gmail.com": {
+    "email": "another.teller@gmail.com",
     "password": "tellerPass",
     "branchID": "6879aad4-4df2-4e32-b500-2d4fc6721189",
     "type": "Teller"
