@@ -33,6 +33,12 @@
     "accountStatus": "ACTIVE",
     "type": "Saving"
   },
+  "a9770b88-161e-46ab-aa17-1524d6a95e18": {
+    "accountId": "a9770b88-161e-46ab-aa17-1524d6a95e18",
+    "customer": "customer.test@gmail.com",
+    "accountStatus": "ACTIVE",
+    "type": "Chequing"
+  },
   "9501e3ad-e672-434c-935f-c926d3a2e949": {
     "accountId": "9501e3ad-e672-434c-935f-c926d3a2e949",
     "customer": "def@gmail.com",
