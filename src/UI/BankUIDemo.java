@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ItemEvent;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -250,7 +251,7 @@ public class BankUIDemo {
             add(title("Account Summary"), g(c, 0, 0, 2));
 
             add(new JLabel("Select Account:"), g(c, 0, 1, 1));
-            accountDropDown = new CustomerAccountSummary.AccountComboBox();
+            accountDropDown = new AccountComboBox();
             add(accountDropDown, g(c, 0, 2, 1));
 
             //this part seems redundant, it is still able to show the details without it
@@ -331,7 +332,7 @@ public class BankUIDemo {
 
                 setRenderer(new DefaultListCellRenderer() {
                     @Override
-                    public java.awt.Component getListCellRendererComponent(
+                    public Component getListCellRendererComponent(
                             JList<?> list,
                             Object value,
                             int index,
@@ -441,7 +442,7 @@ public class BankUIDemo {
 
                 setRenderer(new DefaultListCellRenderer() {
                     @Override
-                    public java.awt.Component getListCellRendererComponent(
+                    public Component getListCellRendererComponent(
                             JList<?> list,
                             Object value,
                             int index,
@@ -582,7 +583,7 @@ public class BankUIDemo {
         JComboBox<String> box = new JComboBox<>(choices);
         JTextField amountInput = new JTextField(22);
 
-        AccountComboBox accountBox = new WithdrawDepositUI.AccountComboBox();
+        AccountComboBox accountBox = new AccountComboBox();
 
         WithdrawDepositUI() {
             super(new GridBagLayout());
@@ -629,7 +630,7 @@ public class BankUIDemo {
 
                 setRenderer(new DefaultListCellRenderer() {
                     @Override
-                    public java.awt.Component getListCellRendererComponent(
+                    public Component getListCellRendererComponent(
                             JList<?> list,
                             Object value,
                             int index,
@@ -1335,7 +1336,7 @@ public class BankUIDemo {
 
                 setRenderer(new DefaultListCellRenderer() {
                     @Override
-                    public java.awt.Component getListCellRendererComponent(
+                    public Component getListCellRendererComponent(
                             JList<?> list,
                             Object value,
                             int index,
@@ -1389,11 +1390,12 @@ public class BankUIDemo {
 
 
     class AdminCreateAccount extends JPanel {
-        private JTextField lastNameField;
-        private JTextField firstNameField;
         private JTextField passwordField;
         private JTextField emailField;
         private JComboBox<String> roleField;
+
+        private JLabel accountTypeLabel;
+        private JComboBox<String> accountTypeField;
 
         AdminCreateAccount() {
             super(new GridBagLayout());
@@ -1410,31 +1412,9 @@ public class BankUIDemo {
 
             add(title("Account Creation"), g(c, 0, 0, 2));
 
-
             // ----------------------------------------------------------------
             // FORM FIELDS (xyw)
             // ----------------------------------------------------------------
-
-            // inside constructor, after you have GridBagConstraints c = gbc();
-            // label
-            add(new JLabel("Role:"), g(c, 0, 3, 1));
-            roleField = new JComboBox<>(new String[]{
-                    Customer.class.getSimpleName(),
-                    Teller.class.getSimpleName(),
-                    Admin.class.getSimpleName()
-            });
-
-
-//            // --- First Name ---
-//            add(new JLabel("First Name:"), g(c, 0, 1, 1));
-//            firstNameField = new JTextField(15);
-//            add(firstNameField, g(c, 1, 1, 1));
-//
-//            // --- Last Name ---
-//            add(new JLabel("Last Name:"), g(c, 0, 2, 1));
-//            lastNameField = new JTextField(15);
-//            add(lastNameField, g(c, 1, 2, 1));
-
             // --- Email ---
             add(new JLabel("Email:"), g(c, 0, 1, 1));
             emailField = new JTextField(15);
@@ -1452,7 +1432,29 @@ public class BankUIDemo {
                     Teller.class.getSimpleName(),
                     Admin.class.getSimpleName()
             });
+            roleField.addItemListener(e -> {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String selected = (String) e.getItem();
+                    boolean isCustomer = selected.equals(Customer.class.getSimpleName());
+                    accountTypeLabel.setVisible(isCustomer);
+                    accountTypeField.setVisible(isCustomer);
+                    revalidate();
+                    repaint();
+                }
+            });
             add(roleField, g(c, 1, 3, 1));
+
+            // --- Account Type (only for Customer) ---
+            accountTypeLabel = new JLabel("Account Type:");
+            accountTypeField = new JComboBox<>(new String[]{
+                    "Chequing",
+                    "Saving",
+                    "Card"
+            });
+            accountTypeLabel.setVisible(false);
+            accountTypeField.setVisible(true);
+            add(accountTypeLabel, g(c, 0, 4, 1));
+            add(accountTypeField, g(c, 1, 4, 1));
 
             // --- Create Button ---
             add(btn("Create Account", this::onCreateAccount),
@@ -1492,6 +1494,24 @@ public class BankUIDemo {
             } catch (InvalidAccountException e) {
                 toast("Duplicate email with another user!");
             }
+
+            // Create account associate with Customer
+
+            if (newUser instanceof Customer) {
+                CreateAccountAction createAccountAction = new CreateAccountAction();
+                createAccountAction.setUser(currentUser);
+                createAccountAction.setAssociatedUser(newUser);
+                createAccountAction.setAccountType(accountTypeField.getSelectedItem().toString());
+                try {
+                    createAccountAction.execute();
+                } catch (InvalidAuthenticationException e) {
+                    toast(e.getMessage());
+                } catch (InvalidAccountException e) {
+                    toast(e.getMessage());
+                }
+            }
+
+
         }
 
         private void resetFields() {
@@ -1583,7 +1603,7 @@ public class BankUIDemo {
 
                 setRenderer(new DefaultListCellRenderer() {
                     @Override
-                    public java.awt.Component getListCellRendererComponent(
+                    public Component getListCellRendererComponent(
                             JList<?> list,
                             Object value,
                             int index,
