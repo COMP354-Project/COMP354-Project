@@ -1340,10 +1340,13 @@ public class BankUIDemo {
 
 
     class AdminCreateAccount extends JPanel {
+        private JTextField firstNameField;
+        private JTextField lastNameField;
         private JTextField passwordField;
         private JTextField emailField;
         private JComboBox<String> roleField;
-
+        private JLabel firstNameLabel;
+        private JLabel lastNameLabel;
         private JLabel accountTypeLabel;
         private JComboBox<String> accountTypeField;
 
@@ -1388,6 +1391,10 @@ public class BankUIDemo {
                     boolean isCustomer = selected.equals(Customer.class.getSimpleName());
                     accountTypeLabel.setVisible(isCustomer);
                     accountTypeField.setVisible(isCustomer);
+                    firstNameLabel.setVisible(isCustomer);
+                    firstNameField.setVisible(isCustomer);
+                    lastNameLabel.setVisible(isCustomer);
+                    lastNameField.setVisible(isCustomer);
                     revalidate();
                     repaint();
                 }
@@ -1406,19 +1413,30 @@ public class BankUIDemo {
             add(accountTypeLabel, g(c, 0, 4, 1));
             add(accountTypeField, g(c, 1, 4, 1));
 
+            // --- First & Last name (for Customer) ---
+            firstNameLabel = new JLabel("First Name:");
+            lastNameLabel = new JLabel("Last Name:");
+            firstNameField = new JTextField(15);
+            lastNameField = new JTextField(15);
+            add(firstNameLabel, g(c, 0, 5, 1));
+            add(firstNameField, g(c, 1, 5, 1));
+            add(lastNameLabel, g(c, 0, 6, 1));
+            add(lastNameField, g(c, 1, 6, 1));
+
+
             // --- Create Button ---
             add(btn("Create Account", this::onCreateAccount),
-                    g(c, 0, 6, 2));
+                    g(c, 0, 7, 2));
 
             // --- Back Button ---
             add(btn("Back", () -> go("admin")),
-                    g(c, 0, 7, 2));
+                    g(c, 0, 8, 2));
 
         }
 
         private void onCreateAccount() {
-//          String firstName = firstNameField.getText().trim();
-//          String lastName = lastNameField.getText().trim();
+            String firstName = firstNameField.getText().trim();
+            String lastName = lastNameField.getText().trim();
             String email = emailField.getText().trim();
             String password = passwordField.getText().trim();
 
@@ -1434,6 +1452,10 @@ public class BankUIDemo {
             };
             newUser.setEmail(email);
             newUser.setPassword(password);
+            if (newUser instanceof Customer) {
+                ((Customer) newUser).setFirstName(firstName);
+                ((Customer) newUser).setLastName(lastName);
+            }
             action.setNewUser(newUser);
             try {
                 action.execute();

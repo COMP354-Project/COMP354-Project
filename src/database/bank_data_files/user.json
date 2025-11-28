@@ -1,7 +1,9 @@
 {
   "customer.test@gmail.com": {
     "email": "customer.test@gmail.com",
-    "password": "12345",
+    "password": "testing",
+    "firstName": "Customer",
+    "lastName": "Test",
     "type": "Customer"
   },
   "atm@bank.com": {
@@ -22,6 +24,11 @@
     "email": "admin@gmail.com",
     "password": "adminPass",
     "type": "Admin"
+  },
+  "anotherteller@gmail.com": {
+    "email": "anotherteller@gmail.com",
+    "password": "tellerPass",
+    "type": "Teller"
   },
   "jjj@gmail.com": {
     "email": "jjj@gmail.com",
@@ -49,6 +56,11 @@
     "password": "tellerPass",
     "branchID": "e8da72ca-8182-491a-aaf1-40c3faffd22e",
     "type": "Teller"
+  },
+  "minh.admin@gmail.com": {
+    "email": "minh.admin@gmail.com",
+    "password": "adminPass",
+    "type": "Admin"
   },
   "teller1@gmail.com": {
     "email": "teller1@gmail.com",
