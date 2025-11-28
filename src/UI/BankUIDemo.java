@@ -67,9 +67,6 @@ public class BankUIDemo {
     protected User currentUser;
     private LoginPage loginPage;
 
-    //Unused currently (but meant for the fund transfer with multiple account under the user
-    private Account currentAccount;
-
     //For the ATM
     private static Account ATM;
 
@@ -394,14 +391,41 @@ public class BankUIDemo {
         FundTransferUI() {
             super(new GridBagLayout());
             setBorder(pad());
+            GridBagConstraints c = gbc();
 
             addComponentListener(new ComponentAdapter() {
                 public void componentShown(ComponentEvent e) {
-                    TransferUI();
+                    fetchSenderAccount();
                     revalidate();
                     repaint();
                 }
             });
+
+            add(title("Fund Transfer"), g(c, 0, 0, 2));
+            senderAccountSelector.setEnabled(true);
+            row(this, c, 1, "Sender Account:", senderAccountSelector);
+
+            row(this, c, 3, "Recipient: ", recipientEmail);
+            JButton searchBtn = btn("Search", () -> {
+                if (findRecipient()) {
+                    revalidate();
+                    repaint();
+                }
+            });
+
+            add(searchBtn, g(c, 0, 4, 2));
+
+            // Account chooser (initially disabled)
+            recipientAccountSelector.setEnabled(false);
+            row(this, c, 5, "Recipient Account:", recipientAccountSelector);
+            row(this, c, 6, "Amount: ", amountInput);
+
+
+            JButton confirmBtn = btn("Confirm", this::conductTransfer);
+            add(confirmBtn, g(c, 0, 7, 2));
+            add(btn("Back", () -> go("cust_account")), g(c, 0, 8, 2));
+
+
         }
 
         static class AccountComboBox extends JComboBox<Account> {
@@ -461,34 +485,6 @@ public class BankUIDemo {
             }
         }
 
-        private void TransferUI() {
-            GridBagConstraints c = gbc();
-//            resetForm();
-
-            add(title("Fund Transfer"), g(c, 0, 0, 2));
-            senderAccountSelector.setEnabled(true);
-            row(this, c, 1, "Sender Account:", senderAccountSelector);
-
-            row(this, c, 3, "Recipient: ", recipientEmail);
-            JButton searchBtn = btn("Search", () -> {
-                findRecipient();
-                fetchSenderAccount();
-            });
-
-            add(searchBtn, g(c, 0, 4, 2));
-
-            // Account chooser (initially disabled)
-            recipientAccountSelector.setEnabled(false);
-            row(this, c, 5, "Recipient Account:", recipientAccountSelector);
-            row(this, c, 6, "Amount: ", amountInput);
-
-
-            JButton confirmBtn = btn("Confirm", this::conductTransfer);
-            add(confirmBtn, g(c, 0, 7, 2));
-            add(btn("Back", () -> go("cust_account")), g(c, 0, 8, 2));
-        }
-
-
         /**
          *
          */
@@ -508,7 +504,7 @@ public class BankUIDemo {
             try {
                 profile.prepare();
                 profile.execute();
-                currentAccount = senderAccountSelector.getSelectAccount();
+                senderAccountSelector.setAccounts(profile.getUserAccount());
             } catch (InvalidAuthenticationException | InvalidAccountException e) {
                 toast("System Timeout");
             } catch (InvalidInputException e) {
@@ -518,21 +514,26 @@ public class BankUIDemo {
             }
         }
 
-        private void findRecipient() {
+        private boolean findRecipient() {
+            ProfileAction action = new ProfileAction();
             try {
                 String email = recipientEmail.getText().trim();
                 User recipient = DatabaseSingleton.getDatabase().getUserByEmail(email);
-                ProfileAction action = new ProfileAction();
-                action.setCurrentUser(recipient);
 
+                action.setCurrentUser(recipient);
+                action.execute();
                 if (recipient == null) {
                     toast("Email not found");
                     recipientAccountSelector.setEnabled(false);
                     recipientAccountSelector.removeAllItems();
-                    return;
+                    return false;
                 }
-
-                recipientAccountSelector.setAccounts(action.getUserAccount());
+            } catch (InvalidAuthenticationException e) {
+                throw new RuntimeException(e);
+            } catch (InvalidAccountException e) {
+                throw new RuntimeException(e);
+            }
+            recipientAccountSelector.setAccounts(action.getUserAccount());
 
 //                ArrayList<Account> accounts = DatabaseSingleton.getDatabase().getAccountsByEmail(email);
 //                recipientAccountSelector.removeAllItems();
@@ -546,10 +547,9 @@ public class BankUIDemo {
 //                        recipientAccountSelector.addItem("Credit Card: " + acc.getAccountID());
 //                    }
 //                }
-                recipientAccountSelector.setEnabled(true);
-            } catch (Exception e) {
-                toast("Invalid destination account");
-            }
+            recipientAccountSelector.setEnabled(true);
+
+            return true;
         }
 
         private boolean conductTransfer() {

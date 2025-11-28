@@ -377,6 +377,24 @@
     "amount": 123.0,
     "status": "ACTIVE"
   },
+  "de9c12f7-808d-4ec4-803e-9d1adb18edcf": {
+    "id": "de9c12f7-808d-4ec4-803e-9d1adb18edcf",
+    "sender": {
+      "accountId": "9501e3ad-e672-434c-935f-c926d3a2e949",
+      "customer": "def@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
+      "customer": "atm@bank.com",
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "timeOfTransaction": "2025-11-27T19:37:31.186027800",
+    "amount": 100.0,
+    "status": "ACTIVE"
+  },
   "73f8fd7b-5202-4763-b4af-d56db61f010a": {
     "id": "73f8fd7b-5202-4763-b4af-d56db61f010a",
     "sender": {
@@ -573,6 +591,24 @@
     },
     "timeOfTransaction": "2025-11-27T13:13:56.002155",
     "amount": 1.0E7,
+    "status": "ACTIVE"
+  },
+  "729fd4be-65bb-407a-9d3b-76051fd2ebb1": {
+    "id": "729fd4be-65bb-407a-9d3b-76051fd2ebb1",
+    "sender": {
+      "accountId": "9501e3ad-e672-434c-935f-c926d3a2e949",
+      "customer": "def@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
+      "customer": "atm@bank.com",
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "timeOfTransaction": "2025-11-27T19:26:39.641750600",
+    "amount": 100.0,
     "status": "ACTIVE"
   },
   "faa6433b-94ba-498a-a0bb-3eab01623162": {
