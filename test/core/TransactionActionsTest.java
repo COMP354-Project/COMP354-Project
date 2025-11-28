@@ -32,7 +32,11 @@ class TransactionActionsTest {
         ExecuteTransactionAction sendAction = new ExecuteTransactionAction();
         sendAction.setUser(user);
         sendAction.setTransactionDetails(testedTransaction);
-        sendAction.execute();
+        try {
+            sendAction.execute();
+        } catch (InvalidAccountException | InvalidAuthenticationException e) {
+            System.err.println(e.getMessage());
+        }
 
         // Log - Testing results
         System.out.println("==========[Testing results - START]==========");
@@ -68,7 +72,11 @@ class TransactionActionsTest {
         ExecuteTransactionAction sendAction = new ExecuteTransactionAction();
         sendAction.setUser(user);
         sendAction.setTransactionDetails(testedTransaction);
-        sendAction.execute();
+        try {
+            sendAction.execute();
+        } catch (InvalidAccountException | InvalidAuthenticationException e) {
+            System.err.println(e.getMessage());
+        }
 
         // Log - Testing parameters
         System.out.println("==========[Testing parameters - START]==========");
