@@ -1029,7 +1029,7 @@ public class BankUIDemo {
      * <p>Verifies the current password before allowing the user to update first
      * and last names. Updates are performed via {@link UpdateProfileAction}.</p>
      */
-    class CustomerProfileUpdate extends JPanel{
+    class CustomerProfileUpdate extends JPanel {
         private final JPasswordField currentPasswordField;
         private final JTextField newFirstNameField;
         private final JTextField newLastNameField;
@@ -1742,8 +1742,8 @@ public class BankUIDemo {
                     firstNameField.setVisible(isCustomer);
                     lastNameLabel.setVisible(isCustomer);
                     lastNameField.setVisible(isCustomer);
-                    branchLabel.setVisible(isTeller);
-                    branchNames.setVisible(isTeller);
+                    branchLabel.setVisible(isTeller || isCustomer);
+                    branchNames.setVisible(isTeller || isCustomer);
                     revalidate();
                     repaint();
                 }
@@ -1769,10 +1769,10 @@ public class BankUIDemo {
                 branchNames.addItem(branch);
             }
             branchLabel = new JLabel("Branch:");
-            branchLabel.setVisible(false);
-            branchNames.setVisible(false);
-            add(branchLabel, g(c, 0, 5, 1));
-            add(branchNames, g(c, 1, 5, 1));
+            branchLabel.setVisible(true);
+            branchNames.setVisible(true);
+            add(branchLabel, g(c, 0, 8, 1));
+            add(branchNames, g(c, 1, 8, 1));
 
             // --- First & Last name (for Customer) ---
             firstNameLabel = new JLabel("First Name:");
@@ -1787,14 +1787,17 @@ public class BankUIDemo {
 
             // --- Create Button ---
             add(btn("Create Account", this::onCreateAccount),
-                    g(c, 0, 8, 1));
+                    g(c, 0, 9, 1));
 
             // --- Back Button ---
             add(btn("Back", () -> go("admin_user_mgmt")),
-                    g(c, 1, 8, 1));
+                    g(c, 1, 9, 1));
 
         }
-        /** Handles creation of the user and associated account if applicable. */
+
+        /**
+         * Handles creation of the user and associated account if applicable.
+         */
         private void onCreateAccount() {
             String firstName = firstNameField.getText().trim();
             String lastName = lastNameField.getText().trim();
@@ -1836,12 +1839,15 @@ public class BankUIDemo {
             // Create account associate with Customer
 
             if (newUser instanceof Customer) {
+                String selectedBranchName = Objects.requireNonNull(branchNames.getSelectedItem()).toString();
                 CreateAccountAction createAccountAction = new CreateAccountAction();
                 createAccountAction.setUser(currentUser);
                 createAccountAction.setAssociatedUser(newUser);
                 createAccountAction.setAccountType(accountTypeField.getSelectedItem().toString());
+                createAccountAction.setCustomerAccountBranch(selectedBranchName);
                 try {
                     createAccountAction.execute();
+                    resetFields();
                 } catch (InvalidAuthenticationException e) {
                     toast(e.getMessage());
                 } catch (InvalidAccountException e) {
@@ -1855,8 +1861,11 @@ public class BankUIDemo {
         private void resetFields() {
             passwordField.setText("");
             emailField.setText("");
+            firstNameField.setText("");
+            lastNameField.setText("");
         }
     }
+
     /**
      * Panel for deactivating a user's account.
      *
@@ -1935,6 +1944,7 @@ public class BankUIDemo {
             emailField.setText("");
             accountsDropDown.setAccounts(new ArrayList<>());
         }
+
         /**
          * ComboBox for displaying accounts.
          *
@@ -2003,6 +2013,7 @@ public class BankUIDemo {
             }
         }
     }
+
     /**
      * Panel for viewing all transactions in the system.
      *
@@ -2054,6 +2065,7 @@ public class BankUIDemo {
             }
             tableModel.setTransactions(viewTransactionAction.getListOfTransactions());
         }
+
         /**
          * Table model for displaying transactions in a JTable.
          */
@@ -2065,6 +2077,7 @@ public class BankUIDemo {
                 this.data = data;
                 fireTableDataChanged(); // tells JTable to repaint
             }
+
             /**
              * Returns the number of rows in the table.
              * Used by JTable for rendering row count.
@@ -2075,6 +2088,7 @@ public class BankUIDemo {
             public int getRowCount() {
                 return data.size();
             }
+
             /**
              * Returns the number of columns in the table.
              * Used by JTable for rendering column count.
@@ -2085,6 +2099,7 @@ public class BankUIDemo {
             public int getColumnCount() {
                 return columns.length;
             }
+
             /**
              * Returns the name of a specific column.
              *
@@ -2095,6 +2110,7 @@ public class BankUIDemo {
             public String getColumnName(int column) {
                 return columns[column];
             }
+
             /**
              * Returns the value at a specific row and column.
              *
@@ -2116,6 +2132,7 @@ public class BankUIDemo {
     }
 
     // ---------- UI helpers ----------
+
     /**
      * Provides a default GridBagConstraints instance with standard insets, anchor, and fill.
      *
@@ -2129,6 +2146,7 @@ public class BankUIDemo {
         c.weightx = 1;
         return c;
     }
+
     /**
      * Clones a GridBagConstraints instance and sets gridx, gridy, and gridwidth.
      *
@@ -2145,6 +2163,7 @@ public class BankUIDemo {
         n.gridwidth = w;
         return n;
     }
+
     /**
      * Creates a JButton from a title string and a Runnable callback.
      *
@@ -2160,6 +2179,7 @@ public class BankUIDemo {
             }
         });
     }
+
     /**
      * Creates a JLabel styled as a section title (bold, 20pt font).
      *
@@ -2171,6 +2191,7 @@ public class BankUIDemo {
         l.setFont(l.getFont().deriveFont(Font.BOLD, 20f));
         return l;
     }
+
     /**
      * Returns a standard empty border for panels.
      *
@@ -2179,6 +2200,7 @@ public class BankUIDemo {
     private static Border pad() {
         return BorderFactory.createEmptyBorder(16, 16, 16, 16);
     }
+
     /**
      * Adds a label and field pair to a panel using GridBagLayout.
      *
@@ -2207,6 +2229,7 @@ public class BankUIDemo {
         c.insets = new Insets(12, 96, 12, 12);
         p.add(field, c);
     }
+
     /**
      * Shows a warning message dialog to the user.
      *
@@ -2215,6 +2238,7 @@ public class BankUIDemo {
     private static void toast(String m) {
         JOptionPane.showMessageDialog(null, m, "Notice", JOptionPane.WARNING_MESSAGE);
     }
+
     /**
      * Shows an information message dialog to the user.
      *

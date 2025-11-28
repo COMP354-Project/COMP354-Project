@@ -6,6 +6,13 @@
     "lastName": "Test",
     "type": "Customer"
   },
+  "johnny.silverhand@gmail.com": {
+    "email": "johnny.silverhand@gmail.com",
+    "password": "customerPass",
+    "firstName": "Johnny",
+    "lastName": "Silverhand",
+    "type": "Customer"
+  },
   "atm@bank.com": {
     "email": "atm@bank.com",
     "password": "freemoney",
