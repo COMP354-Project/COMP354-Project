@@ -64,6 +64,13 @@
     "password": "adminPass",
     "type": "Admin"
   },
+  "valid.email@gmail.com": {
+    "email": "valid.email@gmail.com",
+    "password": "validPass123!",
+    "firstName": "invalid password",
+    "lastName": "cust",
+    "type": "Customer"
+  },
   "teller1@gmail.com": {
     "email": "teller1@gmail.com",
     "password": "tellerPass",

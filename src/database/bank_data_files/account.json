@@ -13,6 +13,12 @@
     "creditUsage": 0.0,
     "type": "Card"
   },
+  "3b2b06e8-81da-4476-8401-8676d1981675": {
+    "accountId": "3b2b06e8-81da-4476-8401-8676d1981675",
+    "customer": "valid.email@gmail.com",
+    "accountStatus": "ACTIVE",
+    "type": "Chequing"
+  },
   "5b9dc767-b51a-4db0-a1d6-5f783f26a48f": {
     "accountId": "5b9dc767-b51a-4db0-a1d6-5f783f26a48f",
     "customer": "ghi@gmail.com",
