@@ -94,6 +94,13 @@
     "branchID": "f2868d14-c831-43be-960a-44a6bb7828f4",
     "type": "Teller"
   },
+  "yuqian.cai@gmail.com": {
+    "email": "yuqian.cai@gmail.com",
+    "password": "67890",
+    "firstName": "Christine",
+    "lastName": "Cai",
+    "type": "Customer"
+  },
   "abc@gmail.com": {
     "email": "abc@gmail.com",
     "password": "password",

@@ -89,6 +89,24 @@
     "amount": 1.0,
     "status": "ACTIVE"
   },
+  "fc8560a7-6c9d-4737-89e8-8fb840cabc2f": {
+    "id": "fc8560a7-6c9d-4737-89e8-8fb840cabc2f",
+    "sender": {
+      "accountId": "5da99aea-7d8a-40fe-a82b-5abc272256b8",
+      "customer": "yuqian.cai@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "b91addd5-0885-4294-a808-554d24abcedc",
+      "customer": "gohgo@gmail.com",
+      "accountStatus": "ACTIVE",
+      "type": "Saving"
+    },
+    "timeOfTransaction": "2025-11-28T13:21:44.581956",
+    "amount": 100.0,
+    "status": "ACTIVE"
+  },
   "1af45f7f-c4e0-4d0e-9d2b-c8cb23982839": {
     "id": "1af45f7f-c4e0-4d0e-9d2b-c8cb23982839",
     "sender": {
@@ -305,6 +323,24 @@
     "amount": 111.0,
     "status": "ACTIVE"
   },
+  "b047f06d-dc36-4dc6-9c75-4c4a5bb768c7": {
+    "id": "b047f06d-dc36-4dc6-9c75-4c4a5bb768c7",
+    "sender": {
+      "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
+      "customer": "atm@bank.com",
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "5da99aea-7d8a-40fe-a82b-5abc272256b8",
+      "customer": "yuqian.cai@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Chequing"
+    },
+    "timeOfTransaction": "2025-11-28T13:39:02.702141",
+    "amount": 20.0,
+    "status": "ACTIVE"
+  },
   "d0395957-61d1-431c-9c13-b900a36c3d90": {
     "id": "d0395957-61d1-431c-9c13-b900a36c3d90",
     "sender": {
@@ -357,6 +393,24 @@
     },
     "timeOfTransaction": "2025-11-27T13:14:26.847922",
     "amount": 2.0E7,
+    "status": "ACTIVE"
+  },
+  "1e047846-3f50-43db-895a-9fa517f64379": {
+    "id": "1e047846-3f50-43db-895a-9fa517f64379",
+    "sender": {
+      "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
+      "customer": "atm@bank.com",
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "5da99aea-7d8a-40fe-a82b-5abc272256b8",
+      "customer": "yuqian.cai@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Chequing"
+    },
+    "timeOfTransaction": "2025-11-28T13:09:08.054337",
+    "amount": 2000.0,
     "status": "ACTIVE"
   },
   "7c13e9ba-c2ba-4088-be37-407bae2f80c4": {
@@ -827,6 +881,24 @@
     "amount": 2.0E7,
     "status": "ACTIVE"
   },
+  "cfdb9611-e9e7-474c-9ea7-561cb03b2c3d": {
+    "id": "cfdb9611-e9e7-474c-9ea7-561cb03b2c3d",
+    "sender": {
+      "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
+      "customer": "atm@bank.com",
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "5da99aea-7d8a-40fe-a82b-5abc272256b8",
+      "customer": "yuqian.cai@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Chequing"
+    },
+    "timeOfTransaction": "2025-11-28T13:41:21.956305",
+    "amount": 10.0,
+    "status": "ACTIVE"
+  },
   "eae6a420-b77c-4548-abf6-75eb57040733": {
     "id": "eae6a420-b77c-4548-abf6-75eb57040733",
     "sender": {
@@ -879,6 +951,24 @@
     },
     "timeOfTransaction": "2025-11-27T13:14:23.997774800",
     "amount": 2.0E7,
+    "status": "ACTIVE"
+  },
+  "9f61746b-80db-41de-a0c6-4eebbddf8216": {
+    "id": "9f61746b-80db-41de-a0c6-4eebbddf8216",
+    "sender": {
+      "accountId": "5da99aea-7d8a-40fe-a82b-5abc272256b8",
+      "customer": "yuqian.cai@gmail.com",
+      "accountStatus": "INACTIVE",
+      "type": "Chequing"
+    },
+    "receiver": {
+      "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
+      "customer": "atm@bank.com",
+      "accountStatus": "ACTIVE",
+      "type": "Chequing"
+    },
+    "timeOfTransaction": "2025-11-28T13:09:44.817783",
+    "amount": 20.0,
     "status": "ACTIVE"
   },
   "30dce7c3-8249-42d0-b3c1-9732c1336173": {
