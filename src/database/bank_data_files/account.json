@@ -1,0 +1,86 @@
+{
+  "f6ba626d-6251-40d1-9480-eb58052ad227": {
+    "accountId": "f6ba626d-6251-40d1-9480-eb58052ad227",
+    "customer": "customer.test@gmail.com",
+    "accountStatus": "ACTIVE",
+    "type": "Chequing"
+  },
+  "bf30216d-cc75-4c3f-9718-4aca2554b5d3": {
+    "accountId": "bf30216d-cc75-4c3f-9718-4aca2554b5d3",
+    "customer": "howard@gmail.com",
+    "accountStatus": "ACTIVE",
+    "creditLimit": 2000.0,
+    "creditUsage": 0.0,
+    "type": "Card"
+  },
+  "3b2b06e8-81da-4476-8401-8676d1981675": {
+    "accountId": "3b2b06e8-81da-4476-8401-8676d1981675",
+    "customer": "valid.email@gmail.com",
+    "accountStatus": "ACTIVE",
+    "type": "Chequing"
+  },
+  "5b9dc767-b51a-4db0-a1d6-5f783f26a48f": {
+    "accountId": "5b9dc767-b51a-4db0-a1d6-5f783f26a48f",
+    "customer": "ghi@gmail.com",
+    "accountStatus": "ACTIVE",
+    "creditLimit": 1500.0,
+    "creditUsage": 500.0,
+    "type": "Card"
+  },
+  "30f49d9c-0b0b-49bd-a511-84d2e648daf5": {
+    "accountId": "30f49d9c-0b0b-49bd-a511-84d2e648daf5",
+    "customer": "abc@gmail.com",
+    "accountStatus": "ACTIVE",
+    "type": "Chequing"
+  },
+  "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706": {
+    "accountId": "e44ed2b1-e5f2-489b-8beb-98ff3c7d2706",
+    "customer": "jjj@gmail.com",
+    "accountStatus": "INACTIVE",
+    "type": "Saving"
+  },
+  "5da99aea-7d8a-40fe-a82b-5abc272256b8": {
+    "accountId": "5da99aea-7d8a-40fe-a82b-5abc272256b8",
+    "customer": "yuqian.cai@gmail.com",
+    "accountStatus": "INACTIVE",
+    "type": "Chequing"
+  },
+  "ae4a0409-772c-4212-94a8-4b6d8cf9aedc": {
+    "accountId": "ae4a0409-772c-4212-94a8-4b6d8cf9aedc",
+    "customer": "mutian@gmail.com",
+    "accountStatus": "ACTIVE",
+    "type": "Saving"
+  },
+  "9501e3ad-e672-434c-935f-c926d3a2e949": {
+    "accountId": "9501e3ad-e672-434c-935f-c926d3a2e949",
+    "customer": "def@gmail.com",
+    "accountStatus": "INACTIVE",
+    "type": "Chequing"
+  },
+  "6def6aff-f656-4922-94f0-7fe125745696": {
+    "accountId": "6def6aff-f656-4922-94f0-7fe125745696",
+    "customer": "minh@gmail.com",
+    "accountStatus": "INACTIVE",
+    "creditLimit": 1500.0,
+    "creditUsage": 0.0,
+    "type": "Card"
+  },
+  "b91addd5-0885-4294-a808-554d24abcedc": {
+    "accountId": "b91addd5-0885-4294-a808-554d24abcedc",
+    "customer": "gohgo@gmail.com",
+    "accountStatus": "ACTIVE",
+    "type": "Saving"
+  },
+  "8df41236-c149-4421-83e8-07a4e4618498": {
+    "accountId": "8df41236-c149-4421-83e8-07a4e4618498",
+    "customer": "atm@bank.com",
+    "accountStatus": "ACTIVE",
+    "type": "Chequing"
+  },
+  "be06c18e-cbbe-450c-8d0e-66718897d4ab": {
+    "accountId": "be06c18e-cbbe-450c-8d0e-66718897d4ab",
+    "customer": "johnny.silverhand@gmail.com",
+    "accountStatus": "ACTIVE",
+    "type": "Chequing"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "customer.test@gmail.com": {
+    "email": "customer.test@gmail.com",
+    "password": "testing",
+    "firstName": "Customer",
+    "lastName": "Test",
+    "type": "Customer"
+  },
+  "johnny.silverhand@gmail.com": {
+    "email": "johnny.silverhand@gmail.com",
+    "password": "customerPass",
+    "firstName": "Johnny",
+    "lastName": "Silverhand",
+    "type": "Customer"
+  },
+  "atm@bank.com": {
+    "email": "atm@bank.com",
+    "password": "freemoney",
+    "firstName": "ATM",
+    "lastName": "Machine",
+    "type": "Customer"
+  },
+  "minh@gmail.com": {
+    "email": "minh@gmail.com",
+    "password": "Minh123!",
+    "firstName": "Minh",
+    "lastName": "Le",
+    "type": "Customer"
+  },
+  "admin@gmail.com": {
+    "email": "admin@gmail.com",
+    "password": "adminPass",
+    "type": "Admin"
+  },
+  "jjj@gmail.com": {
+    "email": "jjj@gmail.com",
+    "password": "password",
+    "firstName": "Jimmy",
+    "lastName": "Neutron",
+    "type": "Customer"
+  },
+  "def@gmail.com": {
+    "email": "def@gmail.com",
+    "password": "password",
+    "firstName": "John",
+    "lastName": "Joe",
+    "type": "Customer"
+  },
+  "mutian@gmail.com": {
+    "email": "mutian@gmail.com",
+    "password": "Mutian123!",
+    "firstName": "Mu Tian",
+    "lastName": "Wang",
+    "type": "Customer"
+  },
+  "teller2@gmail.com": {
+    "email": "teller2@gmail.com",
+    "password": "tellerPass",
+    "branchID": "e8da72ca-8182-491a-aaf1-40c3faffd22e",
+    "type": "Teller"
+  },
+  "minh.admin@gmail.com": {
+    "email": "minh.admin@gmail.com",
+    "password": "adminPass",
+    "type": "Admin"
+  },
+  "valid.email@gmail.com": {
+    "email": "valid.email@gmail.com",
+    "password": "validPass123!",
+    "firstName": "invalid password",
+    "lastName": "cust",
+    "type": "Customer"
+  },
+  "teller1@gmail.com": {
+    "email": "teller1@gmail.com",
+    "password": "tellerPass",
+    "branchID": "6879aad4-4df2-4e32-b500-2d4fc6721189",
+    "type": "Teller"
+  },
+  "another.teller@gmail.com": {
+    "email": "another.teller@gmail.com",
+    "password": "tellerPass",
+    "branchID": "6879aad4-4df2-4e32-b500-2d4fc6721189",
+    "type": "Teller"
+  },
+  "mutian.wang@hotmail.com": {
+    "email": "mutian.wang@hotmail.com",
+    "password": "12345",
+    "type": "Admin"
+  },
+  "teller3@gmail.com": {
+    "email": "teller3@gmail.com",
+    "password": "tellerPass",
+    "branchID": "f2868d14-c831-43be-960a-44a6bb7828f4",
+    "type": "Teller"
+  },
+  "yuqian.cai@gmail.com": {
+    "email": "yuqian.cai@gmail.com",
+    "password": "67890",
+    "firstName": "Christine",
+    "lastName": "Cai",
+    "type": "Customer"
+  },
+  "abc@gmail.com": {
+    "email": "abc@gmail.com",
+    "password": "password",
+    "firstName": "Joseph",
+    "lastName": "Joestar",
+    "type": "Customer"
+  },
+  "katyusha.gup@hotmail.com": {
+    "email": "katyusha.gup@hotmail.com",
+    "password": "blayt",
+    "type": "Admin"
+  },
+  "ghi@gmail.com": {
+    "email": "ghi@gmail.com",
+    "password": "password",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "type": "Customer"
+  },
+  "gohgo@gmail.com": {
+    "email": "gohgo@gmail.com",
+    "password": "Gohgo123!",
+    "firstName": "Goher",
+    "lastName": "Idk",
+    "type": "Customer"
+  },
+  "howard@gmail.com": {
+    "email": "howard@gmail.com",
+    "password": "Howard123!",
+    "firstName": "Jia Hao",
+    "lastName": "To",
+    "type": "Customer"
+  }
+}
